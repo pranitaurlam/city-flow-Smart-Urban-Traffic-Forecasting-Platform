@@ -1,5 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useMemo, useState } from "react";
 import {
   ArrowRight,
   BarChart3,
@@ -20,6 +20,7 @@ import {
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useTheme } from "@/hooks/use-theme";
 import globeImage from "@/assets/cityflow-globe-transparent.png";
 import cityStrip from "@/assets/cityflow-cities.jpg";
 
@@ -54,19 +55,10 @@ const features = [
 
 
 function CityFlow() {
-  const [dark, setDark] = useState(false);
+  const { dark, toggleDark } = useTheme();
   const [menuOpen, setMenuOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [notice, setNotice] = useState("");
-
-  useEffect(() => {
-    const preferred = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    setDark(preferred);
-  }, []);
-
-  useEffect(() => {
-    document.documentElement.classList.toggle("dark", dark);
-  }, [dark]);
 
   const filteredCities = useMemo(() => {
     const clean = query.trim().toLowerCase();
@@ -94,10 +86,10 @@ function CityFlow() {
             ))}
           </nav>
           <div className="hidden items-center gap-3 sm:flex">
-            <Button variant="ghost" size="icon" onClick={() => setDark((value) => !value)} aria-label={`Switch to ${dark ? "light" : "dark"} mode`}>
+            <Button variant="ghost" size="icon" onClick={() => toggleDark()} aria-label={`Switch to ${dark ? "light" : "dark"} mode`}>
               {dark ? <Sun /> : <Moon />}
             </Button>
-            <Button variant="outline">Sign In</Button>
+            <Button variant="outline" asChild><Link to="/signin">Sign In</Link></Button>
             <Button variant="cityflow">Get Started</Button>
           </div>
           <Button className="sm:hidden" variant="ghost" size="icon" onClick={() => setMenuOpen((value) => !value)} aria-label="Toggle menu">{menuOpen ? <X /> : <Menu />}</Button>
@@ -106,7 +98,7 @@ function CityFlow() {
         {menuOpen && (
           <div className="glass-panel absolute left-5 right-5 top-20 z-40 grid gap-2 rounded-lg p-4 sm:hidden">
             {["Home", "Explore", "Forecast", "Analytics", "Cities", "About"].map((item) => <a key={item} href={`#${item.toLowerCase()}`} onClick={() => setMenuOpen(false)} className="rounded-md px-3 py-2 font-semibold hover:bg-accent">{item}</a>)}
-            <Button variant="outline" onClick={() => setDark((value) => !value)}>{dark ? <Sun /> : <Moon />} {dark ? "Light mode" : "Dark mode"}</Button>
+            <Button variant="outline" onClick={() => toggleDark()}>{dark ? <Sun /> : <Moon />} {dark ? "Light mode" : "Dark mode"}</Button>
           </div>
         )}
 
