@@ -10,12 +10,20 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as LocationsRouteImport } from './routes/locations'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as SigninRouteImport } from './routes/signin'
+import { Route as TrafficAnalysisRouteImport } from './routes/traffic-analysis'
+import { Route as DashboardCityRouteImport } from './routes/dashboard.$city'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LocationsRoute = LocationsRouteImport.update({
+  id: '/locations',
+  path: '/locations',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -28,35 +36,76 @@ const SigninRoute = SigninRouteImport.update({
   path: '/signin',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TrafficAnalysisRoute = TrafficAnalysisRouteImport.update({
+  id: '/traffic-analysis',
+  path: '/traffic-analysis',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardCityRoute = DashboardCityRouteImport.update({
+  id: '/dashboard/$city',
+  path: '/dashboard/$city',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/locations': typeof LocationsRoute
   '/login': typeof LoginRoute
   '/signin': typeof SigninRoute
+  '/traffic-analysis': typeof TrafficAnalysisRoute
+  '/dashboard/$city': typeof DashboardCityRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/locations': typeof LocationsRoute
   '/login': typeof LoginRoute
   '/signin': typeof SigninRoute
+  '/traffic-analysis': typeof TrafficAnalysisRoute
+  '/dashboard/$city': typeof DashboardCityRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/locations': typeof LocationsRoute
   '/login': typeof LoginRoute
   '/signin': typeof SigninRoute
+  '/traffic-analysis': typeof TrafficAnalysisRoute
+  '/dashboard/$city': typeof DashboardCityRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/signin'
+  fullPaths:
+    | '/'
+    | '/locations'
+    | '/login'
+    | '/signin'
+    | '/traffic-analysis'
+    | '/dashboard/$city'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/signin'
-  id: '__root__' | '/' | '/login' | '/signin'
+  to:
+    | '/'
+    | '/locations'
+    | '/login'
+    | '/signin'
+    | '/traffic-analysis'
+    | '/dashboard/$city'
+  id:
+    | '__root__'
+    | '/'
+    | '/locations'
+    | '/login'
+    | '/signin'
+    | '/traffic-analysis'
+    | '/dashboard/$city'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  LocationsRoute: typeof LocationsRoute
   LoginRoute: typeof LoginRoute
   SigninRoute: typeof SigninRoute
+  TrafficAnalysisRoute: typeof TrafficAnalysisRoute
+  DashboardCityRoute: typeof DashboardCityRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -66,6 +115,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/locations': {
+      id: '/locations'
+      path: '/locations'
+      fullPath: '/locations'
+      preLoaderRoute: typeof LocationsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -82,13 +138,30 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SigninRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/traffic-analysis': {
+      id: '/traffic-analysis'
+      path: '/traffic-analysis'
+      fullPath: '/traffic-analysis'
+      preLoaderRoute: typeof TrafficAnalysisRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard/$city': {
+      id: '/dashboard/$city'
+      path: '/dashboard/$city'
+      fullPath: '/dashboard/$city'
+      preLoaderRoute: typeof DashboardCityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  LocationsRoute: LocationsRoute,
   LoginRoute: LoginRoute,
   SigninRoute: SigninRoute,
+  TrafficAnalysisRoute: TrafficAnalysisRoute,
+  DashboardCityRoute: DashboardCityRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
