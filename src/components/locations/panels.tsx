@@ -14,7 +14,7 @@ import type { TrafficReading } from "@/lib/traffic-server";
 import type { WeatherReading } from "@/lib/weather-server";
 import { tomorrowPeakForecast, weeklyTrend } from "@/lib/location-forecast";
 
-function TierBadge({ tier }: { tier: TrafficTier }) {
+export function TierBadge({ tier }: { tier: TrafficTier }) {
   return (
     <span
       className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-bold"
@@ -229,20 +229,22 @@ export function HistoricalPreviewChart({ location }: { location: BengaluruLocati
 export function NearbyLocationsSection({
   locations,
   onSelect,
+  onCompareClick,
 }: {
-  locations: BengaluruLocation[];
+  locations: { location: BengaluruLocation; km: number }[];
   onSelect: (slug: string) => void;
+  onCompareClick?: () => void;
 }) {
   return (
-    <section>
+    <section id="nearby">
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-bold">Nearby Locations</h3>
-        <Button variant="ghost" size="sm" className="text-brand-cyan">
+        <Button variant="ghost" size="sm" className="text-brand-cyan" onClick={onCompareClick}>
           Compare Locations <ArrowRight className="size-4" />
         </Button>
       </div>
       <div className="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        {locations.map((location) => (
+        {locations.map(({ location, km }) => (
           <button
             key={location.slug}
             type="button"
@@ -252,8 +254,12 @@ export function NearbyLocationsSection({
             <p className="flex items-center gap-1.5 text-sm font-bold">
               <MapPin size={14} className="text-brand-cyan" /> {location.name}
             </p>
-            <div className="mt-2">
+            <p className="mt-0.5 text-xs text-muted-foreground">{km.toFixed(1)} km away</p>
+            <div className="mt-2 flex items-center justify-between">
               <TierBadge tier={location.baseTier} />
+              <span className="text-xs font-semibold text-muted-foreground">
+                {Math.round(location.basePeakVolume * 0.65).toLocaleString()} veh/hr
+              </span>
             </div>
           </button>
         ))}

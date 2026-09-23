@@ -32,10 +32,13 @@ export function BengaluruMap({
   selectedSlug,
   selectedTier,
   onSelect,
+  showTraffic = true,
 }: {
   selectedSlug: string;
   selectedTier: TrafficTier;
   onSelect: (slug: string) => void;
+  /** When false, markers render in a neutral color instead of traffic-tier colors. */
+  showTraffic?: boolean;
 }) {
   const selected = bengaluruLocations.find((item) => item.slug === selectedSlug);
 
@@ -63,7 +66,9 @@ export function BengaluruMap({
       />
       {bengaluruLocations.map((location) => {
         const isSelected = location.slug === selectedSlug;
-        const color = trafficTierColor[isSelected ? selectedTier : location.baseTier];
+        const color = showTraffic
+          ? trafficTierColor[isSelected ? selectedTier : location.baseTier]
+          : "var(--brand-cyan)";
         return (
           <Marker
             key={location.slug}
