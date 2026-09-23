@@ -31,7 +31,8 @@ export const HOUR_LABELS = [
   "11PM",
 ];
 
-const DAY_SHAPE = [
+/** Relative intensity of traffic by hour (0..1), 12AM..11PM. Same shape reused everywhere for consistency. */
+export const DAY_SHAPE = [
   0.3, 0.24, 0.2, 0.18, 0.22, 0.34, 0.55, 0.78, 0.9, 0.8, 0.72, 0.74, 0.78, 0.74, 0.76, 0.7, 0.8,
   0.92, 1.0, 0.86, 0.66, 0.52, 0.42, 0.34,
 ];

@@ -6,6 +6,7 @@ import {
   LayoutDashboard,
   Lightbulb,
   MapPin,
+  Milestone,
   ScatterChart,
   Settings,
   TrendingUp,
@@ -25,12 +26,13 @@ const navItems = [
   },
   { label: "Locations", icon: MapPin, to: "/locations" as const, params: {} },
   { label: "Traffic Analysis", icon: Activity, to: "/traffic-analysis" as const, params: {} },
-  { label: "Forecast", icon: TrendingUp, to: undefined, params: {} },
-  { label: "Peak Hours", icon: Timer, to: undefined, params: {} },
-  { label: "Cluster Analysis", icon: ScatterChart, to: undefined, params: {} },
-  { label: "Reports", icon: FileBarChart, to: undefined, params: {} },
-  { label: "Insights", icon: Lightbulb, to: undefined, params: {} },
-  { label: "Alerts", icon: AlertTriangle, to: undefined, params: {} },
+  { label: "Forecast", icon: TrendingUp, to: "/forecast" as const, params: {} },
+  { label: "Route Forecast", icon: Milestone, to: "/route-forecast" as const, params: {} },
+  { label: "Peak Hours", icon: Timer, to: "/peak-hours" as const, params: {} },
+  { label: "Cluster Analysis", icon: ScatterChart, to: "/cluster-analysis" as const, params: {} },
+  { label: "Reports", icon: FileBarChart, to: "/reports" as const, params: {} },
+  { label: "Insights", icon: Lightbulb, to: "/insights" as const, params: {} },
+  { label: "Alerts", icon: AlertTriangle, to: "/alerts" as const, params: {} },
 ];
 
 const bottomItems = [
@@ -52,7 +54,7 @@ export function DashboardSidebar() {
 
       <nav className="flex-1 space-y-1 overflow-y-auto px-3" aria-label="Dashboard navigation">
         {navItems.map(({ label, icon: Icon, to, params }) => {
-          const active = to ? pathname.startsWith(to.split("$")[0] ?? to) : false;
+          const active = pathname.startsWith(to.split("$")[0] ?? to);
           const itemClass = cn(
             "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
             active
@@ -60,25 +62,11 @@ export function DashboardSidebar() {
               : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
           );
 
-          if (to) {
-            return (
-              <Link key={label} to={to} params={params} className={itemClass}>
-                <Icon size={18} />
-                {label}
-              </Link>
-            );
-          }
-
           return (
-            <a
-              key={label}
-              href="#"
-              onClick={(event) => event.preventDefault()}
-              className={itemClass}
-            >
+            <Link key={label} to={to} params={params} className={itemClass}>
               <Icon size={18} />
               {label}
-            </a>
+            </Link>
           );
         })}
       </nav>

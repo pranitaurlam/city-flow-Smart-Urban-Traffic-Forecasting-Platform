@@ -164,12 +164,23 @@ const rawBengaluruLocations: BengaluruLocation[] = [
     basePeakVolume: 2400,
   },
   {
+    // "Old Airport Road" near HAL/Indiranagar — not the actual airport (see kempegowda-airport below).
     slug: "airport-road",
-    name: "Airport Road",
+    name: "Old Airport Road",
     lat: 13.01,
     lon: 77.648,
     baseTier: "Moderate",
     basePeakVolume: 2000,
+  },
+  {
+    slug: "kempegowda-airport",
+    name: "Kempegowda International Airport",
+    lat: 13.1986,
+    lon: 77.7066,
+    // ~35 km NH44 highway drive from the city centre; usually moderate but often
+    // High/Very High near the airport approach and during peak hours.
+    baseTier: "High",
+    basePeakVolume: 2600,
   },
   {
     slug: "jayanagar",
