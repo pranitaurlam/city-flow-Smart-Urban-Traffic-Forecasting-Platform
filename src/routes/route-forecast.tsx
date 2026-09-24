@@ -10,6 +10,7 @@ import {
   ComposedChart,
   Legend,
   Line,
+  LineChart,
   ReferenceLine,
   ResponsiveContainer,
   Tooltip,
@@ -17,6 +18,7 @@ import {
   YAxis,
 } from "recharts";
 import {
+  AlertTriangle,
   ArrowLeftRight,
   Bell,
   Bike,
@@ -35,12 +37,25 @@ import { DashboardSidebar } from "@/components/dashboard/sidebar";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/hooks/use-theme";
 import { TierBadge } from "@/components/locations/panels";
-import { RouteMap, type RouteLine } from "@/components/route/route-map";
+import { RouteMap, type HeatmapSegment, type RouteLine } from "@/components/route/route-map";
+import { WhatIfSimulator } from "@/components/route/what-if-simulator";
+import { ArrivalPlanner } from "@/components/route/arrival-planner";
+import { SavedJourneys } from "@/components/route/saved-journeys";
+import { RecurringJourney } from "@/components/route/recurring-journey";
+import { WeatherAlongRoute } from "@/components/route/weather-along-route";
+import {
+  DelayBreakdownCard,
+  ForecastAccuracyCard,
+  HistoricalComparisonCard,
+  JourneyIntelligenceCard,
+  RouteAlertsCard,
+} from "@/components/route/insight-cards";
 import {
   bengaluruLocations,
   distanceKm,
   trafficTierColor,
   type BengaluruLocation,
+  type TrafficTier,
 } from "@/lib/locations";
 import { getRoute, type TravelMode } from "@/lib/route-server";
 import { getLiveTraffic } from "@/lib/traffic-server";
@@ -51,6 +66,7 @@ import {
   dayLabel,
   estimateTravelTime,
   routeExplainability,
+  typicalDayAverageMinutes,
 } from "@/lib/route-forecast";
 
 export const Route = createFileRoute("/route-forecast")({
@@ -70,6 +86,7 @@ const POPULAR = [
   "electronic-city",
 ];
 const ROUTE_COLORS = ["var(--brand-cyan)", "var(--brand-violet)", "oklch(0.6 0.01 260)"];
+const TIER_ORDER: TrafficTier[] = ["Low", "Moderate", "High", "Very High"];
 
 /**
  * OSRM's routing duration doesn't reliably reflect real Bengaluru travel time (it
@@ -164,6 +181,7 @@ function RouteForecastPage() {
   const [planned, setPlanned] = useState(true);
   const [dayOffset, setDayOffset] = useState(1);
   const [hour, setHour] = useState(18);
+  const [heatmapMode, setHeatmapMode] = useState<"off" | "live" | "forecast" | "historical">("off");
 
   const source = bengaluruLocations.find((l) => l.slug === sourceSlug) ?? bengaluruLocations[0]!;
   const destination = bengaluruLocations.find((l) => l.slug === destSlug) ?? bengaluruLocations[1]!;
@@ -317,6 +335,123 @@ function RouteForecastPage() {
   const selectedTimeMark =
     graphData.find((g) => g.hourNum >= hour)?.hour ?? graphData[0]?.hour ?? null;
 
+  // --- Advanced features: derived data ---------------------------------
+
+  const departureChartData = useMemo(
+    () =>
+      carBaseDurationMin
+        ? HOURS.map((h) => ({
+            hour: h,
+            label: `${h % 12 === 0 ? 12 : h % 12}${h < 12 ? "AM" : "PM"}`,
+            travelTime: estimateTravelTime(carBaseDurationMin, dayOffset, h).travelTime,
+          }))
+        : [],
+    [carBaseDurationMin, dayOffset],
+  );
+
+  const evolutionData = useMemo(
+    () => forecast7Day.map((d) => ({ label: d.relative, travelTime: d.travelTime, tier: d.tier })),
+    [forecast7Day],
+  );
+
+  const typicalDayMin = carBaseDurationMin
+    ? typicalDayAverageMinutes(carBaseDurationMin, dayOffset)
+    : 0;
+  const historicalDiffPct =
+    typicalDayMin && selectedDayForecast
+      ? Math.round(((selectedDayForecast.travelTime - typicalDayMin) / typicalDayMin) * 100)
+      : 0;
+
+  const isRainForecast =
+    !!weather && /rain/i.test(dayOffset <= 1 ? weather.tomorrow.condition : weather.condition);
+  const rainFactorPct = explain.find((f) => f.label === "Rain Forecast")?.pct ?? 0;
+  const totalDelay = selectedDayForecast?.delay ?? 0;
+  const weatherDelayMin = isRainForecast ? Math.round((totalDelay * rainFactorPct) / 100) : 0;
+  const trafficDelayMin = totalDelay - weatherDelayMin;
+
+  const routeAlerts = useMemo(() => {
+    const alerts: {
+      icon: typeof AlertTriangle;
+      title: string;
+      time: string;
+      location: string;
+      effect: string;
+    }[] = [];
+    if (!selectedDayForecast) return alerts;
+    const { relative, monthDay } = dayLabel(dayOffset);
+    const timeLabel = `${relative}, ${monthDay} · ${hour % 12 === 0 ? 12 : hour % 12}${hour < 12 ? "AM" : "PM"}`;
+
+    if (selectedDayForecast.tier === "High" || selectedDayForecast.tier === "Very High") {
+      alerts.push({
+        icon: AlertTriangle,
+        title: "High Traffic Expected",
+        time: timeLabel,
+        location: `${source.name} → ${destination.name}`,
+        effect: `Expect ${selectedDayForecast.delay >= 0 ? "+" : ""}${selectedDayForecast.delay} min delay`,
+      });
+    }
+    if (isRainForecast) {
+      alerts.push({
+        icon: CloudRain,
+        title: "Rain Forecast",
+        time: timeLabel,
+        location: destination.name,
+        effect: "May be associated with slower traffic along this route",
+      });
+    }
+    if (typicalDayMin && selectedDayForecast.travelTime > typicalDayMin * 1.3) {
+      alerts.push({
+        icon: AlertTriangle,
+        title: "Unusual Traffic Pattern",
+        time: timeLabel,
+        location: `${source.name} → ${destination.name}`,
+        effect: `${historicalDiffPct}% above this route's typical travel time`,
+      });
+    }
+    return alerts;
+  }, [
+    selectedDayForecast,
+    dayOffset,
+    hour,
+    isRainForecast,
+    typicalDayMin,
+    historicalDiffPct,
+    source.name,
+    destination.name,
+  ]);
+
+  const heatmapSegments: HeatmapSegment[] = useMemo(() => {
+    if (heatmapMode === "off" || !carRoute.data || routeSamples.length === 0) return [];
+    const geo = carRoute.data.primary.geometry;
+    // Divide the full route geometry evenly by however many de-duplicated samples
+    // remain — NOT by the original 5-way sampling fractions, since dedup can leave
+    // fewer than 5 (using those would leave the back half of the route uncovered).
+    const segmentCount = routeSamples.length;
+    const dayShiftFromModerate =
+      TIER_ORDER.indexOf(selectedDayForecast?.tier ?? "Moderate") - TIER_ORDER.indexOf("Moderate");
+
+    return routeSamples.map((seg, i) => {
+      const startIdx = Math.floor((geo.length * i) / segmentCount);
+      const endIdx = Math.floor((geo.length * (i + 1)) / segmentCount);
+      const segGeometry = geo.slice(startIdx, Math.max(startIdx + 2, endIdx + 1));
+
+      let tier: TrafficTier;
+      if (heatmapMode === "live") {
+        tier = sampleTrafficQueries[i]?.data?.tier ?? seg.baseTier;
+      } else if (heatmapMode === "historical") {
+        tier = seg.baseTier;
+      } else {
+        const baseRank = TIER_ORDER.indexOf(seg.baseTier);
+        tier =
+          TIER_ORDER[Math.min(3, Math.max(0, baseRank + dayShiftFromModerate))] ?? seg.baseTier;
+      }
+
+      return { geometry: segGeometry, color: trafficTierColor[tier], label: seg.name, tier };
+    });
+  }, [heatmapMode, carRoute.data, routeSamples, sampleTrafficQueries, selectedDayForecast]);
+
+  const midpointSample = routeSamples[Math.floor(routeSamples.length / 2)] ?? destination;
+
   return (
     <div className="flex min-h-screen bg-background text-foreground">
       <DashboardSidebar />
@@ -428,6 +563,16 @@ function RouteForecastPage() {
             </div>
           </section>
 
+          <SavedJourneys
+            currentSourceSlug={sourceSlug}
+            currentDestSlug={destSlug}
+            onSelect={(src, dest) => {
+              setSourceSlug(src);
+              setDestSlug(dest);
+              setPlanned(true);
+            }}
+          />
+
           {planned && (
             <>
               {/* 4. Map */}
@@ -437,6 +582,7 @@ function RouteForecastPage() {
                     source={{ lat: source.lat, lon: source.lon }}
                     destination={{ lat: destination.lat, lon: destination.lon }}
                     routes={routeLines}
+                    heatmapSegments={heatmapSegments}
                   />
                 </div>
                 <div className="glass-panel pointer-events-none absolute right-4 top-4 z-[400] rounded-xl px-3 py-2 text-xs font-semibold">
@@ -450,6 +596,34 @@ function RouteForecastPage() {
                     </div>
                   ))}
                 </div>
+                <div className="glass-panel pointer-events-auto absolute left-4 top-4 z-[400] flex flex-wrap gap-1 rounded-xl p-1.5 text-xs font-semibold">
+                  {(
+                    [
+                      { key: "off", label: "Routes" },
+                      { key: "live", label: "Live Traffic" },
+                      { key: "forecast", label: "Forecast Traffic" },
+                      { key: "historical", label: "Historical Avg" },
+                    ] as const
+                  ).map((opt) => (
+                    <button
+                      key={opt.key}
+                      type="button"
+                      onClick={() => setHeatmapMode(opt.key)}
+                      className={`rounded-lg px-2.5 py-1.5 transition ${
+                        heatmapMode === opt.key
+                          ? "bg-gradient-brand text-primary-foreground"
+                          : "text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+                {heatmapMode !== "off" && (
+                  <div className="glass-panel pointer-events-none absolute bottom-4 left-4 z-[400] rounded-xl px-3 py-1.5 text-[11px] font-bold text-brand-cyan">
+                    CITYFLOW FORECAST — route traffic heatmap ({heatmapMode})
+                  </div>
+                )}
               </section>
 
               {/* 5. Transport mode selector */}
@@ -531,6 +705,26 @@ function RouteForecastPage() {
                 </div>
               </section>
 
+              {selectedDayForecast && (
+                <JourneyIntelligenceCard
+                  routeLabel={`${source.name} → ${destination.name}`}
+                  whenLabel={`${dayLabel(dayOffset).relative} · ${hour % 12 === 0 ? 12 : hour % 12}:00 ${hour < 12 ? "AM" : "PM"}`}
+                  travelTime={selectedDayForecast.travelTime}
+                  rangeLow={selectedDayForecast.rangeLow}
+                  rangeHigh={selectedDayForecast.rangeHigh}
+                  tier={selectedDayForecast.tier}
+                  delay={selectedDayForecast.delay}
+                  weatherSummary={
+                    weather
+                      ? `${dayOffset <= 1 ? weather.tomorrow.condition : weather.condition}`
+                      : "—"
+                  }
+                  historicalPct={historicalDiffPct}
+                  confidence={selectedDayForecast.confidence}
+                  factors={explain}
+                />
+              )}
+
               {/* 7. Future date/time selector */}
               <section className="glass-panel rounded-2xl p-5">
                 <p className="text-xs font-bold uppercase tracking-wide text-brand-violet">
@@ -587,6 +781,46 @@ function RouteForecastPage() {
                 </div>
               </section>
 
+              {/* Departure Time Simulator */}
+              <section className="glass-panel rounded-2xl p-5 sm:p-6">
+                <h3 className="text-sm font-bold">Departure Time Simulator</h3>
+                <p className="text-xs text-muted-foreground">
+                  Estimated travel time by departure time — {dayLabel(dayOffset).relative}. Click a
+                  bar to select that time.
+                </p>
+                <div className="mt-4 h-48">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={departureChartData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                      <XAxis dataKey="label" stroke="var(--muted-foreground)" fontSize={11} />
+                      <YAxis
+                        stroke="var(--muted-foreground)"
+                        fontSize={11}
+                        width={44}
+                        unit=" min"
+                      />
+                      <Tooltip
+                        contentStyle={{
+                          background: "var(--card)",
+                          border: "1px solid var(--border)",
+                          borderRadius: 8,
+                          fontSize: 12,
+                        }}
+                      />
+                      <Bar dataKey="travelTime" radius={[4, 4, 0, 0]} cursor="pointer">
+                        {departureChartData.map((d) => (
+                          <Cell
+                            key={d.hour}
+                            fill={d.hour === hour ? "var(--destructive)" : "var(--brand-cyan)"}
+                            onClick={() => setHour(d.hour)}
+                          />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </section>
+
               {/* 8. 7-day route forecast */}
               <section>
                 <h3 className="text-sm font-bold">7-Day Route Forecast</h3>
@@ -638,6 +872,43 @@ function RouteForecastPage() {
                   />
                 </section>
               )}
+
+              {/* Forecast Evolution */}
+              <section className="glass-panel rounded-2xl p-5 sm:p-6">
+                <h3 className="text-sm font-bold">Forecast Evolution</h3>
+                <p className="text-xs text-muted-foreground">
+                  How the estimated travel time changes across the next 7 days.
+                </p>
+                <div className="mt-4 h-48">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={evolutionData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                      <XAxis dataKey="label" stroke="var(--muted-foreground)" fontSize={11} />
+                      <YAxis
+                        stroke="var(--muted-foreground)"
+                        fontSize={11}
+                        width={44}
+                        unit=" min"
+                      />
+                      <Tooltip
+                        contentStyle={{
+                          background: "var(--card)",
+                          border: "1px solid var(--border)",
+                          borderRadius: 8,
+                          fontSize: 12,
+                        }}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="travelTime"
+                        stroke="var(--brand-cyan)"
+                        strokeWidth={2.5}
+                        dot={{ r: 4 }}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              </section>
 
               {/* 9. Future traffic graph */}
               <section className="glass-panel rounded-2xl p-5 sm:p-6">
@@ -741,6 +1012,24 @@ function RouteForecastPage() {
                 </div>
               </section>
 
+              {/* Historical comparison + delay breakdown */}
+              {selectedDayForecast && (
+                <section className="grid gap-4 lg:grid-cols-2">
+                  <HistoricalComparisonCard
+                    dateLabel={`${dayLabel(dayOffset).relative} · ${dayLabel(dayOffset).weekday} · ${hour % 12 === 0 ? 12 : hour % 12}${hour < 12 ? "AM" : "PM"}`}
+                    forecastMin={selectedDayForecast.travelTime}
+                    typicalMin={typicalDayMin}
+                  />
+                  <DelayBreakdownCard
+                    normalMin={Math.round(carBaseDurationMin)}
+                    trafficDelayMin={trafficDelayMin}
+                    weatherDelayMin={weatherDelayMin}
+                  />
+                </section>
+              )}
+
+              <RouteAlertsCard alerts={routeAlerts} />
+
               {/* 11. Why this forecast */}
               <section className="glass-panel rounded-2xl p-5 sm:p-6">
                 <h3 className="text-sm font-bold">
@@ -818,6 +1107,12 @@ function RouteForecastPage() {
                 )}
               </section>
 
+              <WeatherAlongRoute
+                source={source}
+                midpoint={midpointSample}
+                destination={destination}
+              />
+
               {/* 13 + 14. Route alternatives + comparison */}
               {mode === "car" && activeRoute && (
                 <>
@@ -871,17 +1166,18 @@ function RouteForecastPage() {
                           <th className="py-2 pr-4 font-semibold">Forecast Time</th>
                           <th className="py-2 pr-4 font-semibold">Expected Delay</th>
                           <th className="py-2 pr-4 font-semibold">Traffic</th>
+                          <th className="py-2 pr-4 font-semibold">Historical Average</th>
                           <th className="py-2 font-semibold">Confidence</th>
                         </tr>
                       </thead>
                       <tbody>
                         {[activeRoute.primary, ...activeRoute.alternatives].map((r, i) => {
                           const routeTypicalSpeed = typicalSpeedForDistance(r.distanceKm);
-                          const est = estimateTravelTime(
-                            durationFromDistance(r.distanceKm, routeTypicalSpeed),
-                            dayOffset,
-                            hour,
+                          const routeBaseDuration = durationFromDistance(
+                            r.distanceKm,
+                            routeTypicalSpeed,
                           );
+                          const est = estimateTravelTime(routeBaseDuration, dayOffset, hour);
                           const routeCurrentSpeed =
                             routeTypicalSpeed *
                             (TIER_SPEED_FACTOR[worstSample?.tier ?? "Moderate"] ?? 1);
@@ -902,6 +1198,9 @@ function RouteForecastPage() {
                               </td>
                               <td className="py-2.5 pr-4">
                                 <TierBadge tier={est.tier} />
+                              </td>
+                              <td className="py-2.5 pr-4">
+                                {formatMin(Math.round(routeBaseDuration))}
                               </td>
                               <td className="py-2.5">{est.confidence}%</td>
                             </tr>
@@ -948,6 +1247,18 @@ function RouteForecastPage() {
                   not a real schedule.
                 </p>
               </section>
+
+              {selectedDayForecast && (
+                <WhatIfSimulator baselineMin={selectedDayForecast.travelTime} />
+              )}
+
+              <ArrivalPlanner baseDurationMin={carBaseDurationMin} dayOffset={dayOffset} />
+
+              <RecurringJourney
+                baseDurationMin={carBaseDurationMin}
+                sourceName={source.name}
+                destName={destination.name}
+              />
 
               {/* 17. Best time window */}
               <section className="glass-panel rounded-2xl p-5 sm:p-6">
@@ -1018,6 +1329,36 @@ function RouteForecastPage() {
                   </p>
                 </section>
               )}
+
+              <ForecastAccuracyCard />
+
+              <section className="glass-panel overflow-x-auto rounded-2xl p-5">
+                <h3 className="text-sm font-bold">How CityFlow Forecasts This Journey</h3>
+                <div className="mt-3 flex min-w-max flex-wrap items-center gap-2 text-[11px] font-semibold text-muted-foreground">
+                  {[
+                    "Source + Destination",
+                    "Geocoding",
+                    "Route Generation",
+                    "Route Segments",
+                    "Live Traffic",
+                    "Historical Traffic",
+                    "Weather Forecast",
+                    "Date + Time",
+                    "CityFlow Forecast Model",
+                    "Segment-Level Forecast",
+                    "Route Travel-Time Estimation",
+                    "Confidence Range",
+                    "Journey Intelligence",
+                  ].map((step, i, arr) => (
+                    <span key={step} className="flex items-center gap-2">
+                      <span className="rounded-full border border-border bg-surface px-2.5 py-1">
+                        {step}
+                      </span>
+                      {i < arr.length - 1 && <span className="text-brand-cyan">→</span>}
+                    </span>
+                  ))}
+                </div>
+              </section>
             </>
           )}
         </main>
