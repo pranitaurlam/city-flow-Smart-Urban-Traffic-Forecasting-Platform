@@ -26,15 +26,26 @@ export type RouteLine = {
   distanceLabel: string;
 };
 
+export type HeatmapSegment = {
+  geometry: [number, number][];
+  color: string;
+  label: string;
+  tier: string;
+};
+
 export function RouteMap({
   source,
   destination,
   routes,
+  heatmapSegments,
 }: {
   source: { lat: number; lon: number } | null;
   destination: { lat: number; lon: number } | null;
   routes: RouteLine[];
+  /** When provided (non-empty), rendered instead of `routes` as traffic-colored sub-segments. */
+  heatmapSegments?: HeatmapSegment[];
 }) {
+  const showHeatmap = !!heatmapSegments && heatmapSegments.length > 0;
   const boundsPoints = routes.length
     ? routes.flatMap((r) => r.geometry)
     : source && destination
@@ -56,23 +67,37 @@ export function RouteMap({
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         attribution="&copy; OpenStreetMap contributors"
       />
-      {routes.map((route) => (
-        <Polyline
-          key={route.label}
-          positions={route.geometry}
-          pathOptions={{ color: route.color, weight: 5, opacity: 0.85 }}
-          eventHandlers={{
-            mouseover: (e) => e.target.setStyle({ weight: 8, opacity: 1 }),
-            mouseout: (e) => e.target.setStyle({ weight: 5, opacity: 0.85 }),
-          }}
-        >
-          <Tooltip sticky direction="top" opacity={1}>
-            <span className="text-xs font-semibold">
-              {route.label}: {route.timeLabel} · {route.distanceLabel}
-            </span>
-          </Tooltip>
-        </Polyline>
-      ))}
+      {showHeatmap
+        ? heatmapSegments!.map((seg, i) => (
+            <Polyline
+              key={`${seg.label}-${i}`}
+              positions={seg.geometry}
+              pathOptions={{ color: seg.color, weight: 6, opacity: 0.9 }}
+            >
+              <Tooltip sticky direction="top" opacity={1}>
+                <span className="text-xs font-semibold">
+                  {seg.label}: {seg.tier}
+                </span>
+              </Tooltip>
+            </Polyline>
+          ))
+        : routes.map((route) => (
+            <Polyline
+              key={route.label}
+              positions={route.geometry}
+              pathOptions={{ color: route.color, weight: 5, opacity: 0.85 }}
+              eventHandlers={{
+                mouseover: (e) => e.target.setStyle({ weight: 8, opacity: 1 }),
+                mouseout: (e) => e.target.setStyle({ weight: 5, opacity: 0.85 }),
+              }}
+            >
+              <Tooltip sticky direction="top" opacity={1}>
+                <span className="text-xs font-semibold">
+                  {route.label}: {route.timeLabel} · {route.distanceLabel}
+                </span>
+              </Tooltip>
+            </Polyline>
+          ))}
       {source && (
         <Marker position={[source.lat, source.lon]} icon={labelIcon("A", "var(--brand-cyan)")} />
       )}
