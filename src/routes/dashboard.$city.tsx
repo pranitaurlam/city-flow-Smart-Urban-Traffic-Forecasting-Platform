@@ -81,12 +81,19 @@ const whyCityFlow = [
   },
 ];
 
-const quickActions = [
-  { label: "Explore Location", icon: Compass, to: "/locations" as const },
-  { label: "Check Forecast", icon: TrendingUp },
-  { label: "Compare Roads", icon: RouteIcon },
-  { label: "Generate Report", icon: BarChart3 },
-];
+function getQuickActions(citySlug: string) {
+  return [
+    { label: "Explore Location", icon: Compass, to: "/locations" as const, search: undefined },
+    {
+      label: "Check Forecast",
+      icon: TrendingUp,
+      to: "/forecast" as const,
+      search: { loc: citySlug },
+    },
+    { label: "Compare Roads", icon: RouteIcon, to: "/route-forecast" as const, search: undefined },
+    { label: "Generate Report", icon: BarChart3, to: "/reports" as const, search: undefined },
+  ];
+}
 
 function pctVsAverage(value: number, average: number) {
   const diff = Math.round(((value - average) / average) * 100);
@@ -96,6 +103,7 @@ function pctVsAverage(value: number, average: number) {
 function CityDashboard() {
   const target = Route.useLoaderData();
   const navigate = useNavigate();
+  const quickActions = getQuickActions(target.slug);
 
   const trafficQuery = useQuery({
     queryKey: ["live-traffic", target.slug],
@@ -365,7 +373,7 @@ function CityDashboard() {
 
           {/* 7. Quick actions */}
           <section className="grid gap-3 pb-4 sm:grid-cols-2 xl:grid-cols-4">
-            {quickActions.map(({ label, icon: Icon, to }) => {
+            {quickActions.map(({ label, icon: Icon, to, search }) => {
               const className =
                 "group flex items-center justify-between rounded-xl border border-border bg-card px-4 py-3.5 text-sm font-semibold shadow-sm transition hover:-translate-y-0.5 hover:border-brand-cyan";
               const content = (
@@ -381,23 +389,18 @@ function CityDashboard() {
                 </>
               );
 
-              if (to) {
+              if (search) {
                 return (
-                  <Link key={label} to={to} className={className}>
+                  <Link key={label} to={to} search={search} className={className}>
                     {content}
                   </Link>
                 );
               }
 
               return (
-                <button
-                  key={label}
-                  type="button"
-                  onClick={(event) => event.preventDefault()}
-                  className={className}
-                >
+                <Link key={label} to={to} className={className}>
                   {content}
-                </button>
+                </Link>
               );
             })}
           </section>
