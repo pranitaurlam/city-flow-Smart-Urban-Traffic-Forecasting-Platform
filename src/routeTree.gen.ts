@@ -10,12 +10,47 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AlertsRouteImport } from './routes/alerts'
+import { Route as ClusterAnalysisRouteImport } from './routes/cluster-analysis'
+import { Route as ForecastRouteImport } from './routes/forecast'
+import { Route as InsightsRouteImport } from './routes/insights'
+import { Route as LocationsRouteImport } from './routes/locations'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as PeakHoursRouteImport } from './routes/peak-hours'
+import { Route as ReportsRouteImport } from './routes/reports'
+import { Route as RouteForecastRouteImport } from './routes/route-forecast'
 import { Route as SigninRouteImport } from './routes/signin'
+import { Route as TrafficAnalysisRouteImport } from './routes/traffic-analysis'
+import { Route as DashboardCityRouteImport } from './routes/dashboard.$city'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AlertsRoute = AlertsRouteImport.update({
+  id: '/alerts',
+  path: '/alerts',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ClusterAnalysisRoute = ClusterAnalysisRouteImport.update({
+  id: '/cluster-analysis',
+  path: '/cluster-analysis',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ForecastRoute = ForecastRouteImport.update({
+  id: '/forecast',
+  path: '/forecast',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InsightsRoute = InsightsRouteImport.update({
+  id: '/insights',
+  path: '/insights',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LocationsRoute = LocationsRouteImport.update({
+  id: '/locations',
+  path: '/locations',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -23,40 +58,145 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PeakHoursRoute = PeakHoursRouteImport.update({
+  id: '/peak-hours',
+  path: '/peak-hours',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReportsRoute = ReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RouteForecastRoute = RouteForecastRouteImport.update({
+  id: '/route-forecast',
+  path: '/route-forecast',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SigninRoute = SigninRouteImport.update({
   id: '/signin',
   path: '/signin',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TrafficAnalysisRoute = TrafficAnalysisRouteImport.update({
+  id: '/traffic-analysis',
+  path: '/traffic-analysis',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardCityRoute = DashboardCityRouteImport.update({
+  id: '/dashboard/$city',
+  path: '/dashboard/$city',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/alerts': typeof AlertsRoute
+  '/cluster-analysis': typeof ClusterAnalysisRoute
+  '/forecast': typeof ForecastRoute
+  '/insights': typeof InsightsRoute
+  '/locations': typeof LocationsRoute
   '/login': typeof LoginRoute
+  '/peak-hours': typeof PeakHoursRoute
+  '/reports': typeof ReportsRoute
+  '/route-forecast': typeof RouteForecastRoute
   '/signin': typeof SigninRoute
+  '/traffic-analysis': typeof TrafficAnalysisRoute
+  '/dashboard/$city': typeof DashboardCityRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/alerts': typeof AlertsRoute
+  '/cluster-analysis': typeof ClusterAnalysisRoute
+  '/forecast': typeof ForecastRoute
+  '/insights': typeof InsightsRoute
+  '/locations': typeof LocationsRoute
   '/login': typeof LoginRoute
+  '/peak-hours': typeof PeakHoursRoute
+  '/reports': typeof ReportsRoute
+  '/route-forecast': typeof RouteForecastRoute
   '/signin': typeof SigninRoute
+  '/traffic-analysis': typeof TrafficAnalysisRoute
+  '/dashboard/$city': typeof DashboardCityRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/alerts': typeof AlertsRoute
+  '/cluster-analysis': typeof ClusterAnalysisRoute
+  '/forecast': typeof ForecastRoute
+  '/insights': typeof InsightsRoute
+  '/locations': typeof LocationsRoute
   '/login': typeof LoginRoute
+  '/peak-hours': typeof PeakHoursRoute
+  '/reports': typeof ReportsRoute
+  '/route-forecast': typeof RouteForecastRoute
   '/signin': typeof SigninRoute
+  '/traffic-analysis': typeof TrafficAnalysisRoute
+  '/dashboard/$city': typeof DashboardCityRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/signin'
+  fullPaths:
+    | '/'
+    | '/alerts'
+    | '/cluster-analysis'
+    | '/forecast'
+    | '/insights'
+    | '/locations'
+    | '/login'
+    | '/peak-hours'
+    | '/reports'
+    | '/route-forecast'
+    | '/signin'
+    | '/traffic-analysis'
+    | '/dashboard/$city'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/signin'
-  id: '__root__' | '/' | '/login' | '/signin'
+  to:
+    | '/'
+    | '/alerts'
+    | '/cluster-analysis'
+    | '/forecast'
+    | '/insights'
+    | '/locations'
+    | '/login'
+    | '/peak-hours'
+    | '/reports'
+    | '/route-forecast'
+    | '/signin'
+    | '/traffic-analysis'
+    | '/dashboard/$city'
+  id:
+    | '__root__'
+    | '/'
+    | '/alerts'
+    | '/cluster-analysis'
+    | '/forecast'
+    | '/insights'
+    | '/locations'
+    | '/login'
+    | '/peak-hours'
+    | '/reports'
+    | '/route-forecast'
+    | '/signin'
+    | '/traffic-analysis'
+    | '/dashboard/$city'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AlertsRoute: typeof AlertsRoute
+  ClusterAnalysisRoute: typeof ClusterAnalysisRoute
+  ForecastRoute: typeof ForecastRoute
+  InsightsRoute: typeof InsightsRoute
+  LocationsRoute: typeof LocationsRoute
   LoginRoute: typeof LoginRoute
+  PeakHoursRoute: typeof PeakHoursRoute
+  ReportsRoute: typeof ReportsRoute
+  RouteForecastRoute: typeof RouteForecastRoute
   SigninRoute: typeof SigninRoute
+  TrafficAnalysisRoute: typeof TrafficAnalysisRoute
+  DashboardCityRoute: typeof DashboardCityRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -68,11 +208,67 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/alerts': {
+      id: '/alerts'
+      path: '/alerts'
+      fullPath: '/alerts'
+      preLoaderRoute: typeof AlertsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cluster-analysis': {
+      id: '/cluster-analysis'
+      path: '/cluster-analysis'
+      fullPath: '/cluster-analysis'
+      preLoaderRoute: typeof ClusterAnalysisRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/forecast': {
+      id: '/forecast'
+      path: '/forecast'
+      fullPath: '/forecast'
+      preLoaderRoute: typeof ForecastRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/insights': {
+      id: '/insights'
+      path: '/insights'
+      fullPath: '/insights'
+      preLoaderRoute: typeof InsightsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/locations': {
+      id: '/locations'
+      path: '/locations'
+      fullPath: '/locations'
+      preLoaderRoute: typeof LocationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/peak-hours': {
+      id: '/peak-hours'
+      path: '/peak-hours'
+      fullPath: '/peak-hours'
+      preLoaderRoute: typeof PeakHoursRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reports': {
+      id: '/reports'
+      path: '/reports'
+      fullPath: '/reports'
+      preLoaderRoute: typeof ReportsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/route-forecast': {
+      id: '/route-forecast'
+      path: '/route-forecast'
+      fullPath: '/route-forecast'
+      preLoaderRoute: typeof RouteForecastRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/signin': {
@@ -82,13 +278,37 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SigninRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/traffic-analysis': {
+      id: '/traffic-analysis'
+      path: '/traffic-analysis'
+      fullPath: '/traffic-analysis'
+      preLoaderRoute: typeof TrafficAnalysisRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard/$city': {
+      id: '/dashboard/$city'
+      path: '/dashboard/$city'
+      fullPath: '/dashboard/$city'
+      preLoaderRoute: typeof DashboardCityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AlertsRoute: AlertsRoute,
+  ClusterAnalysisRoute: ClusterAnalysisRoute,
+  ForecastRoute: ForecastRoute,
+  InsightsRoute: InsightsRoute,
+  LocationsRoute: LocationsRoute,
   LoginRoute: LoginRoute,
+  PeakHoursRoute: PeakHoursRoute,
+  ReportsRoute: ReportsRoute,
+  RouteForecastRoute: RouteForecastRoute,
   SigninRoute: SigninRoute,
+  TrafficAnalysisRoute: TrafficAnalysisRoute,
+  DashboardCityRoute: DashboardCityRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

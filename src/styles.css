@@ -64,6 +64,7 @@
   --color-surface-strong: var(--surface-strong);
   --color-brand-cyan: var(--brand-cyan);
   --color-brand-violet: var(--brand-violet);
+  --color-brand-blue: var(--brand-blue);
   --color-success: var(--success);
   --color-warning: var(--warning);
 }
@@ -106,6 +107,7 @@
   --surface-strong: oklch(1 0 0 / 94%);
   --brand-cyan: oklch(0.73 0.16 225);
   --brand-violet: oklch(0.62 0.24 300);
+  --brand-blue: oklch(0.58 0.19 255);
   --success: oklch(0.76 0.17 165);
   --warning: oklch(0.8 0.17 83);
 }
@@ -147,6 +149,7 @@
   --surface-strong: oklch(0.17 0.045 253 / 92%);
   --brand-cyan: oklch(0.76 0.16 225);
   --brand-violet: oklch(0.67 0.23 300);
+  --brand-blue: oklch(0.7 0.17 255);
   --success: oklch(0.78 0.17 165);
   --warning: oklch(0.82 0.17 83);
 }
