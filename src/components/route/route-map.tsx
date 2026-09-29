@@ -9,6 +9,11 @@ function labelIcon(label: string, color: string) {
   return divIcon({ html, className: "", iconSize: [28, 28], iconAnchor: [14, 14] });
 }
 
+function incidentIcon() {
+  const html = `<span class="grid size-6 place-items-center rounded-full bg-destructive text-xs font-extrabold text-white shadow-lg ring-2 ring-white">!</span>`;
+  return divIcon({ html, className: "", iconSize: [24, 24], iconAnchor: [12, 12] });
+}
+
 function FitToRoute({ points }: { points: [number, number][] }) {
   const map = useMap();
   useEffect(() => {
@@ -33,17 +38,27 @@ export type HeatmapSegment = {
   tier: string;
 };
 
+export type IncidentMarker = {
+  lat: number;
+  lon: number;
+  label: string;
+  note?: string;
+};
+
 export function RouteMap({
   source,
   destination,
   routes,
   heatmapSegments,
+  incidents,
 }: {
   source: { lat: number; lon: number } | null;
   destination: { lat: number; lon: number } | null;
   routes: RouteLine[];
   /** When provided (non-empty), rendered instead of `routes` as traffic-colored sub-segments. */
   heatmapSegments?: HeatmapSegment[];
+  /** Active incident reports to flag on the map. */
+  incidents?: IncidentMarker[];
 }) {
   const showHeatmap = !!heatmapSegments && heatmapSegments.length > 0;
   const boundsPoints = routes.length
@@ -107,6 +122,16 @@ export function RouteMap({
           icon={labelIcon("B", "var(--brand-violet)")}
         />
       )}
+      {incidents?.map((incident, i) => (
+        <Marker key={i} position={[incident.lat, incident.lon]} icon={incidentIcon()}>
+          <Tooltip direction="top" opacity={1}>
+            <span className="text-xs font-semibold">
+              {incident.label}
+              {incident.note ? ` — ${incident.note}` : ""}
+            </span>
+          </Tooltip>
+        </Marker>
+      ))}
       {boundsPoints.length > 1 && <FitToRoute points={boundsPoints} />}
     </MapContainer>
   );
