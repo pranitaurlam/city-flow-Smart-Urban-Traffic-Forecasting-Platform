@@ -5,7 +5,8 @@ import { z } from "zod";
 import { DashboardSidebar } from "@/components/dashboard/sidebar";
 import { useTheme } from "@/hooks/use-theme";
 import { Button } from "@/components/ui/button";
-import { Bell, Database, Moon, Sun, User } from "lucide-react";
+import { Database, Moon, Sun, User } from "lucide-react";
+import { NotificationCenter } from "@/components/route/notification-center";
 import {
   ForecastPreviewCard,
   LiveTrafficPanel,
@@ -123,10 +124,7 @@ function LocationsPage() {
               >
                 {dark ? <Sun /> : <Moon />}
               </Button>
-              <Button variant="ghost" size="icon" className="relative" aria-label="Notifications">
-                <Bell />
-                <span className="absolute right-2 top-2 size-2 rounded-full bg-destructive" />
-              </Button>
+              <NotificationCenter />
               <span className="grid size-9 place-items-center rounded-full bg-secondary text-secondary-foreground">
                 <User size={16} />
               </span>

@@ -15,6 +15,7 @@ import { MapPin, Moon, Sun, X } from "lucide-react";
 import { DashboardSidebar } from "@/components/dashboard/sidebar";
 import { Button } from "@/components/ui/button";
 import { TierBadge } from "@/components/locations/panels";
+import { NotificationCenter } from "@/components/route/notification-center";
 import { useTheme } from "@/hooks/use-theme";
 import { bengaluruLocations, trafficTierColor, type TrafficTier } from "@/lib/locations";
 import { bangaloreTrafficHistory } from "@/data/bangalore-traffic-history";
@@ -99,6 +100,7 @@ function ClusterAnalysisPage() {
             >
               {dark ? <Sun /> : <Moon />}
             </Button>
+            <NotificationCenter />
           </div>
         </header>
 

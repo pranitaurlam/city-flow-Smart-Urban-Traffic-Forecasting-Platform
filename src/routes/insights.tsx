@@ -12,6 +12,7 @@ import {
 import { DashboardSidebar } from "@/components/dashboard/sidebar";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/hooks/use-theme";
+import { NotificationCenter } from "@/components/route/notification-center";
 import { bengaluruLocations } from "@/lib/locations";
 import { bangaloreTrafficHistory } from "@/data/bangalore-traffic-history";
 
@@ -95,6 +96,7 @@ function InsightsPage() {
             >
               {dark ? <Sun /> : <Moon />}
             </Button>
+            <NotificationCenter />
           </div>
         </header>
 

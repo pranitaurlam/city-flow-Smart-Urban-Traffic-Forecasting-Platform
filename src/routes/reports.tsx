@@ -3,6 +3,7 @@ import { Download, Moon, Sun } from "lucide-react";
 import { DashboardSidebar } from "@/components/dashboard/sidebar";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/hooks/use-theme";
+import { NotificationCenter } from "@/components/route/notification-center";
 import { TierBadge } from "@/components/locations/panels";
 import { bengaluruLocations } from "@/lib/locations";
 import { bangaloreTrafficHistory } from "@/data/bangalore-traffic-history";
@@ -64,6 +65,7 @@ function ReportsPage() {
             >
               {dark ? <Sun /> : <Moon />}
             </Button>
+            <NotificationCenter />
           </div>
         </header>
 
