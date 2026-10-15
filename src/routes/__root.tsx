@@ -11,6 +11,7 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { useTrafficTrendAlerts } from "../hooks/use-traffic-trend-alerts";
 
 function NotFoundComponent() {
   return (
@@ -120,11 +121,18 @@ function RootShell({ children }: { children: ReactNode }) {
   );
 }
 
+/** Renders nothing — just runs the site-wide traffic trend alert() detector. */
+function TrendAlertRuntime() {
+  useTrafficTrendAlerts();
+  return null;
+}
+
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
   return (
     <QueryClientProvider client={queryClient}>
+      <TrendAlertRuntime />
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
     </QueryClientProvider>

@@ -157,51 +157,12 @@ export function applyWhatIf(baselineMin: number, activeKeys: Set<WhatIfKey>) {
   return { scenarioMin, diffMin: scenarioMin - Math.round(baselineMin), totalPct };
 }
 
-// ---------------------------------------------------------------------------
-// Arrival Time Planner
-// ---------------------------------------------------------------------------
-
 export function minutesToClockLabel(minutesSinceMidnight: number) {
   const clamped = ((minutesSinceMidnight % 1440) + 1440) % 1440;
   const h = Math.floor(clamped / 60);
   const m = Math.round(clamped % 60);
   const label = `${h % 12 === 0 ? 12 : h % 12}:${String(m).padStart(2, "0")} ${h < 12 ? "AM" : "PM"}`;
   return label;
-}
-
-/** Recommends a departure window so the traveller arrives by the target time, using the selected day's hourly forecast. */
-export function recommendDeparture(
-  baseDurationMin: number,
-  offset: number,
-  targetHour: number,
-  targetMinute: number,
-  base: Date = new Date(),
-) {
-  const targetTotalMin = targetHour * 60 + targetMinute;
-  const hourly = buildHourlyForDay(baseDurationMin, offset, base);
-
-  let best: (typeof hourly)[number] | null = null;
-  for (const h of hourly) {
-    const departTotal = h.hour * 60;
-    const arrivalTotal = departTotal + h.travelTime;
-    if (arrivalTotal <= targetTotalMin && (!best || departTotal > best.hour * 60)) {
-      best = h;
-    }
-  }
-  const reference = best ?? hourly[Math.max(0, targetHour - 1)] ?? hourly[0]!;
-
-  const latestDepartureMin = targetTotalMin - reference.travelTime;
-  const bufferMin = Math.max(5, reference.rangeHigh - reference.travelTime);
-  const earliestDepartureMin = latestDepartureMin - bufferMin;
-
-  return {
-    windowStart: minutesToClockLabel(earliestDepartureMin),
-    windowEnd: minutesToClockLabel(latestDepartureMin),
-    journeyRangeLow: reference.rangeLow,
-    journeyRangeHigh: reference.rangeHigh,
-    confidence: reference.confidence,
-    tier: reference.tier,
-  };
 }
 
 // ---------------------------------------------------------------------------

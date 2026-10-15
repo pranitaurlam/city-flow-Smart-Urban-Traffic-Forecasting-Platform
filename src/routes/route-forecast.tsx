@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import {
@@ -20,9 +20,10 @@ import {
 import {
   AlertTriangle,
   ArrowLeftRight,
-  Bell,
+  ArrowRight,
   Bike,
   Bus,
+  CalendarClock,
   Car,
   CloudRain,
   Droplets,
@@ -38,10 +39,13 @@ import { Button } from "@/components/ui/button";
 import { useTheme } from "@/hooks/use-theme";
 import { useIncidents } from "@/hooks/use-incidents";
 import { TierBadge } from "@/components/locations/panels";
+import { PersonalRouteAlerts } from "@/components/route/personal-route-alerts";
+import { RouteAlertAnalysisDialog } from "@/components/route/route-alert-analysis";
+import { NotificationCenter } from "@/components/route/notification-center";
+import { useRouteMonitor } from "@/hooks/use-route-monitor";
 import { RouteMap, type HeatmapSegment, type RouteLine } from "@/components/route/route-map";
 import { IncidentReportButton } from "@/components/route/incident-report";
 import { WhatIfSimulator } from "@/components/route/what-if-simulator";
-import { ArrivalPlanner } from "@/components/route/arrival-planner";
 import { SavedJourneys } from "@/components/route/saved-journeys";
 import { RecurringJourney } from "@/components/route/recurring-journey";
 import { WeatherAlongRoute } from "@/components/route/weather-along-route";
@@ -186,6 +190,7 @@ function RouteForecastPage() {
   const [dayOffset, setDayOffset] = useState(1);
   const [hour, setHour] = useState(18);
   const [heatmapMode, setHeatmapMode] = useState<"off" | "live" | "forecast" | "historical">("off");
+  const monitor = useRouteMonitor();
 
   const source = bengaluruLocations.find((l) => l.slug === sourceSlug) ?? bengaluruLocations[0]!;
   const destination = bengaluruLocations.find((l) => l.slug === destSlug) ?? bengaluruLocations[1]!;
@@ -533,10 +538,7 @@ function RouteForecastPage() {
               >
                 {dark ? <Sun /> : <Moon />}
               </Button>
-              <Button variant="ghost" size="icon" className="relative" aria-label="Notifications">
-                <Bell />
-                <span className="absolute right-2 top-2 size-2 rounded-full bg-destructive" />
-              </Button>
+              <NotificationCenter />
               <span className="grid size-9 place-items-center rounded-full bg-secondary text-secondary-foreground">
                 <User size={16} />
               </span>
@@ -627,6 +629,8 @@ function RouteForecastPage() {
               setPlanned(true);
             }}
           />
+
+          <PersonalRouteAlerts monitor={monitor} />
 
           {planned && (
             <>
@@ -1360,7 +1364,25 @@ function RouteForecastPage() {
                 <WhatIfSimulator baselineMin={selectedDayForecast.travelTime} />
               )}
 
-              <ArrivalPlanner baseDurationMin={carBaseDurationMin} dayOffset={dayOffset} />
+              <section className="glass-panel flex flex-wrap items-center justify-between gap-4 rounded-2xl p-5 sm:p-6">
+                <div className="flex items-center gap-3">
+                  <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[color-mix(in_oklab,var(--brand-cyan)_14%,transparent)] text-brand-cyan">
+                    <CalendarClock size={18} />
+                  </span>
+                  <div>
+                    <p className="text-sm font-bold">Need to arrive by a specific time?</p>
+                    <p className="text-xs text-muted-foreground">
+                      Use the Arrival Planner for a recommended departure window, reliability
+                      target, and risk indicator.
+                    </p>
+                  </div>
+                </div>
+                <Button variant="cityflow" className="rounded-xl" asChild>
+                  <Link to="/arrival-planner">
+                    Open Arrival Planner <ArrowRight className="size-4" />
+                  </Link>
+                </Button>
+              </section>
 
               <RecurringJourney
                 baseDurationMin={carBaseDurationMin}
@@ -1469,6 +1491,7 @@ function RouteForecastPage() {
               </section>
             </>
           )}
+          <RouteAlertAnalysisDialog monitor={monitor} />
         </main>
       </div>
     </div>

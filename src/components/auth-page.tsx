@@ -37,7 +37,11 @@ export function AuthPage() {
       </Button>
 
       <div className="relative z-10 w-full max-w-md">
-        <Link to="/" className="mb-8 flex items-center justify-center gap-2" aria-label="CityFlow home">
+        <Link
+          to="/"
+          className="mb-8 flex items-center justify-center gap-2"
+          aria-label="CityFlow home"
+        >
           <span className="grid size-10 place-items-center rounded-full bg-gradient-brand text-primary-foreground">
             <RouteIcon size={24} />
           </span>
@@ -46,7 +50,9 @@ export function AuthPage() {
 
         <div className="glass-panel rounded-lg p-8 shadow-sm">
           <h1 className="text-2xl font-extrabold tracking-normal">Welcome back</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Log in to access live traffic insights.</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Log in to access live traffic insights.
+          </p>
 
           <form onSubmit={submit} className="mt-6 space-y-4" noValidate>
             <div className="space-y-2">

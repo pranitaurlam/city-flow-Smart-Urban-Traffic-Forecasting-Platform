@@ -65,13 +65,13 @@ These are planned after the core requirements are complete and are not required 
 
 ## Tech stack
 
-| Layer | Technology |
-| --- | --- |
+| Layer             | Technology                                                                        |
+| ----------------- | --------------------------------------------------------------------------------- |
 | Data and modeling | Python, Scikit-Learn (Random Forest, XGBoost), Statsmodels (SARIMA, Holt-Winters) |
-| Storage | PostgreSQL or MySQL |
-| Web application | React 19, TanStack Start, TanStack Router, Vite |
-| UI | Tailwind CSS, Radix UI, shadcn-style components, Recharts |
-| Tooling | Bun, TypeScript, ESLint, Prettier |
+| Storage           | PostgreSQL or MySQL                                                               |
+| Web application   | React 19, TanStack Start, TanStack Router, Vite                                   |
+| UI                | Tailwind CSS, Radix UI, shadcn-style components, Recharts                         |
+| Tooling           | Bun, TypeScript, ESLint, Prettier                                                 |
 
 ## Architecture
 
@@ -147,33 +147,33 @@ bun run preview
 
 ## Available scripts
 
-| Script | Purpose |
-| --- | --- |
-| `dev` | Start the Vite development server |
-| `build` | Create a production build |
+| Script      | Purpose                               |
+| ----------- | ------------------------------------- |
+| `dev`       | Start the Vite development server     |
+| `build`     | Create a production build             |
 | `build:dev` | Build using development mode settings |
-| `preview` | Serve the production build locally |
-| `lint` | Run ESLint across the project |
-| `format` | Format the codebase with Prettier |
+| `preview`   | Serve the production build locally    |
+| `lint`      | Run ESLint across the project         |
+| `format`    | Format the codebase with Prettier     |
 
 ## Roadmap
 
 The project runs over twelve weeks.
 
-| Week | Deliverable |
-| --- | --- |
-| 1 | Project planning and requirement analysis |
-| 2 | Dataset collection and exploration |
-| 3 | Data cleaning pipeline, development environment, and database setup |
-| 4 | Feature engineering and exploratory data analysis |
-| 5 | Baseline and regression model development (Random Forest, XGBoost) |
-| 6 | Corridor severity calibration and congestion scoring |
-| 7 | Backend API development |
-| 8 | Dashboard development and data visualization |
-| 9 | Stretch goals: explainability panel and forecast confidence range |
-| 10 | Statistical baseline comparison (SARIMA, Holt-Winters) and Dockerized demo |
-| 11 | System testing, bug fixing, and performance tuning |
-| 12 | Final documentation, presentation, and demo rehearsal |
+| Week | Deliverable                                                                |
+| ---- | -------------------------------------------------------------------------- |
+| 1    | Project planning and requirement analysis                                  |
+| 2    | Dataset collection and exploration                                         |
+| 3    | Data cleaning pipeline, development environment, and database setup        |
+| 4    | Feature engineering and exploratory data analysis                          |
+| 5    | Baseline and regression model development (Random Forest, XGBoost)         |
+| 6    | Corridor severity calibration and congestion scoring                       |
+| 7    | Backend API development                                                    |
+| 8    | Dashboard development and data visualization                               |
+| 9    | Stretch goals: explainability panel and forecast confidence range          |
+| 10   | Statistical baseline comparison (SARIMA, Holt-Winters) and Dockerized demo |
+| 11   | System testing, bug fixing, and performance tuning                         |
+| 12   | Final documentation, presentation, and demo rehearsal                      |
 
 ## Evaluation and acceptance
 
