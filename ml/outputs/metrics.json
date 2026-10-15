@@ -1,0 +1,422 @@
+[
+  {
+    "target": "congestion_pct",
+    "horizon": 1,
+    "train_rows": 6770,
+    "test_rows": 718,
+    "full_train_rows": 7488,
+    "metrics": {
+      "baseline": {
+        "mae": 18.362783493511923,
+        "rmse": 24.261888050314994,
+        "mape": 31.68268008822538,
+        "r2": -0.19521125510304738
+      },
+      "random_forest": {
+        "mae": 13.066852068483326,
+        "rmse": 17.16291086032897,
+        "mape": 23.586666719914266,
+        "r2": 0.4018950743966645
+      },
+      "xgboost": {
+        "mae": 13.010589464249843,
+        "rmse": 17.08342116884044,
+        "mape": 23.519610775141977,
+        "r2": 0.40742246759324086
+      }
+    },
+    "chosen_model": "xgboost",
+    "beats_baseline_on": 4,
+    "model_path": "outputs/models/congestion_pct_h1_xgboost.joblib"
+  },
+  {
+    "target": "congestion_pct",
+    "horizon": 2,
+    "train_rows": 6762,
+    "test_rows": 718,
+    "full_train_rows": 7480,
+    "metrics": {
+      "baseline": {
+        "mae": 17.75534686133569,
+        "rmse": 23.806627094607865,
+        "mape": 30.57707918002735,
+        "r2": -0.1507771336467163
+      },
+      "random_forest": {
+        "mae": 13.618779783982301,
+        "rmse": 17.58942044484314,
+        "mape": 25.01031134263869,
+        "r2": 0.37179911279082045
+      },
+      "xgboost": {
+        "mae": 13.763167830746013,
+        "rmse": 17.755110629040118,
+        "mape": 25.22410904677753,
+        "r2": 0.359908219271437
+      }
+    },
+    "chosen_model": "xgboost",
+    "beats_baseline_on": 4,
+    "model_path": "outputs/models/congestion_pct_h2_xgboost.joblib"
+  },
+  {
+    "target": "congestion_pct",
+    "horizon": 3,
+    "train_rows": 6754,
+    "test_rows": 718,
+    "full_train_rows": 7472,
+    "metrics": {
+      "baseline": {
+        "mae": 18.22676132899935,
+        "rmse": 24.5351117392088,
+        "mape": 31.99388518834409,
+        "r2": -0.22228242077676286
+      },
+      "random_forest": {
+        "mae": 13.478208429825846,
+        "rmse": 17.467144292619274,
+        "mape": 24.804332873891536,
+        "r2": 0.3805028667477268
+      },
+      "xgboost": {
+        "mae": 13.678180257543916,
+        "rmse": 17.76854136060814,
+        "mape": 25.294200468736506,
+        "r2": 0.358939466938784
+      }
+    },
+    "chosen_model": "xgboost",
+    "beats_baseline_on": 4,
+    "model_path": "outputs/models/congestion_pct_h3_xgboost.joblib"
+  },
+  {
+    "target": "congestion_pct",
+    "horizon": 4,
+    "train_rows": 6746,
+    "test_rows": 718,
+    "full_train_rows": 7464,
+    "metrics": {
+      "baseline": {
+        "mae": 18.065571945852334,
+        "rmse": 24.558248721772383,
+        "mape": 32.19342577510883,
+        "r2": -0.2245887694543749
+      },
+      "random_forest": {
+        "mae": 13.546396115043846,
+        "rmse": 17.47564932348587,
+        "mape": 24.76921023546953,
+        "r2": 0.37989943382321345
+      },
+      "xgboost": {
+        "mae": 13.796037379574962,
+        "rmse": 17.784092067657966,
+        "mape": 25.41897462274344,
+        "r2": 0.3578168866809335
+      }
+    },
+    "chosen_model": "xgboost",
+    "beats_baseline_on": 4,
+    "model_path": "outputs/models/congestion_pct_h4_xgboost.joblib"
+  },
+  {
+    "target": "congestion_pct",
+    "horizon": 5,
+    "train_rows": 6738,
+    "test_rows": 718,
+    "full_train_rows": 7456,
+    "metrics": {
+      "baseline": {
+        "mae": 17.696919412741337,
+        "rmse": 23.84950810402931,
+        "mape": 31.476413691468302,
+        "r2": -0.15492647633935897
+      },
+      "random_forest": {
+        "mae": 13.685023299817246,
+        "rmse": 17.61969315799866,
+        "mape": 24.995672722375822,
+        "r2": 0.36963489021604057
+      },
+      "xgboost": {
+        "mae": 13.648239146831251,
+        "rmse": 17.540196249787343,
+        "mape": 25.026890356252483,
+        "r2": 0.37531024772119936
+      }
+    },
+    "chosen_model": "xgboost",
+    "beats_baseline_on": 4,
+    "model_path": "outputs/models/congestion_pct_h5_xgboost.joblib"
+  },
+  {
+    "target": "congestion_pct",
+    "horizon": 6,
+    "train_rows": 6730,
+    "test_rows": 718,
+    "full_train_rows": 7448,
+    "metrics": {
+      "baseline": {
+        "mae": 18.542677206868024,
+        "rmse": 24.598123326909036,
+        "mape": 32.664166208418955,
+        "r2": -0.22856866526869668
+      },
+      "random_forest": {
+        "mae": 13.694428126211788,
+        "rmse": 17.707481861712218,
+        "mape": 25.205762458460963,
+        "r2": 0.36333775481705854
+      },
+      "xgboost": {
+        "mae": 13.833595976394019,
+        "rmse": 17.68391742832354,
+        "mape": 25.394999658512567,
+        "r2": 0.36503111841942903
+      }
+    },
+    "chosen_model": "xgboost",
+    "beats_baseline_on": 4,
+    "model_path": "outputs/models/congestion_pct_h6_xgboost.joblib"
+  },
+  {
+    "target": "congestion_pct",
+    "horizon": 7,
+    "train_rows": 6722,
+    "test_rows": 718,
+    "full_train_rows": 7440,
+    "metrics": {
+      "baseline": {
+        "mae": 18.044110430331674,
+        "rmse": 24.498756279841423,
+        "mape": 31.7857388629599,
+        "r2": -0.218662814976206
+      },
+      "random_forest": {
+        "mae": 13.722882333713596,
+        "rmse": 17.738306367657774,
+        "mape": 25.240459995795845,
+        "r2": 0.3611192710863319
+      },
+      "xgboost": {
+        "mae": 13.891075724639999,
+        "rmse": 17.829073128370943,
+        "mape": 25.361741045044422,
+        "r2": 0.35456424852775326
+      }
+    },
+    "chosen_model": "xgboost",
+    "beats_baseline_on": 4,
+    "model_path": "outputs/models/congestion_pct_h7_xgboost.joblib"
+  },
+  {
+    "target": "avg_speed_kph",
+    "horizon": 1,
+    "train_rows": 6770,
+    "test_rows": 718,
+    "full_train_rows": 7488,
+    "metrics": {
+      "baseline": {
+        "mae": 9.765610939564183,
+        "rmse": 12.442642441406335,
+        "mape": 25.74142096799763,
+        "r2": -0.9998215029463446
+      },
+      "random_forest": {
+        "mae": 6.411534514459843,
+        "rmse": 8.351144163857176,
+        "mape": 17.13453519158216,
+        "r2": 0.09913865297625002
+      },
+      "xgboost": {
+        "mae": 6.416245173368906,
+        "rmse": 8.343088622255102,
+        "mape": 17.123545630713213,
+        "r2": 0.10087576250010788
+      }
+    },
+    "chosen_model": "xgboost",
+    "beats_baseline_on": 4,
+    "model_path": "outputs/models/avg_speed_kph_h1_xgboost.joblib"
+  },
+  {
+    "target": "avg_speed_kph",
+    "horizon": 2,
+    "train_rows": 6762,
+    "test_rows": 718,
+    "full_train_rows": 7480,
+    "metrics": {
+      "baseline": {
+        "mae": 9.979736913658355,
+        "rmse": 12.705225602034202,
+        "mape": 26.281814585638134,
+        "r2": -1.0851185577414326
+      },
+      "random_forest": {
+        "mae": 6.772285992836492,
+        "rmse": 8.673358617874197,
+        "mape": 18.00563512680677,
+        "r2": 0.028281214813320577
+      },
+      "xgboost": {
+        "mae": 6.870558372767699,
+        "rmse": 8.789221484585047,
+        "mape": 18.21538274929177,
+        "r2": 0.0021464454143865774
+      }
+    },
+    "chosen_model": "xgboost",
+    "beats_baseline_on": 4,
+    "model_path": "outputs/models/avg_speed_kph_h2_xgboost.joblib"
+  },
+  {
+    "target": "avg_speed_kph",
+    "horizon": 3,
+    "train_rows": 6754,
+    "test_rows": 718,
+    "full_train_rows": 7472,
+    "metrics": {
+      "baseline": {
+        "mae": 9.96740382984218,
+        "rmse": 12.66640872300788,
+        "mape": 26.33947204961535,
+        "r2": -1.0723971536248187
+      },
+      "random_forest": {
+        "mae": 6.765719395344645,
+        "rmse": 8.71433484183559,
+        "mape": 17.963785104565765,
+        "r2": 0.01907799274642419
+      },
+      "xgboost": {
+        "mae": 6.839512006868762,
+        "rmse": 8.822176725703347,
+        "mape": 18.13234776589046,
+        "r2": -0.0053504995375397435
+      }
+    },
+    "chosen_model": "xgboost",
+    "beats_baseline_on": 4,
+    "model_path": "outputs/models/avg_speed_kph_h3_xgboost.joblib"
+  },
+  {
+    "target": "avg_speed_kph",
+    "horizon": 4,
+    "train_rows": 6746,
+    "test_rows": 718,
+    "full_train_rows": 7464,
+    "metrics": {
+      "baseline": {
+        "mae": 10.383718213260027,
+        "rmse": 13.113594120633069,
+        "mape": 27.400338355546754,
+        "r2": -1.221311509061688
+      },
+      "random_forest": {
+        "mae": 6.82983717500288,
+        "rmse": 8.694745927730645,
+        "mape": 18.094952201104462,
+        "r2": 0.023483056452306528
+      },
+      "xgboost": {
+        "mae": 6.900668222988612,
+        "rmse": 8.763235805781774,
+        "mape": 18.198156886308684,
+        "r2": 0.008038109566980367
+      }
+    },
+    "chosen_model": "xgboost",
+    "beats_baseline_on": 4,
+    "model_path": "outputs/models/avg_speed_kph_h4_xgboost.joblib"
+  },
+  {
+    "target": "avg_speed_kph",
+    "horizon": 5,
+    "train_rows": 6738,
+    "test_rows": 718,
+    "full_train_rows": 7456,
+    "metrics": {
+      "baseline": {
+        "mae": 9.929727081728371,
+        "rmse": 12.583666123011627,
+        "mape": 26.27987366346104,
+        "r2": -1.0454099538040347
+      },
+      "random_forest": {
+        "mae": 6.862197902978571,
+        "rmse": 8.763029184190394,
+        "mape": 18.155909505098233,
+        "r2": 0.008084886427177973
+      },
+      "xgboost": {
+        "mae": 6.9551195145358795,
+        "rmse": 8.865195086994762,
+        "mape": 18.387611736894883,
+        "r2": -0.01517890714698611
+      }
+    },
+    "chosen_model": "xgboost",
+    "beats_baseline_on": 4,
+    "model_path": "outputs/models/avg_speed_kph_h5_xgboost.joblib"
+  },
+  {
+    "target": "avg_speed_kph",
+    "horizon": 6,
+    "train_rows": 6730,
+    "test_rows": 718,
+    "full_train_rows": 7448,
+    "metrics": {
+      "baseline": {
+        "mae": 9.834022810301619,
+        "rmse": 12.344757567461796,
+        "mape": 26.27472826000104,
+        "r2": -0.9684805243663237
+      },
+      "random_forest": {
+        "mae": 6.877675473434176,
+        "rmse": 8.718456050252701,
+        "mape": 18.236131958953305,
+        "r2": 0.018149972416364735
+      },
+      "xgboost": {
+        "mae": 6.886131642498818,
+        "rmse": 8.737956726842626,
+        "mape": 18.254883364905712,
+        "r2": 0.013752828561977237
+      }
+    },
+    "chosen_model": "xgboost",
+    "beats_baseline_on": 4,
+    "model_path": "outputs/models/avg_speed_kph_h6_xgboost.joblib"
+  },
+  {
+    "target": "avg_speed_kph",
+    "horizon": 7,
+    "train_rows": 6722,
+    "test_rows": 718,
+    "full_train_rows": 7440,
+    "metrics": {
+      "baseline": {
+        "mae": 9.684635395626625,
+        "rmse": 12.273919098429584,
+        "mape": 25.823334069589325,
+        "r2": -0.9459537057317793
+      },
+      "random_forest": {
+        "mae": 6.9465204653673265,
+        "rmse": 8.829215714233454,
+        "mape": 18.454309520892284,
+        "r2": -0.006955426302013734
+      },
+      "xgboost": {
+        "mae": 6.921453693122102,
+        "rmse": 8.823011442400523,
+        "mape": 18.348106881491177,
+        "r2": -0.005540752481800526
+      }
+    },
+    "chosen_model": "xgboost",
+    "beats_baseline_on": 4,
+    "model_path": "outputs/models/avg_speed_kph_h7_xgboost.joblib"
+  }
+]
