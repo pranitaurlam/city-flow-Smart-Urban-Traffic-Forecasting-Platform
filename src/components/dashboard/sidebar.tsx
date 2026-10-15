@@ -1,6 +1,7 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import {
   AlertTriangle,
+  CalendarClock,
   FileBarChart,
   HelpCircle,
   LayoutDashboard,
@@ -28,6 +29,12 @@ const navItems = [
   { label: "Traffic Analysis", icon: Activity, to: "/traffic-analysis" as const, params: {} },
   { label: "Forecast", icon: TrendingUp, to: "/forecast" as const, params: {} },
   { label: "Route Forecast", icon: Milestone, to: "/route-forecast" as const, params: {} },
+  {
+    label: "Arrival Planner",
+    icon: CalendarClock,
+    to: "/arrival-planner" as const,
+    params: {},
+  },
   { label: "Peak Hours", icon: Timer, to: "/peak-hours" as const, params: {} },
   { label: "Cluster Analysis", icon: ScatterChart, to: "/cluster-analysis" as const, params: {} },
   { label: "Reports", icon: FileBarChart, to: "/reports" as const, params: {} },

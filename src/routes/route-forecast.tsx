@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import {
@@ -20,9 +20,10 @@ import {
 import {
   AlertTriangle,
   ArrowLeftRight,
-  Bell,
+  ArrowRight,
   Bike,
   Bus,
+  CalendarClock,
   Car,
   CloudRain,
   Droplets,
@@ -37,9 +38,11 @@ import { DashboardSidebar } from "@/components/dashboard/sidebar";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/hooks/use-theme";
 import { TierBadge } from "@/components/locations/panels";
-import { RouteMap, type HeatmapSegment, type RouteLine } from "@/components/route/route-map";
+import { PersonalRouteAlerts } from "@/components/route/personal-route-alerts";
+import { RouteAlertAnalysisDialog } from "@/components/route/route-alert-analysis";
+import { NotificationCenter } from "@/components/route/notification-center";
+import { useRouteMonitor } from "@/hooks/use-route-monitor";
 import { WhatIfSimulator } from "@/components/route/what-if-simulator";
-import { ArrivalPlanner } from "@/components/route/arrival-planner";
 import { SavedJourneys } from "@/components/route/saved-journeys";
 import { RecurringJourney } from "@/components/route/recurring-journey";
 import { WeatherAlongRoute } from "@/components/route/weather-along-route";
@@ -86,7 +89,6 @@ const POPULAR = [
   "electronic-city",
 ];
 const ROUTE_COLORS = ["var(--brand-cyan)", "var(--brand-violet)", "oklch(0.6 0.01 260)"];
-const TIER_ORDER: TrafficTier[] = ["Low", "Moderate", "High", "Very High"];
 
 /**
  * OSRM's routing duration doesn't reliably reflect real Bengaluru travel time (it
@@ -181,7 +183,7 @@ function RouteForecastPage() {
   const [planned, setPlanned] = useState(true);
   const [dayOffset, setDayOffset] = useState(1);
   const [hour, setHour] = useState(18);
-  const [heatmapMode, setHeatmapMode] = useState<"off" | "live" | "forecast" | "historical">("off");
+  const monitor = useRouteMonitor();
 
   const source = bengaluruLocations.find((l) => l.slug === sourceSlug) ?? bengaluruLocations[0]!;
   const destination = bengaluruLocations.find((l) => l.slug === destSlug) ?? bengaluruLocations[1]!;
@@ -287,25 +289,6 @@ function RouteForecastPage() {
     () => routeExplainability(dayOffset, hour, weather?.condition),
     [dayOffset, hour, weather?.condition],
   );
-
-  const routeLines: RouteLine[] = activeRoute
-    ? [activeRoute.primary, ...activeRoute.alternatives].map((r, i) => {
-        const routeSpeedKph =
-          typicalSpeedForDistance(r.distanceKm) *
-          (TIER_SPEED_FACTOR[worstSample?.tier ?? "Moderate"] ?? 1);
-        const minutes =
-          mode === "car"
-            ? Math.round(durationFromDistance(r.distanceKm, routeSpeedKph))
-            : Math.round(r.durationMin);
-        return {
-          geometry: r.geometry,
-          color: ROUTE_COLORS[i] ?? ROUTE_COLORS[2]!,
-          label: `Route ${String.fromCharCode(65 + i)}`,
-          timeLabel: formatMin(minutes),
-          distanceLabel: `${r.distanceKm.toFixed(1)} km`,
-        };
-      })
-    : [];
 
   const swap = () => {
     setSourceSlug(destSlug);
@@ -420,36 +403,6 @@ function RouteForecastPage() {
     destination.name,
   ]);
 
-  const heatmapSegments: HeatmapSegment[] = useMemo(() => {
-    if (heatmapMode === "off" || !carRoute.data || routeSamples.length === 0) return [];
-    const geo = carRoute.data.primary.geometry;
-    // Divide the full route geometry evenly by however many de-duplicated samples
-    // remain — NOT by the original 5-way sampling fractions, since dedup can leave
-    // fewer than 5 (using those would leave the back half of the route uncovered).
-    const segmentCount = routeSamples.length;
-    const dayShiftFromModerate =
-      TIER_ORDER.indexOf(selectedDayForecast?.tier ?? "Moderate") - TIER_ORDER.indexOf("Moderate");
-
-    return routeSamples.map((seg, i) => {
-      const startIdx = Math.floor((geo.length * i) / segmentCount);
-      const endIdx = Math.floor((geo.length * (i + 1)) / segmentCount);
-      const segGeometry = geo.slice(startIdx, Math.max(startIdx + 2, endIdx + 1));
-
-      let tier: TrafficTier;
-      if (heatmapMode === "live") {
-        tier = sampleTrafficQueries[i]?.data?.tier ?? seg.baseTier;
-      } else if (heatmapMode === "historical") {
-        tier = seg.baseTier;
-      } else {
-        const baseRank = TIER_ORDER.indexOf(seg.baseTier);
-        tier =
-          TIER_ORDER[Math.min(3, Math.max(0, baseRank + dayShiftFromModerate))] ?? seg.baseTier;
-      }
-
-      return { geometry: segGeometry, color: trafficTierColor[tier], label: seg.name, tier };
-    });
-  }, [heatmapMode, carRoute.data, routeSamples, sampleTrafficQueries, selectedDayForecast]);
-
   const midpointSample = routeSamples[Math.floor(routeSamples.length / 2)] ?? destination;
 
   return (
@@ -478,10 +431,7 @@ function RouteForecastPage() {
               >
                 {dark ? <Sun /> : <Moon />}
               </Button>
-              <Button variant="ghost" size="icon" className="relative" aria-label="Notifications">
-                <Bell />
-                <span className="absolute right-2 top-2 size-2 rounded-full bg-destructive" />
-              </Button>
+              <NotificationCenter />
               <span className="grid size-9 place-items-center rounded-full bg-secondary text-secondary-foreground">
                 <User size={16} />
               </span>
@@ -573,59 +523,10 @@ function RouteForecastPage() {
             }}
           />
 
+          <PersonalRouteAlerts monitor={monitor} />
+
           {planned && (
             <>
-              {/* 4. Map */}
-              <section className="glass-panel relative overflow-hidden rounded-2xl">
-                <div className="h-[420px] w-full sm:h-[500px]">
-                  <RouteMap
-                    source={{ lat: source.lat, lon: source.lon }}
-                    destination={{ lat: destination.lat, lon: destination.lon }}
-                    routes={routeLines}
-                    heatmapSegments={heatmapSegments}
-                  />
-                </div>
-                <div className="glass-panel pointer-events-none absolute right-4 top-4 z-[400] rounded-xl px-3 py-2 text-xs font-semibold">
-                  {(["Low", "Moderate", "High", "Very High"] as const).map((tier) => (
-                    <div key={tier} className="flex items-center gap-1.5 py-0.5">
-                      <i
-                        className="size-2 rounded-full"
-                        style={{ background: trafficTierColor[tier] }}
-                      />
-                      {tier}
-                    </div>
-                  ))}
-                </div>
-                <div className="glass-panel pointer-events-auto absolute left-4 top-4 z-[400] flex flex-wrap gap-1 rounded-xl p-1.5 text-xs font-semibold">
-                  {(
-                    [
-                      { key: "off", label: "Routes" },
-                      { key: "live", label: "Live Traffic" },
-                      { key: "forecast", label: "Forecast Traffic" },
-                      { key: "historical", label: "Historical Avg" },
-                    ] as const
-                  ).map((opt) => (
-                    <button
-                      key={opt.key}
-                      type="button"
-                      onClick={() => setHeatmapMode(opt.key)}
-                      className={`rounded-lg px-2.5 py-1.5 transition ${
-                        heatmapMode === opt.key
-                          ? "bg-gradient-brand text-primary-foreground"
-                          : "text-muted-foreground hover:text-foreground"
-                      }`}
-                    >
-                      {opt.label}
-                    </button>
-                  ))}
-                </div>
-                {heatmapMode !== "off" && (
-                  <div className="glass-panel pointer-events-none absolute bottom-4 left-4 z-[400] rounded-xl px-3 py-1.5 text-[11px] font-bold text-brand-cyan">
-                    CITYFLOW FORECAST — route traffic heatmap ({heatmapMode})
-                  </div>
-                )}
-              </section>
-
               {/* 5. Transport mode selector */}
               <section className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                 <ModeButton
@@ -1252,7 +1153,25 @@ function RouteForecastPage() {
                 <WhatIfSimulator baselineMin={selectedDayForecast.travelTime} />
               )}
 
-              <ArrivalPlanner baseDurationMin={carBaseDurationMin} dayOffset={dayOffset} />
+              <section className="glass-panel flex flex-wrap items-center justify-between gap-4 rounded-2xl p-5 sm:p-6">
+                <div className="flex items-center gap-3">
+                  <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[color-mix(in_oklab,var(--brand-cyan)_14%,transparent)] text-brand-cyan">
+                    <CalendarClock size={18} />
+                  </span>
+                  <div>
+                    <p className="text-sm font-bold">Need to arrive by a specific time?</p>
+                    <p className="text-xs text-muted-foreground">
+                      Use the Arrival Planner for a recommended departure window, reliability
+                      target, and risk indicator.
+                    </p>
+                  </div>
+                </div>
+                <Button variant="cityflow" className="rounded-xl" asChild>
+                  <Link to="/arrival-planner">
+                    Open Arrival Planner <ArrowRight className="size-4" />
+                  </Link>
+                </Button>
+              </section>
 
               <RecurringJourney
                 baseDurationMin={carBaseDurationMin}
@@ -1361,6 +1280,7 @@ function RouteForecastPage() {
               </section>
             </>
           )}
+          <RouteAlertAnalysisDialog monitor={monitor} />
         </main>
       </div>
     </div>
