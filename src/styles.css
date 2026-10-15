@@ -188,16 +188,29 @@
 }
 
 @keyframes float-globe {
-  0%, 100% { transform: translateY(0) rotate(-1deg); }
-  50% { transform: translateY(-9px) rotate(1deg); }
+  0%,
+  100% {
+    transform: translateY(0) rotate(-1deg);
+  }
+  50% {
+    transform: translateY(-9px) rotate(1deg);
+  }
 }
 
 @keyframes spin-globe {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .globe-float { animation: float-globe 9s ease-in-out infinite; }
-  .globe-rotate { animation: spin-globe 60s linear infinite; }
+  .globe-float {
+    animation: float-globe 9s ease-in-out infinite;
+  }
+  .globe-rotate {
+    animation: spin-globe 60s linear infinite;
+  }
 }
