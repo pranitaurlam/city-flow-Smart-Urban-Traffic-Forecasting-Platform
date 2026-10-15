@@ -37,11 +37,14 @@ import {
 import { DashboardSidebar } from "@/components/dashboard/sidebar";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/hooks/use-theme";
+import { useIncidents } from "@/hooks/use-incidents";
 import { TierBadge } from "@/components/locations/panels";
 import { PersonalRouteAlerts } from "@/components/route/personal-route-alerts";
 import { RouteAlertAnalysisDialog } from "@/components/route/route-alert-analysis";
 import { NotificationCenter } from "@/components/route/notification-center";
 import { useRouteMonitor } from "@/hooks/use-route-monitor";
+import { RouteMap, type HeatmapSegment, type RouteLine } from "@/components/route/route-map";
+import { IncidentReportButton } from "@/components/route/incident-report";
 import { WhatIfSimulator } from "@/components/route/what-if-simulator";
 import { SavedJourneys } from "@/components/route/saved-journeys";
 import { RecurringJourney } from "@/components/route/recurring-journey";
@@ -71,6 +74,7 @@ import {
   routeExplainability,
   typicalDayAverageMinutes,
 } from "@/lib/route-forecast";
+import { incidentsOnRoute, INCIDENT_LABEL } from "@/lib/incidents";
 
 export const Route = createFileRoute("/route-forecast")({
   ssr: false,
@@ -89,6 +93,7 @@ const POPULAR = [
   "electronic-city",
 ];
 const ROUTE_COLORS = ["var(--brand-cyan)", "var(--brand-violet)", "oklch(0.6 0.01 260)"];
+const TIER_ORDER: TrafficTier[] = ["Low", "Moderate", "High", "Very High"];
 
 /**
  * OSRM's routing duration doesn't reliably reflect real Bengaluru travel time (it
@@ -177,12 +182,14 @@ function nearestKnown(lat: number, lon: number) {
 
 function RouteForecastPage() {
   const { dark, toggleDark } = useTheme();
+  const { incidents, refresh: refreshIncidents } = useIncidents();
   const [sourceSlug, setSourceSlug] = useState("marathahalli");
   const [destSlug, setDestSlug] = useState("mg-road");
   const [mode, setMode] = useState<TravelMode>("car");
   const [planned, setPlanned] = useState(true);
   const [dayOffset, setDayOffset] = useState(1);
   const [hour, setHour] = useState(18);
+  const [heatmapMode, setHeatmapMode] = useState<"off" | "live" | "forecast" | "historical">("off");
   const monitor = useRouteMonitor();
 
   const source = bengaluruLocations.find((l) => l.slug === sourceSlug) ?? bengaluruLocations[0]!;
@@ -290,6 +297,63 @@ function RouteForecastPage() {
     [dayOffset, hour, weather?.condition],
   );
 
+  const routeLines: RouteLine[] = useMemo(
+    () =>
+      activeRoute
+        ? [activeRoute.primary, ...activeRoute.alternatives].map((r, i) => {
+            const routeSpeedKph =
+              typicalSpeedForDistance(r.distanceKm) *
+              (TIER_SPEED_FACTOR[worstSample?.tier ?? "Moderate"] ?? 1);
+            const minutes =
+              mode === "car"
+                ? Math.round(durationFromDistance(r.distanceKm, routeSpeedKph))
+                : Math.round(r.durationMin);
+            return {
+              geometry: r.geometry,
+              color: ROUTE_COLORS[i] ?? ROUTE_COLORS[2]!,
+              label: `Route ${String.fromCharCode(65 + i)}`,
+              timeLabel: formatMin(minutes),
+              distanceLabel: `${r.distanceKm.toFixed(1)} km`,
+            };
+          })
+        : [],
+    [activeRoute, mode, worstSample?.tier],
+  );
+
+  // Active incident reports matched to each displayed route, by index (0 = Route A/primary).
+  const routeIncidents = useMemo(
+    () => routeLines.map((r) => incidentsOnRoute(incidents, r.geometry)),
+    [routeLines, incidents],
+  );
+  const primaryIncidents = useMemo(() => routeIncidents[0] ?? [], [routeIncidents]);
+  const clearAlternateIndex = routeIncidents.findIndex((list, i) => i > 0 && list.length === 0);
+
+  // Where a new incident report gets pinned: the midpoint of the currently
+  // recommended route, tagged with the nearest known location for display.
+  const reportTarget = useMemo(() => {
+    const geo = routeLines[0]?.geometry;
+    if (!geo || geo.length < 2) return null;
+    const mid = geo[Math.floor(geo.length / 2)]!;
+    return { lat: mid[0], lon: mid[1], roadHint: nearestKnown(mid[0], mid[1]).name };
+  }, [routeLines]);
+
+  const mapIncidents = useMemo(() => {
+    const seen = new Set<string>();
+    return routeIncidents
+      .flat()
+      .reduce<{ lat: number; lon: number; label: string; note?: string }[]>((list, incident) => {
+        if (seen.has(incident.id)) return list;
+        seen.add(incident.id);
+        list.push({
+          lat: incident.lat,
+          lon: incident.lon,
+          label: `${INCIDENT_LABEL[incident.type]} near ${incident.roadHint}`,
+          ...(incident.note ? { note: incident.note } : {}),
+        });
+        return list;
+      }, []);
+  }, [routeIncidents]);
+
   const swap = () => {
     setSourceSlug(destSlug);
     setDestSlug(sourceSlug);
@@ -360,6 +424,18 @@ function RouteForecastPage() {
       location: string;
       effect: string;
     }[] = [];
+    primaryIncidents.forEach((incident) => {
+      alerts.unshift({
+        icon: AlertTriangle,
+        title: `${INCIDENT_LABEL[incident.type]} Reported`,
+        time: new Date(incident.reportedAt).toLocaleTimeString(undefined, {
+          hour: "numeric",
+          minute: "2-digit",
+        }),
+        location: `Near ${incident.roadHint} on ${source.name} → ${destination.name}`,
+        effect: incident.note || "Reported by a traveller on this route — consider an alternate.",
+      });
+    });
     if (!selectedDayForecast) return alerts;
     const { relative, monthDay } = dayLabel(dayOffset);
     const timeLabel = `${relative}, ${monthDay} · ${hour % 12 === 0 ? 12 : hour % 12}${hour < 12 ? "AM" : "PM"}`;
@@ -393,6 +469,7 @@ function RouteForecastPage() {
     }
     return alerts;
   }, [
+    primaryIncidents,
     selectedDayForecast,
     dayOffset,
     hour,
@@ -402,6 +479,36 @@ function RouteForecastPage() {
     source.name,
     destination.name,
   ]);
+
+  const heatmapSegments: HeatmapSegment[] = useMemo(() => {
+    if (heatmapMode === "off" || !carRoute.data || routeSamples.length === 0) return [];
+    const geo = carRoute.data.primary.geometry;
+    // Divide the full route geometry evenly by however many de-duplicated samples
+    // remain — NOT by the original 5-way sampling fractions, since dedup can leave
+    // fewer than 5 (using those would leave the back half of the route uncovered).
+    const segmentCount = routeSamples.length;
+    const dayShiftFromModerate =
+      TIER_ORDER.indexOf(selectedDayForecast?.tier ?? "Moderate") - TIER_ORDER.indexOf("Moderate");
+
+    return routeSamples.map((seg, i) => {
+      const startIdx = Math.floor((geo.length * i) / segmentCount);
+      const endIdx = Math.floor((geo.length * (i + 1)) / segmentCount);
+      const segGeometry = geo.slice(startIdx, Math.max(startIdx + 2, endIdx + 1));
+
+      let tier: TrafficTier;
+      if (heatmapMode === "live") {
+        tier = sampleTrafficQueries[i]?.data?.tier ?? seg.baseTier;
+      } else if (heatmapMode === "historical") {
+        tier = seg.baseTier;
+      } else {
+        const baseRank = TIER_ORDER.indexOf(seg.baseTier);
+        tier =
+          TIER_ORDER[Math.min(3, Math.max(0, baseRank + dayShiftFromModerate))] ?? seg.baseTier;
+      }
+
+      return { geometry: segGeometry, color: trafficTierColor[tier], label: seg.name, tier };
+    });
+  }, [heatmapMode, carRoute.data, routeSamples, sampleTrafficQueries, selectedDayForecast]);
 
   const midpointSample = routeSamples[Math.floor(routeSamples.length / 2)] ?? destination;
 
@@ -527,6 +634,91 @@ function RouteForecastPage() {
 
           {planned && (
             <>
+              {primaryIncidents.length > 0 && (
+                <section className="glass-panel flex flex-wrap items-center justify-between gap-3 rounded-xl border border-destructive/40 bg-destructive/10 p-3 text-sm">
+                  <div className="flex items-start gap-2">
+                    <AlertTriangle className="mt-0.5 size-4 shrink-0 text-destructive" />
+                    <span>
+                      <strong>
+                        {primaryIncidents.length} incident{primaryIncidents.length > 1 ? "s" : ""}{" "}
+                        reported
+                      </strong>{" "}
+                      on Route A near {primaryIncidents[0]!.roadHint}.{" "}
+                      {clearAlternateIndex >= 0
+                        ? `Route ${String.fromCharCode(65 + clearAlternateIndex)} has no reports — it may be the better choice right now.`
+                        : "Every routed alternative also has a report nearby — check details before heading out."}
+                    </span>
+                  </div>
+                  {clearAlternateIndex >= 0 && (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        document
+                          .querySelector("#route-alternatives")
+                          ?.scrollIntoView({ behavior: "smooth", block: "center" })
+                      }
+                      className="shrink-0 rounded-lg bg-destructive px-3 py-1.5 text-xs font-bold text-white"
+                    >
+                      Compare Route {String.fromCharCode(65 + clearAlternateIndex)}
+                    </button>
+                  )}
+                </section>
+              )}
+
+              {/* 4. Map */}
+              <section className="glass-panel relative overflow-hidden rounded-2xl">
+                <div className="h-[420px] w-full sm:h-[500px]">
+                  <RouteMap
+                    source={{ lat: source.lat, lon: source.lon }}
+                    destination={{ lat: destination.lat, lon: destination.lon }}
+                    routes={routeLines}
+                    heatmapSegments={heatmapSegments}
+                    incidents={mapIncidents}
+                  />
+                </div>
+                <div className="glass-panel pointer-events-none absolute right-4 top-4 z-[400] rounded-xl px-3 py-2 text-xs font-semibold">
+                  {(["Low", "Moderate", "High", "Very High"] as const).map((tier) => (
+                    <div key={tier} className="flex items-center gap-1.5 py-0.5">
+                      <i
+                        className="size-2 rounded-full"
+                        style={{ background: trafficTierColor[tier] }}
+                      />
+                      {tier}
+                    </div>
+                  ))}
+                </div>
+                <div className="glass-panel pointer-events-auto absolute left-4 top-4 z-[400] flex flex-wrap gap-1 rounded-xl p-1.5 text-xs font-semibold">
+                  {(
+                    [
+                      { key: "off", label: "Routes" },
+                      { key: "live", label: "Live Traffic" },
+                      { key: "forecast", label: "Forecast Traffic" },
+                      { key: "historical", label: "Historical Avg" },
+                    ] as const
+                  ).map((opt) => (
+                    <button
+                      key={opt.key}
+                      type="button"
+                      onClick={() => setHeatmapMode(opt.key)}
+                      className={`rounded-lg px-2.5 py-1.5 transition ${
+                        heatmapMode === opt.key
+                          ? "bg-gradient-brand text-primary-foreground"
+                          : "text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                  <div className="mx-0.5 w-px self-stretch bg-border" />
+                  <IncidentReportButton target={reportTarget} onReported={refreshIncidents} />
+                </div>
+                {heatmapMode !== "off" && (
+                  <div className="glass-panel pointer-events-none absolute bottom-4 left-4 z-[400] rounded-xl px-3 py-1.5 text-[11px] font-bold text-brand-cyan">
+                    CITYFLOW FORECAST — route traffic heatmap ({heatmapMode})
+                  </div>
+                )}
+              </section>
+
               {/* 5. Transport mode selector */}
               <section className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                 <ModeButton
@@ -1017,7 +1209,7 @@ function RouteForecastPage() {
               {/* 13 + 14. Route alternatives + comparison */}
               {mode === "car" && activeRoute && (
                 <>
-                  <section>
+                  <section id="route-alternatives">
                     <h3 className="text-sm font-bold">Route Alternatives</h3>
                     <div className="mt-3 grid gap-3 sm:grid-cols-3">
                       {[activeRoute.primary, ...activeRoute.alternatives].map((r, i) => {
@@ -1026,16 +1218,27 @@ function RouteForecastPage() {
                           dayOffset,
                           hour,
                         );
+                        const blocked = (routeIncidents[i]?.length ?? 0) > 0;
                         return (
-                          <div key={i} className="glass-panel rounded-xl p-4">
-                            <div className="flex items-center gap-2">
-                              <i
-                                className="size-2.5 rounded-full"
-                                style={{ background: ROUTE_COLORS[i] }}
-                              />
-                              <p className="text-sm font-bold">
-                                Route {String.fromCharCode(65 + i)}
-                              </p>
+                          <div
+                            key={i}
+                            className={`glass-panel rounded-xl p-4 ${blocked ? "border border-destructive/50" : ""}`}
+                          >
+                            <div className="flex items-center justify-between gap-2">
+                              <div className="flex items-center gap-2">
+                                <i
+                                  className="size-2.5 rounded-full"
+                                  style={{ background: ROUTE_COLORS[i] }}
+                                />
+                                <p className="text-sm font-bold">
+                                  Route {String.fromCharCode(65 + i)}
+                                </p>
+                              </div>
+                              {blocked && (
+                                <span className="flex items-center gap-1 rounded-full bg-destructive/15 px-2 py-0.5 text-[10px] font-bold text-destructive">
+                                  <AlertTriangle size={10} /> Incident
+                                </span>
+                              )}
                             </div>
                             <p className="mt-2 text-lg font-extrabold">
                               {r.distanceKm.toFixed(1)} km
@@ -1085,10 +1288,18 @@ function RouteForecastPage() {
                           const currentTime = Math.round(
                             durationFromDistance(r.distanceKm, routeCurrentSpeed),
                           );
+                          const blocked = (routeIncidents[i]?.length ?? 0) > 0;
                           return (
                             <tr key={i} className="border-b border-border last:border-0">
                               <td className="py-2.5 pr-4 font-medium">
-                                Route {String.fromCharCode(65 + i)}
+                                <span className="flex items-center gap-1.5">
+                                  Route {String.fromCharCode(65 + i)}
+                                  {blocked && (
+                                    <span className="flex items-center gap-1 rounded-full bg-destructive/15 px-2 py-0.5 text-[10px] font-bold text-destructive">
+                                      <AlertTriangle size={10} /> Incident
+                                    </span>
+                                  )}
+                                </span>
                               </td>
                               <td className="py-2.5 pr-4">{r.distanceKm.toFixed(1)} km</td>
                               <td className="py-2.5 pr-4">{formatMin(currentTime)}</td>
