@@ -112,9 +112,15 @@ function LocationsPage() {
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
-              <span className="flex items-center gap-1.5 rounded-full bg-secondary px-3 py-1.5 text-xs font-bold text-success">
-                <i className="size-2 animate-pulse rounded-full bg-success" /> Live Data
-              </span>
+              {traffic?.live ? (
+                <span className="flex items-center gap-1.5 rounded-full bg-secondary px-3 py-1.5 text-xs font-bold text-success">
+                  <i className="size-2 animate-pulse rounded-full bg-success" /> Live Data
+                </span>
+              ) : (
+                <span className="flex items-center gap-1.5 rounded-full bg-secondary px-3 py-1.5 text-xs font-bold text-muted-foreground">
+                  <i className="size-2 rounded-full bg-muted-foreground" /> Estimated · Not Live
+                </span>
+              )}
 
               <Button
                 variant="ghost"

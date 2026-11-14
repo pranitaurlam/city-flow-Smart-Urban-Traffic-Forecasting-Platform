@@ -76,6 +76,23 @@ export const geocodePlace = createServerFn({ method: "GET" })
     const { query } = data;
     if (!query) return null;
 
+    // A tracked CityFlow location typed by name resolves to the same coordinates
+    // the rest of the app uses, rather than whatever OpenStreetMap ranks first.
+    const known = bengaluruLocations.find(
+      (l) =>
+        l.name.toLowerCase() === query.replace(/,\s*(bengaluru|bangalore)$/i, "").toLowerCase(),
+    );
+    if (known) {
+      return {
+        query,
+        lat: known.lat,
+        lon: known.lon,
+        label: `${known.name}, Bengaluru`,
+        approximate: false,
+        source: "cityflow",
+      };
+    }
+
     const direct = await nominatim(query);
     if (direct) return { query, ...direct, approximate: false, source: "openstreetmap" };
 

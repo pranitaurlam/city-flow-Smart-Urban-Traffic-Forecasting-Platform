@@ -208,7 +208,7 @@ function latestFeasibleDeparture(
   reliability: ReliabilityTarget,
 ) {
   let best: number | null = null;
-  for (let dep = 0; dep < deadline; dep += 5) {
+  for (let dep = 0; dep < deadline; dep += 1) {
     const point = meanAt(ctx, offset, dep);
     const required = point.minutes + Z_SCORE[reliability] * point.sigma;
     if (dep + required <= deadline) best = dep;
@@ -313,8 +313,10 @@ export function buildArrivalPlan(input: ArrivalPlanInput): ArrivalPlanResult {
     Math.max(0, feasible95 - Math.max(input.bufferMin, 10)),
   );
 
+  // "Late" must actually be later than the recommendation: the latest departure that
+  // still meets 80%, or 10 min after the recommendation when the 80% point is barely later.
   const feasible80 = latestFeasibleDeparture(ctx, offset, deadline, 80) ?? baseDeparture;
-  const lateDeparture = Math.max(recommendedDeparture, feasible80);
+  const lateDeparture = Math.min(deadline - 1, Math.max(recommendedDeparture + 10, feasible80));
 
   const recommended = buildOption(
     ctx,
