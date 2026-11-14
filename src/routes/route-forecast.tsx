@@ -526,10 +526,7 @@ function RouteForecastPage() {
               </p>
             </div>
             <div className="flex items-center gap-3">
-              <span className="flex items-center gap-1.5 rounded-full bg-secondary px-3 py-1.5 text-xs font-bold text-success">
-                <i className="size-2 animate-pulse rounded-full bg-success" /> Live Data · Updated
-                recently
-              </span>
+              <DataSourceBadge live={monitor.trafficLive} />
               <Button
                 variant="ghost"
                 size="icon"
@@ -1621,5 +1618,20 @@ function SegmentRow({
       </div>
       {traffic && <TierBadge tier={traffic.tier} />}
     </div>
+  );
+}
+
+function DataSourceBadge({ live }: { live: boolean }) {
+  return live ? (
+    <span className="flex items-center gap-1.5 rounded-full bg-secondary px-3 py-1.5 text-xs font-bold text-success">
+      <i className="size-2 animate-pulse rounded-full bg-success" /> Live Data
+    </span>
+  ) : (
+    <span
+      className="flex items-center gap-1.5 rounded-full bg-secondary px-3 py-1.5 text-xs font-bold text-muted-foreground"
+      title="Live traffic feed not connected (HERE_API_KEY is not set). Travel times are estimated from historical patterns and weather."
+    >
+      <i className="size-2 rounded-full bg-muted-foreground" /> Estimated · Not Live
+    </span>
   );
 }

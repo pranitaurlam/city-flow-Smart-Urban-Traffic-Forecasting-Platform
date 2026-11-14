@@ -21,7 +21,8 @@ export function ArrivalPredictionDashboard({
   mode: PlannerMode;
 }) {
   const { recommended } = plan;
-  const risk = RISK_STYLE[recommended.risk];
+  const risk =
+    RISK_STYLE[plan.departureInPast && !plan.unreachable ? "High Risk" : recommended.risk];
   const RiskIcon = risk.icon;
 
   return (
@@ -34,7 +35,9 @@ export function ArrivalPredictionDashboard({
           <h2 className="mt-1 text-2xl font-extrabold sm:text-[28px]">
             {plan.unreachable
               ? "This deadline may not be reachable"
-              : `Leave by ${recommended.departureLabel}`}
+              : plan.departureInPast
+                ? `You needed to leave by ${recommended.departureLabel}`
+                : `Leave by ${recommended.departureLabel}`}
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">
             {originText} → {destinationText} · to arrive by {plan.deadlineLabel}
@@ -48,7 +51,7 @@ export function ArrivalPredictionDashboard({
           }}
         >
           <RiskIcon size={16} />
-          {recommended.risk}
+          {plan.departureInPast && !plan.unreachable ? "Departure passed" : recommended.risk}
         </div>
       </div>
 
@@ -61,7 +64,8 @@ export function ArrivalPredictionDashboard({
       )}
       {plan.departureInPast && !plan.unreachable && (
         <p className="mt-4 rounded-xl border border-border bg-surface-strong p-3 text-sm font-semibold text-muted-foreground">
-          The recommended departure window for today has already passed.
+          The recommended departure time for today has already passed, so arriving by{" "}
+          {plan.deadlineLabel} today is unlikely. Pick tomorrow&apos;s date to plan the next trip.
         </p>
       )}
 

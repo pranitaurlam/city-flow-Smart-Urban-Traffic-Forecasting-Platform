@@ -1,0 +1,11 @@
+node_modules
+.output
+.wrangler
+.tanstack
+.git
+.env
+backend/.venv
+backend/.env
+backend/cityflow.db
+**/__pycache__
+ml/outputs/models

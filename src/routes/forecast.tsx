@@ -19,6 +19,7 @@ import { NotificationCenter } from "@/components/route/notification-center";
 import { LocationSearch } from "@/components/locations/location-search";
 import { TierBadge } from "@/components/locations/panels";
 import { WhyForecastCard } from "@/components/locations/why-forecast";
+import { ModelForecastCard } from "@/components/locations/model-forecast";
 import { bengaluruLocations, findLocation } from "@/lib/locations";
 import { tomorrowPeakForecast } from "@/lib/location-forecast";
 import { buildHourly, NOW_HOUR_INDEX } from "@/lib/hourly";
@@ -179,6 +180,8 @@ function ForecastPage() {
               </ResponsiveContainer>
             </div>
           </section>
+
+          <ModelForecastCard location={location} />
 
           <WhyForecastCard location={location} weatherCondition={weatherQuery.data?.condition} />
         </main>
