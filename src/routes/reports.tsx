@@ -7,6 +7,7 @@ import { NotificationCenter } from "@/components/route/notification-center";
 import { TierBadge } from "@/components/locations/panels";
 import { bengaluruLocations } from "@/lib/locations";
 import { bangaloreTrafficHistory } from "@/data/bangalore-traffic-history";
+import { cityflowApi } from "@/lib/cityflow-api";
 
 export const Route = createFileRoute("/reports")({
   ssr: false,
@@ -78,9 +79,19 @@ function ReportsPage() {
                 backed by the Kaggle traffic dataset
               </p>
             </div>
-            <Button variant="cityflow" size="sm" onClick={downloadCsv}>
-              Generate Report <Download className="size-4" />
-            </Button>
+            <div className="flex flex-wrap gap-2">
+              <Button variant="outline" size="sm" asChild>
+                <a
+                  href={cityflowApi.trendReportUrl()}
+                  title="Historical vs model forecast for every dataset area, from the CityFlow backend"
+                >
+                  Forecast Trend CSV <Download className="size-4" />
+                </a>
+              </Button>
+              <Button variant="cityflow" size="sm" onClick={downloadCsv}>
+                Generate Report <Download className="size-4" />
+              </Button>
+            </div>
           </section>
 
           <section className="glass-panel overflow-x-auto rounded-2xl p-5">

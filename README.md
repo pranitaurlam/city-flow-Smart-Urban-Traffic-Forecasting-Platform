@@ -2,7 +2,7 @@
 
 CityFlow is a data-driven platform that forecasts urban road congestion ahead of time and explains the factors behind each forecast. Unlike live navigation tools that only show current conditions, CityFlow analyzes historical traffic, weather, and calendar data to project how congestion will look hours or days into the future, then presents the results through an interactive monitoring dashboard.
 
-This repository currently holds the CityFlow web application. The data pipeline, forecasting models, and API are being built to the specification in the project documentation, and are tracked in the roadmap below.
+This repository holds the CityFlow web application (`src/`), the forecasting models (`ml/`), and a backend API with a database (`backend/`). Remaining work is tracked in the roadmap below.
 
 ## Overview
 
@@ -110,7 +110,11 @@ cityflow/
   tests/        unit and integration tests
 ```
 
-This repository currently contains the web application under `src/`, which becomes the dashboard layer. The Python pipeline, database, and API are added in later weeks of the roadmap.
+This repository currently contains:
+
+- `src/`: the web application (dashboard layer)
+- `ml/`: feature engineering, model training, and forecast generation. See [ml/README.md](ml/README.md).
+- `backend/`: a FastAPI service that serves history, forecasts, and model metrics from PostgreSQL or SQLite. See [backend/README.md](backend/README.md).
 
 ## Getting started
 
@@ -137,6 +141,19 @@ bun run dev
 ```
 
 Vite prints the local URL in the terminal, by default `http://localhost:5173`.
+
+### Run the backend (optional)
+
+The Forecast and Reports pages read model forecasts from the backend. Without it, they show a short notice instead, and the rest of the app still works.
+
+```
+cd backend
+python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
+.venv/bin/python -m app.seed
+.venv/bin/uvicorn app.main:app --reload --port 8000
+```
+
+To run PostgreSQL and the API with Docker instead, use `docker compose up --build`.
 
 ### Production build
 
