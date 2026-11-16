@@ -30,6 +30,7 @@ import { Button } from "@/components/ui/button";
 import { DashboardSidebar } from "@/components/dashboard/sidebar";
 import { DashboardHeader } from "@/components/dashboard/header";
 import { TrafficGauge } from "@/components/dashboard/gauge";
+import { CountUp } from "@/components/motion/count-up";
 import {
   dashboardTargets,
   findDashboardTarget,
@@ -151,7 +152,7 @@ function CityDashboard() {
       <div className="flex min-w-0 flex-1 flex-col">
         <DashboardHeader target={target} />
 
-        <main className="mx-auto w-full max-w-[1400px] flex-1 space-y-6 px-5 py-6 sm:px-8">
+        <main className="cf-stagger mx-auto w-full max-w-[1400px] flex-1 space-y-6 px-5 py-6 sm:px-8">
           {/* 1. Welcome card */}
           <section className="glass-panel relative overflow-hidden rounded-2xl p-6 sm:p-8">
             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_80%_30%,color-mix(in_oklab,var(--brand-violet)_14%,transparent),transparent_55%)]" />
@@ -178,7 +179,7 @@ function CityDashboard() {
           </section>
 
           {/* 2. Key metric cards */}
-          <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+          <section className="cf-stagger grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
             <MetricCard
               icon={CarFront}
               label="Current Traffic Volume"
@@ -426,15 +427,17 @@ function MetricCard({
   trend?: string;
 }) {
   return (
-    <div className="glass-panel rounded-2xl p-4">
+    <div className="glass-panel group rounded-2xl p-4 transition duration-300 hover:-translate-y-1 hover:shadow-brand">
       <div className="flex items-center justify-between">
-        <span className="grid size-10 place-items-center rounded-lg bg-secondary text-brand-cyan">
+        <span className="grid size-10 place-items-center rounded-lg bg-secondary text-brand-cyan transition-transform duration-300 group-hover:scale-110">
           <Icon size={18} />
         </span>
         {trend && <span className="text-[11px] font-bold text-muted-foreground">{trend}</span>}
       </div>
       <p className="mt-3 text-xs text-muted-foreground">{label}</p>
-      <p className="mt-1 text-lg font-extrabold leading-tight tracking-normal">{value}</p>
+      <p className="mt-1 text-lg font-extrabold leading-tight tracking-normal">
+        <CountUp text={value} />
+      </p>
       <p className={`mt-1 text-xs font-semibold ${statusTone}`}>{status}</p>
     </div>
   );

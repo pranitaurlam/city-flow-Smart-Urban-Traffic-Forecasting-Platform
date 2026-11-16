@@ -237,7 +237,7 @@ function ArrivalPlannerPage() {
       <DashboardSidebar />
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-20 border-b border-border bg-surface-strong px-5 py-4 backdrop-blur-xl sm:px-8">
+        <header className="cf-flowline sticky top-0 z-20 border-b border-border bg-surface-strong px-5 py-4 backdrop-blur-xl sm:px-8">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
               <h1 className="text-2xl font-extrabold tracking-normal">Arrival Planner</h1>
@@ -262,7 +262,7 @@ function ArrivalPlannerPage() {
           </div>
         </header>
 
-        <main className="mx-auto w-full max-w-[1400px] flex-1 space-y-6 px-5 py-6 sm:px-8">
+        <main className="cf-stagger mx-auto w-full max-w-[1400px] flex-1 space-y-6 px-5 py-6 sm:px-8">
           <ArrivalPlannerForm
             form={form}
             onChange={update}
