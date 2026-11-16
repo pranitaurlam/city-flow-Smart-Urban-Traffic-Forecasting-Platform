@@ -133,39 +133,3 @@ export function HeroBackdrop() {
     </div>
   );
 }
-
-// Light trails: upper lane flows right (cyan headlights), lower lane flows
-// left (violet tail lights). Durations and delays are staggered so the
-// traffic never looks synchronised.
-const STREAKS = [
-  { top: "26%", len: 140, dur: 3.8, delay: 0, c: "var(--brand-cyan)", dir: "fwd" },
-  { top: "18%", len: 90, dur: 5.2, delay: 1.6, c: "var(--brand-blue)", dir: "fwd" },
-  { top: "30%", len: 70, dur: 4.4, delay: 2.9, c: "var(--brand-cyan)", dir: "fwd" },
-  { top: "70%", len: 120, dur: 4.6, delay: 0.8, c: "var(--brand-violet)", dir: "rev" },
-  { top: "78%", len: 80, dur: 6, delay: 2.2, c: "var(--brand-violet)", dir: "rev" },
-  { top: "66%", len: 60, dur: 3.6, delay: 3.4, c: "oklch(0.7 0.2 20)", dir: "rev" },
-] as const;
-
-/** A slim road band with moving light trails, between the hero and the features. */
-export function TrafficRoad() {
-  return (
-    <div className="cf-road" aria-hidden="true">
-      {STREAKS.map((s, i) => (
-        <span
-          key={i}
-          className="cf-streak"
-          data-dir={s.dir}
-          style={
-            {
-              top: s.top,
-              "--len": `${s.len}px`,
-              "--dur": `${s.dur}s`,
-              "--delay": `${s.delay}s`,
-              "--c": s.c,
-            } as React.CSSProperties
-          }
-        />
-      ))}
-    </div>
-  );
-}

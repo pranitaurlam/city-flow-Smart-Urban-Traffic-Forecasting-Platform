@@ -434,34 +434,9 @@
 }
 
 /* ---------------------------------------------------------------------------
-   Traffic-flow motion used across the app: light streaks on a road band,
-   a light travelling along page headers, staggered page entrance, gauge
-   needle sweep and a sidebar sheen. Static without motion preference.
+   Traffic-flow motion used across the app: a light travelling along page
+   headers, staggered page entrance, gauge needle sweep and a sidebar sheen. Static without motion preference.
 --------------------------------------------------------------------------- */
-
-@keyframes cf-streak {
-  from {
-    left: -20%;
-  }
-  to {
-    left: 110%;
-  }
-}
-
-@keyframes cf-streak-rev {
-  from {
-    left: 110%;
-  }
-  to {
-    left: -20%;
-  }
-}
-
-@keyframes cf-lane {
-  to {
-    background-position: -48px 0;
-  }
-}
 
 @keyframes cf-flow {
   from {
@@ -490,52 +465,6 @@
   50% {
     opacity: 0.7;
   }
-}
-
-/* A slim "road" with lane markings and vehicle light trails. */
-.cf-road {
-  position: relative;
-  height: 46px;
-  overflow: hidden;
-  background: linear-gradient(
-    180deg,
-    transparent,
-    color-mix(in oklab, var(--foreground) 4%, transparent) 30%,
-    color-mix(in oklab, var(--foreground) 4%, transparent) 70%,
-    transparent
-  );
-  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
-}
-
-.cf-road::before {
-  /* Dashed centre line. */
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 50%;
-  height: 2px;
-  transform: translateY(-50%);
-  background: repeating-linear-gradient(
-    90deg,
-    color-mix(in oklab, var(--foreground) 22%, transparent) 0 24px,
-    transparent 24px 48px
-  );
-}
-
-.cf-streak {
-  position: absolute;
-  left: -20%;
-  height: 3px;
-  width: var(--len, 120px);
-  border-radius: 9999px;
-  background: linear-gradient(90deg, transparent, var(--c));
-  filter: drop-shadow(0 0 6px var(--c));
-  opacity: 0;
-}
-
-.cf-streak[data-dir="rev"] {
-  background: linear-gradient(270deg, transparent, var(--c));
 }
 
 /* A light travelling along a header's bottom edge. */
@@ -581,17 +510,6 @@
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .cf-road::before {
-    animation: cf-lane 1.2s linear infinite;
-  }
-  .cf-streak {
-    opacity: 1;
-    animation: cf-streak var(--dur, 4s) linear infinite;
-    animation-delay: var(--delay, 0s);
-  }
-  .cf-streak[data-dir="rev"] {
-    animation-name: cf-streak-rev;
-  }
   .cf-flowline::after {
     animation: cf-flow 7s linear infinite;
   }
@@ -627,5 +545,532 @@
 @media (prefers-reduced-motion: reduce) {
   .cf-needle {
     transition: none;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   More dashboard motion: bars filling in, notification bell, badge pops,
+   table rows sliding in, and a soft edge glow on panels.
+--------------------------------------------------------------------------- */
+
+@keyframes cf-grow {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes cf-bell {
+  0%,
+  84%,
+  100% {
+    transform: rotate(0deg);
+  }
+  87% {
+    transform: rotate(14deg);
+  }
+  90% {
+    transform: rotate(-12deg);
+  }
+  93% {
+    transform: rotate(8deg);
+  }
+  96% {
+    transform: rotate(-4deg);
+  }
+}
+
+@keyframes cf-pop {
+  0% {
+    transform: scale(0);
+  }
+  70% {
+    transform: scale(1.25);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes cf-row {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.cf-bar {
+  transform-origin: left;
+}
+
+.cf-stagger .glass-panel {
+  transition:
+    border-color 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+.cf-stagger .glass-panel:hover {
+  border-color: color-mix(in oklab, var(--brand-cyan) 35%, transparent);
+  box-shadow: 0 18px 50px color-mix(in oklab, var(--brand-violet) 12%, transparent);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .cf-bar {
+    animation: cf-grow 1s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+    animation-delay: var(--d, 200ms);
+  }
+  .cf-bell svg {
+    transform-origin: 50% 15%;
+    animation: cf-bell 6s ease-in-out infinite;
+  }
+  .cf-pop {
+    animation: cf-pop 0.45s cubic-bezier(0.3, 1.5, 0.6, 1) both;
+  }
+  .cf-rows > tr {
+    animation: cf-row 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+    animation-delay: calc(var(--i, 0) * 45ms + 250ms);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Street scene: a junction with a two-lane main road, a cross street and two
+   signals on one shared 12 s cycle.
+     main road  green 0–50%, amber 50–58%, red 58–100%
+     cross road red 0–62%, green 62–94%, amber 94–100%
+   Eastbound cars queue at the stop line on red and pull away on green;
+   westbound and cross-street cars only pass the junction on their green.
+   Without motion it shows a still frame: main road red with a queue.
+--------------------------------------------------------------------------- */
+
+.cf-street {
+  --cross-x: 64%;
+  --cross-w: 56px;
+  --car-w: 30px;
+  --car-h: 15px;
+  --gap: 10px;
+  position: relative;
+  height: 120px;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.cf-street[data-size="compact"] {
+  --cross-w: 40px;
+  --car-w: 22px;
+  --car-h: 11px;
+  --gap: 7px;
+  height: 64px;
+}
+
+.cf-street-road {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 22%;
+  bottom: 22%;
+  background: color-mix(in oklab, var(--foreground) 9%, transparent);
+  border-block: 1px solid color-mix(in oklab, var(--foreground) 12%, transparent);
+}
+
+.cf-street-road::before {
+  /* Dashed centre line, interrupted by the junction. */
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 2px;
+  transform: translateY(-50%);
+  background: repeating-linear-gradient(
+    90deg,
+    color-mix(in oklab, var(--foreground) 30%, transparent) 0 18px,
+    transparent 18px 36px
+  );
+}
+
+.cf-street-cross {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(var(--cross-x) - var(--cross-w) / 2);
+  width: var(--cross-w);
+  background: color-mix(in oklab, var(--foreground) 10%, var(--background));
+  border-inline: 1px solid color-mix(in oklab, var(--foreground) 12%, transparent);
+  z-index: 1;
+}
+
+.cf-street-zebra {
+  /* Pedestrian crossing stripes before and after the junction. */
+  position: absolute;
+  top: 22%;
+  bottom: 22%;
+  width: 10px;
+  z-index: 1;
+  background: repeating-linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--foreground) 35%, transparent) 0 4px,
+    transparent 4px 8px
+  );
+}
+
+.cf-street-stop {
+  position: absolute;
+  top: 22%;
+  height: 28%;
+  width: 3px;
+  left: calc(var(--cross-x) - var(--cross-w) / 2 - 14px);
+  background: color-mix(in oklab, var(--foreground) 45%, transparent);
+  z-index: 1;
+}
+
+.cf-car {
+  position: absolute;
+  width: var(--car-w);
+  height: var(--car-h);
+  z-index: 2;
+}
+
+.cf-car[data-lane="east"] {
+  top: calc(22% + (28% - var(--car-h)) / 2);
+  /* Queue position i behind the stop line. */
+  --stop: calc(
+    var(--cross-x) - var(--cross-w) / 2 - 18px - var(--car-w) - var(--i) *
+      (var(--car-w) + var(--gap))
+  );
+  left: var(--stop);
+}
+
+.cf-car[data-lane="west"] {
+  bottom: calc(22% + (28% - var(--car-h)) / 2);
+  transform: scaleX(-1);
+  left: var(--park, 20%);
+}
+
+.cf-car[data-lane="cross"] {
+  left: calc(var(--cross-x) + var(--cross-w) / 4 - var(--car-w) / 2);
+  top: -40%;
+  transform: rotate(90deg);
+  opacity: 0;
+}
+
+.cf-signal {
+  position: absolute;
+  z-index: 3;
+  display: grid;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 5px;
+  background: oklch(0.22 0.02 260);
+  box-shadow: 0 2px 6px rgb(0 0 0 / 0.25);
+}
+
+.cf-signal[data-for="main"] {
+  top: 2px;
+  left: calc(var(--cross-x) - var(--cross-w) / 2 - 30px);
+}
+
+.cf-signal[data-for="cross"] {
+  bottom: 2px;
+  left: calc(var(--cross-x) + var(--cross-w) / 2 + 6px);
+}
+
+.cf-street[data-size="compact"] .cf-signal {
+  padding: 2px;
+  gap: 1.5px;
+}
+
+.cf-lamp {
+  width: 7px;
+  height: 7px;
+  border-radius: 9999px;
+  background: var(--lamp);
+  opacity: 0.18;
+}
+
+.cf-street[data-size="compact"] .cf-lamp {
+  width: 5px;
+  height: 5px;
+}
+
+.cf-lamp[data-color="red"] {
+  --lamp: oklch(0.65 0.24 25);
+}
+.cf-lamp[data-color="amber"] {
+  --lamp: oklch(0.82 0.17 80);
+}
+.cf-lamp[data-color="green"] {
+  --lamp: oklch(0.75 0.2 150);
+}
+
+/* Still frame: main road red, cross road green. */
+.cf-signal[data-for="main"] .cf-lamp[data-color="red"],
+.cf-signal[data-for="cross"] .cf-lamp[data-color="green"] {
+  opacity: 1;
+  box-shadow: 0 0 8px var(--lamp);
+}
+
+@keyframes cf-main-green {
+  0%,
+  49.9% {
+    opacity: 1;
+    box-shadow: 0 0 8px var(--lamp);
+  }
+  50%,
+  100% {
+    opacity: 0.18;
+    box-shadow: none;
+  }
+}
+@keyframes cf-main-amber {
+  0%,
+  49.9% {
+    opacity: 0.18;
+    box-shadow: none;
+  }
+  50%,
+  57.9% {
+    opacity: 1;
+    box-shadow: 0 0 8px var(--lamp);
+  }
+  58%,
+  100% {
+    opacity: 0.18;
+    box-shadow: none;
+  }
+}
+@keyframes cf-main-red {
+  0%,
+  57.9% {
+    opacity: 0.18;
+    box-shadow: none;
+  }
+  58%,
+  100% {
+    opacity: 1;
+    box-shadow: 0 0 8px var(--lamp);
+  }
+}
+@keyframes cf-cross-red {
+  0%,
+  61.9% {
+    opacity: 1;
+    box-shadow: 0 0 8px var(--lamp);
+  }
+  62%,
+  100% {
+    opacity: 0.18;
+    box-shadow: none;
+  }
+}
+@keyframes cf-cross-green {
+  0%,
+  61.9% {
+    opacity: 0.18;
+    box-shadow: none;
+  }
+  62%,
+  93.9% {
+    opacity: 1;
+    box-shadow: 0 0 8px var(--lamp);
+  }
+  94%,
+  100% {
+    opacity: 0.18;
+    box-shadow: none;
+  }
+}
+@keyframes cf-cross-amber {
+  0%,
+  93.9% {
+    opacity: 0.18;
+    box-shadow: none;
+  }
+  94%,
+  100% {
+    opacity: 1;
+    box-shadow: 0 0 8px var(--lamp);
+  }
+}
+
+/* Eastbound queue: car i pulls away i×5% after green, exits, then drives back
+   in and stops at its queue spot during red. */
+@keyframes cf-east-0 {
+  0% {
+    left: var(--stop);
+    animation-timing-function: ease-in;
+  }
+  30% {
+    left: 106%;
+    opacity: 1;
+  }
+  30.1%,
+  40% {
+    left: -14%;
+    opacity: 0;
+    animation-timing-function: ease-out;
+  }
+  40.1% {
+    left: -14%;
+    opacity: 1;
+    animation-timing-function: ease-out;
+  }
+  66%,
+  100% {
+    left: var(--stop);
+    opacity: 1;
+  }
+}
+@keyframes cf-east-1 {
+  0%,
+  5% {
+    left: var(--stop);
+    animation-timing-function: ease-in;
+  }
+  35% {
+    left: 106%;
+    opacity: 1;
+  }
+  35.1%,
+  45% {
+    left: -14%;
+    opacity: 0;
+  }
+  45.1% {
+    left: -14%;
+    opacity: 1;
+    animation-timing-function: ease-out;
+  }
+  72%,
+  100% {
+    left: var(--stop);
+    opacity: 1;
+  }
+}
+@keyframes cf-east-2 {
+  0%,
+  10% {
+    left: var(--stop);
+    animation-timing-function: ease-in;
+  }
+  40% {
+    left: 106%;
+    opacity: 1;
+  }
+  40.1%,
+  50% {
+    left: -14%;
+    opacity: 0;
+  }
+  50.1% {
+    left: -14%;
+    opacity: 1;
+    animation-timing-function: ease-out;
+  }
+  78%,
+  100% {
+    left: var(--stop);
+    opacity: 1;
+  }
+}
+
+/* Westbound: cross the junction only during the main-road green. */
+@keyframes cf-west-0 {
+  0%,
+  2% {
+    left: 106%;
+  }
+  38%,
+  100% {
+    left: -14%;
+  }
+}
+@keyframes cf-west-1 {
+  0%,
+  14% {
+    left: 106%;
+  }
+  50%,
+  100% {
+    left: -14%;
+  }
+}
+
+/* Cross street: drive through during its green. */
+@keyframes cf-cross-0 {
+  0%,
+  62% {
+    top: -40%;
+    opacity: 1;
+  }
+  80%,
+  100% {
+    top: 130%;
+    opacity: 1;
+  }
+}
+@keyframes cf-cross-1 {
+  0%,
+  74% {
+    top: -40%;
+    opacity: 1;
+  }
+  93%,
+  100% {
+    top: 130%;
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .cf-street .cf-car,
+  .cf-street .cf-lamp {
+    animation-duration: 12s;
+    animation-iteration-count: infinite;
+    animation-timing-function: linear;
+  }
+  .cf-car[data-anim="east-0"] {
+    animation-name: cf-east-0;
+  }
+  .cf-car[data-anim="east-1"] {
+    animation-name: cf-east-1;
+  }
+  .cf-car[data-anim="east-2"] {
+    animation-name: cf-east-2;
+  }
+  .cf-car[data-anim="west-0"] {
+    animation-name: cf-west-0;
+  }
+  .cf-car[data-anim="west-1"] {
+    animation-name: cf-west-1;
+  }
+  .cf-car[data-anim="cross-0"] {
+    animation-name: cf-cross-0;
+  }
+  .cf-car[data-anim="cross-1"] {
+    animation-name: cf-cross-1;
+  }
+  .cf-signal[data-for="main"] .cf-lamp[data-color="green"] {
+    animation-name: cf-main-green;
+  }
+  .cf-signal[data-for="main"] .cf-lamp[data-color="amber"] {
+    animation-name: cf-main-amber;
+  }
+  .cf-signal[data-for="main"] .cf-lamp[data-color="red"] {
+    animation-name: cf-main-red;
+  }
+  .cf-signal[data-for="cross"] .cf-lamp[data-color="red"] {
+    animation-name: cf-cross-red;
+  }
+  .cf-signal[data-for="cross"] .cf-lamp[data-color="green"] {
+    animation-name: cf-cross-green;
+  }
+  .cf-signal[data-for="cross"] .cf-lamp[data-color="amber"] {
+    animation-name: cf-cross-amber;
   }
 }

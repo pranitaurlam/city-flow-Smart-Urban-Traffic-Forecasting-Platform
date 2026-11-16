@@ -33,6 +33,8 @@ import {
   PersonStanding,
   Sun,
   User,
+  ExternalLink,
+  Zap,
 } from "lucide-react";
 import { DashboardSidebar } from "@/components/dashboard/sidebar";
 import { Button } from "@/components/ui/button";
@@ -41,6 +43,9 @@ import { useIncidents } from "@/hooks/use-incidents";
 import { TierBadge } from "@/components/locations/panels";
 import { PersonalRouteAlerts } from "@/components/route/personal-route-alerts";
 import { EventImpactCard } from "@/components/route/event-impact-card";
+import { googleMapsDirectionsUrl } from "@/lib/route-intelligence";
+import { distinctivePoint } from "@/lib/event-traffic";
+import { CountUp } from "@/components/motion/count-up";
 import { RouteAlertAnalysisDialog } from "@/components/route/route-alert-analysis";
 import { NotificationCenter } from "@/components/route/notification-center";
 import { useRouteMonitor } from "@/hooks/use-route-monitor";
@@ -335,6 +340,39 @@ function RouteForecastPage() {
     [routeLines, incidents],
   );
   const primaryIncidents = useMemo(() => routeIncidents[0] ?? [], [routeIncidents]);
+
+  // The quickest displayed car route for the selected departure, skipping
+  // routes with a reported incident unless every route has one. Its Google
+  // Maps link passes a point that only this route goes through, so Google
+  // follows the same road rather than picking its own.
+  const fastestRoute = useMemo(() => {
+    if (mode !== "car" || !activeRoute) return null;
+    const options = [activeRoute.primary, ...activeRoute.alternatives].map((route, index) => ({
+      index,
+      route,
+      minutes: estimateTravelTime(
+        durationFromDistance(route.distanceKm, typicalSpeedForDistance(route.distanceKm)),
+        dayOffset,
+        hour,
+      ).travelTime,
+      blocked: (routeIncidents[index]?.length ?? 0) > 0,
+    }));
+    const clear = options.filter((o) => !o.blocked);
+    const best = [...(clear.length ? clear : options)].sort(
+      (a, b) => a.minutes - b.minutes || a.route.durationMin - b.route.durationMin,
+    )[0]!;
+    const others = options.filter((o) => o.index !== best.index).flatMap((o) => o.route.geometry);
+    const via = others.length ? distinctivePoint(best.route.geometry, others) : null;
+    return {
+      ...best,
+      url: googleMapsDirectionsUrl(
+        `${source.lat},${source.lon}`,
+        `${destination.lat},${destination.lon}`,
+        "driving",
+        via ? [via] : [],
+      ),
+    };
+  }, [mode, activeRoute, routeIncidents, dayOffset, hour, source, destination]);
   const clearAlternateIndex = routeIncidents.findIndex((list, i) => i > 0 && list.length === 0);
 
   // Where a new incident report gets pinned: the midpoint of the currently
@@ -1158,7 +1196,7 @@ function RouteForecastPage() {
                       </div>
                       <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-secondary">
                         <div
-                          className="h-full rounded-full bg-gradient-brand"
+                          className="cf-bar h-full rounded-full bg-gradient-brand"
                           style={{ width: `${f.pct}%` }}
                         />
                       </div>
@@ -1243,7 +1281,13 @@ function RouteForecastPage() {
                         return (
                           <div
                             key={i}
-                            className={`glass-panel rounded-xl p-4 ${blocked ? "border border-destructive/50" : ""}`}
+                            className={`glass-panel rounded-xl p-4 ${
+                              blocked
+                                ? "border border-destructive/50"
+                                : fastestRoute?.index === i
+                                  ? "border border-success/60 ring-1 ring-success/30"
+                                  : ""
+                            }`}
                           >
                             <div className="flex items-center justify-between gap-2">
                               <div className="flex items-center gap-2">
@@ -1255,10 +1299,16 @@ function RouteForecastPage() {
                                   Route {String.fromCharCode(65 + i)}
                                 </p>
                               </div>
-                              {blocked && (
+                              {blocked ? (
                                 <span className="flex items-center gap-1 rounded-full bg-destructive/15 px-2 py-0.5 text-[10px] font-bold text-destructive">
                                   <AlertTriangle size={10} /> Incident
                                 </span>
+                              ) : (
+                                fastestRoute?.index === i && (
+                                  <span className="flex items-center gap-1 rounded-full bg-success/15 px-2 py-0.5 text-[10px] font-bold text-success">
+                                    <Zap size={10} /> Fastest
+                                  </span>
+                                )
                               )}
                             </div>
                             <p className="mt-2 text-lg font-extrabold">
@@ -1278,6 +1328,32 @@ function RouteForecastPage() {
                         );
                       })}
                     </div>
+                    {fastestRoute && (
+                      <div className="glass-panel mt-3 flex flex-wrap items-center justify-between gap-4 rounded-xl border border-success/40 p-4">
+                        <div>
+                          <p className="flex items-center gap-2 text-sm font-bold">
+                            <Zap className="size-4 text-success" />
+                            Fastest: Route {String.fromCharCode(65 + fastestRoute.index)} ·{" "}
+                            {fastestRoute.route.distanceKm.toFixed(1)} km · ~
+                            {formatMin(fastestRoute.minutes)}
+                          </p>
+                          <p className="mt-0.5 text-xs text-muted-foreground">
+                            {source.name} → {destination.name} · {dayLabel(dayOffset).relative} at{" "}
+                            {`${hour % 12 === 0 ? 12 : hour % 12}:00 ${hour < 12 ? "AM" : "PM"}`}
+                            {fastestRoute.blocked
+                              ? " · every route has a reported incident"
+                              : routeIncidents.some((list) => list.length > 0)
+                                ? " · avoids the reported incident"
+                                : ""}
+                          </p>
+                        </div>
+                        <Button variant="cityflow" className="rounded-xl" asChild>
+                          <a href={fastestRoute.url} target="_blank" rel="noopener noreferrer">
+                            Open fastest route in Google Maps <ExternalLink className="size-4" />
+                          </a>
+                        </Button>
+                      </div>
+                    )}
                   </section>
 
                   <section className="glass-panel overflow-x-auto rounded-2xl p-5">
@@ -1526,7 +1602,9 @@ function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div>
       <p className="text-xs text-muted-foreground">{label}</p>
-      <p className="text-lg font-extrabold">{value}</p>
+      <p className="text-lg font-extrabold">
+        <CountUp text={value} />
+      </p>
     </div>
   );
 }

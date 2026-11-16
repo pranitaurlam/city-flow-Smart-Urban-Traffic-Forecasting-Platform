@@ -19,7 +19,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/hooks/use-theme";
 import { cities } from "@/lib/cities";
-import { GlobeOrbit, HeroBackdrop, HeroCards, TrafficRoad } from "@/components/landing/hero-orbit";
+import { GlobeOrbit, HeroBackdrop, HeroCards } from "@/components/landing/hero-orbit";
+import { StreetScene } from "@/components/motion/street-scene";
 import globeImage from "@/assets/cityflow-globe-transparent.png";
 import cityStrip from "@/assets/cityflow-cities.jpg";
 
@@ -88,20 +89,6 @@ function CityFlow() {
             </span>
             <span className="text-2xl font-extrabold tracking-normal">CityFlow</span>
           </a>
-          <nav
-            className="hidden items-center gap-8 text-sm font-medium lg:flex"
-            aria-label="Main navigation"
-          >
-            {["Home", "Explore", "Forecast", "Analytics", "Cities", "About"].map((item) => (
-              <a
-                key={item}
-                href={item === "Home" ? "#top" : `#${item.toLowerCase()}`}
-                className="border-b-2 border-transparent py-3 transition hover:border-brand-violet hover:text-brand-cyan"
-              >
-                {item}
-              </a>
-            ))}
-          </nav>
           <div className="hidden items-center gap-3 sm:flex">
             <Button
               variant="ghost"
@@ -133,16 +120,14 @@ function CityFlow() {
 
         {menuOpen && (
           <div className="glass-panel absolute left-5 right-5 top-20 z-40 grid gap-2 rounded-lg p-4 sm:hidden">
-            {["Home", "Explore", "Forecast", "Analytics", "Cities", "About"].map((item) => (
-              <a
-                key={item}
-                href={`#${item.toLowerCase()}`}
-                onClick={() => setMenuOpen(false)}
-                className="rounded-md px-3 py-2 font-semibold hover:bg-accent"
-              >
-                {item}
-              </a>
-            ))}
+            <Button variant="outline" asChild>
+              <Link to="/signin">Sign In</Link>
+            </Button>
+            <Button variant="cityflow" asChild>
+              <Link to="/dashboard/$city" params={{ city: "bengaluru" }}>
+                Get Started
+              </Link>
+            </Button>
             <Button variant="outline" onClick={() => toggleDark()}>
               {dark ? <Sun /> : <Moon />} {dark ? "Light mode" : "Dark mode"}
             </Button>
@@ -238,7 +223,7 @@ function CityFlow() {
         </div>
       </section>
 
-      <TrafficRoad />
+      <StreetScene />
 
       <section
         id="explore"

@@ -84,8 +84,8 @@ function AlertsPage() {
                 </div>
               </div>
               <Button variant="outline" size="sm" asChild>
-                <Link to="/locations" search={{ loc: location.slug }}>
-                  View on Map <ArrowRight className="size-4" />
+                <Link to="/forecast" search={{ loc: location.slug }}>
+                  View Forecast <ArrowRight className="size-4" />
                 </Link>
               </Button>
             </section>

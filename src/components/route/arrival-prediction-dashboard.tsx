@@ -2,6 +2,7 @@ import { ExternalLink, ShieldAlert, ShieldCheck, ShieldHalf } from "lucide-react
 import { Button } from "@/components/ui/button";
 import { openInGoogleMaps, type PlannerMode } from "@/lib/route-intelligence";
 import { formatMinutes, type ArrivalPlanResult, type RiskLevel } from "@/lib/arrival-planner";
+import { CountUp } from "@/components/motion/count-up";
 
 const RISK_STYLE: Record<RiskLevel, { icon: typeof ShieldCheck; tone: string; bg: string }> = {
   "On Track": { icon: ShieldCheck, tone: "text-success", bg: "var(--success)" },
@@ -105,7 +106,9 @@ function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div>
       <p className="text-xs text-muted-foreground">{label}</p>
-      <p className="mt-0.5 text-sm font-extrabold sm:text-base">{value}</p>
+      <p className="mt-0.5 text-sm font-extrabold sm:text-base">
+        <CountUp text={value} />
+      </p>
     </div>
   );
 }
