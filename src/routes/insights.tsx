@@ -114,7 +114,7 @@ function InsightsPage() {
           </section>
 
           <Link
-            to="/locations"
+            to="/forecast"
             className="glass-panel group flex items-center justify-between rounded-2xl p-5 transition hover:border-brand-cyan"
           >
             <span className="flex items-center gap-3">
@@ -122,9 +122,9 @@ function InsightsPage() {
                 <Lightbulb size={18} />
               </span>
               <span>
-                <span className="block text-sm font-bold">Explore locations for more detail</span>
+                <span className="block text-sm font-bold">See the forecast for each location</span>
                 <span className="block text-xs text-muted-foreground">
-                  Dive into live traffic, weather, and forecasts per location
+                  Expected traffic, weather and the 7-day model forecast per location
                 </span>
               </span>
             </span>

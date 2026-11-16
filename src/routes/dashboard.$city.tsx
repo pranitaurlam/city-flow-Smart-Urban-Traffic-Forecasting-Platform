@@ -19,7 +19,7 @@ import {
   CarFront,
   ChevronDown,
   Clock3,
-  Compass,
+  Activity,
   FlaskConical,
   Lightbulb,
   Route as RouteIcon,
@@ -31,6 +31,7 @@ import { DashboardSidebar } from "@/components/dashboard/sidebar";
 import { DashboardHeader } from "@/components/dashboard/header";
 import { TrafficGauge } from "@/components/dashboard/gauge";
 import { CountUp } from "@/components/motion/count-up";
+import { StreetScene } from "@/components/motion/street-scene";
 import {
   dashboardTargets,
   findDashboardTarget,
@@ -84,7 +85,12 @@ const whyCityFlow = [
 
 function getQuickActions(citySlug: string) {
   return [
-    { label: "Explore Location", icon: Compass, to: "/locations" as const, search: undefined },
+    {
+      label: "Traffic Analysis",
+      icon: Activity,
+      to: "/traffic-analysis" as const,
+      search: undefined,
+    },
     {
       label: "Check Forecast",
       icon: TrendingUp,
@@ -168,14 +174,21 @@ function CityDashboard() {
                 </p>
               </div>
               <div className="relative hidden h-40 items-center justify-center lg:flex">
-                <img
-                  src={cityIllustration}
-                  alt=""
-                  aria-hidden="true"
-                  className="w-full max-w-[260px] object-contain opacity-90 dark:opacity-95"
-                />
+                <div className="cf-halo size-48" aria-hidden="true" />
+                <div className="globe-float relative w-full max-w-[260px]">
+                  <img
+                    src={cityIllustration}
+                    alt=""
+                    aria-hidden="true"
+                    className="globe-rotate w-full object-contain opacity-90 dark:opacity-95"
+                  />
+                </div>
               </div>
             </div>
+            <StreetScene
+              size="compact"
+              className="relative z-10 -mx-6 -mb-6 mt-5 sm:-mx-8 sm:-mb-8"
+            />
           </section>
 
           {/* 2. Key metric cards */}

@@ -18,6 +18,7 @@ export const Route = createFileRoute("/reports")({
 const rows = bengaluruLocations.map((location) => {
   const history = bangaloreTrafficHistory[location.slug];
   return {
+    slug: location.slug,
     name: location.name,
     tier: location.baseTier,
     volume: Math.round(location.basePeakVolume * 0.65),
@@ -105,13 +106,17 @@ function ReportsPage() {
                   <th className="py-2 font-semibold">Data Source</th>
                 </tr>
               </thead>
-              <tbody>
-                {rows.map((row) => (
-                  <tr key={row.name} className="border-b border-border last:border-0">
+              <tbody className="cf-rows">
+                {rows.map((row, i) => (
+                  <tr
+                    key={row.name}
+                    className="border-b border-border last:border-0"
+                    style={{ "--i": i } as React.CSSProperties}
+                  >
                     <td className="py-2.5 pr-4 font-medium">
                       <Link
-                        to="/locations"
-                        search={{ loc: row.name.toLowerCase().replace(/\s+/g, "-") }}
+                        to="/traffic-analysis"
+                        search={{ loc: row.slug }}
                         className="hover:text-brand-cyan"
                       >
                         {row.name}

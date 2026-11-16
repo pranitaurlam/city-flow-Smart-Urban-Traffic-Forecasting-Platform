@@ -24,7 +24,7 @@ export function WhyForecastCard({
             </div>
             <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-secondary">
               <div
-                className="h-full rounded-full bg-gradient-brand"
+                className="cf-bar h-full rounded-full bg-gradient-brand"
                 style={{ width: `${factor.pct}%` }}
               />
             </div>

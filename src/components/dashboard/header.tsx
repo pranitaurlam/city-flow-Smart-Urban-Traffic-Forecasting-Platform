@@ -110,7 +110,13 @@ export function DashboardHeader({ target }: { target: DashboardTarget }) {
               {weather ? `${weather.condition}, ${weather.tempC}°C` : "Loading…"}
             </span>
             {weather && (
-              <span className="text-[10px] font-bold text-muted-foreground">
+              <span className="flex items-center gap-1 text-[10px] font-bold text-muted-foreground">
+                {weather.live && (
+                  <span className="relative flex size-1.5">
+                    <span className="cf-ping absolute inset-0 rounded-full bg-success" />
+                    <span className="relative size-1.5 rounded-full bg-success" />
+                  </span>
+                )}
                 {weather.live ? "LIVE" : "EST."}
               </span>
             )}

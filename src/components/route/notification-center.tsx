@@ -57,12 +57,15 @@ export function NotificationCenter() {
         <Button
           variant="ghost"
           size="icon"
-          className="relative"
+          className={unread ? "cf-bell relative" : "relative"}
           aria-label={unread ? `Notifications, ${unread} unread` : "Notifications"}
         >
           <Bell />
           {unread > 0 && (
-            <span className="absolute -right-0.5 -top-0.5 grid min-w-4 place-items-center rounded-full bg-destructive px-1 text-[10px] font-bold leading-4 text-white">
+            <span
+              key={unread}
+              className="cf-pop absolute -right-0.5 -top-0.5 grid min-w-4 place-items-center rounded-full bg-destructive px-1 text-[10px] font-bold leading-4 text-white"
+            >
               {unread > 9 ? "9+" : unread}
             </span>
           )}
