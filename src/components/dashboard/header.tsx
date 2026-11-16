@@ -55,7 +55,7 @@ export function DashboardHeader({ target }: { target: DashboardTarget }) {
   };
 
   return (
-    <header className="sticky top-0 z-20 border-b border-border bg-surface-strong px-5 py-4 backdrop-blur-xl sm:px-8">
+    <header className="cf-flowline sticky top-0 z-20 border-b border-border bg-surface-strong px-5 py-4 backdrop-blur-xl sm:px-8">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-extrabold tracking-normal">Dashboard</h1>

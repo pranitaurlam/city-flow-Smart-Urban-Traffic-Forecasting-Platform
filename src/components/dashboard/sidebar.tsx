@@ -65,15 +65,18 @@ export function DashboardSidebar() {
         {navItems.map(({ label, icon: Icon, to, params }) => {
           const active = pathname.startsWith(to.split("$")[0] ?? to);
           const itemClass = cn(
-            "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+            "group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
             active
-              ? "bg-gradient-brand text-primary-foreground shadow-brand"
+              ? "cf-sheen bg-gradient-brand text-primary-foreground shadow-brand"
               : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
           );
 
           return (
             <Link key={label} to={to} params={params} className={itemClass}>
-              <Icon size={18} />
+              <Icon
+                size={18}
+                className="transition-transform duration-200 group-hover:translate-x-0.5 group-hover:scale-110"
+              />
               {label}
             </Link>
           );

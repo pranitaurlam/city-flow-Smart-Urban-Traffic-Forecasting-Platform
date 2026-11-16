@@ -3,14 +3,11 @@ import { useMemo, useState } from "react";
 import {
   ArrowRight,
   BarChart3,
-  CarFront,
   ChartNoAxesCombined,
   Clock3,
-  CloudSun,
   Globe2,
   Leaf,
   Map,
-  MapPin,
   Menu,
   Moon,
   Navigation,
@@ -22,6 +19,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/hooks/use-theme";
 import { cities } from "@/lib/cities";
+import { GlobeOrbit, HeroBackdrop, HeroCards, TrafficRoad } from "@/components/landing/hero-orbit";
 import globeImage from "@/assets/cityflow-globe-transparent.png";
 import cityStrip from "@/assets/cityflow-cities.jpg";
 
@@ -82,6 +80,7 @@ function CityFlow() {
     <main className="min-h-screen overflow-hidden bg-background text-foreground transition-colors duration-500">
       <section className="relative mx-auto min-h-[660px] max-w-[1536px] px-5 pb-8 pt-4 sm:px-8 lg:px-14">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_62%_34%,color-mix(in_oklab,var(--brand-cyan)_16%,transparent),transparent_40%)]" />
+        <HeroBackdrop />
         <header className="relative z-30 flex h-14 items-center justify-between">
           <a href="#top" className="flex items-center gap-2" aria-label="CityFlow home">
             <span className="grid size-10 place-items-center rounded-full bg-gradient-brand text-primary-foreground">
@@ -115,7 +114,11 @@ function CityFlow() {
             <Button variant="outline" asChild>
               <Link to="/signin">Sign In</Link>
             </Button>
-            <Button variant="cityflow">Get Started</Button>
+            <Button variant="cityflow" className="cf-glow" asChild>
+              <Link to="/dashboard/$city" params={{ city: "bengaluru" }}>
+                Get Started
+              </Link>
+            </Button>
           </div>
           <Button
             className="sm:hidden"
@@ -151,23 +154,38 @@ function CityFlow() {
           className="relative z-10 grid items-center gap-8 pt-10 lg:grid-cols-[0.82fr_1.18fr] lg:pt-12"
         >
           <div className="relative z-20 max-w-xl">
-            <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-secondary px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
-              <span className="size-2 rounded-full bg-success" /> Live global traffic insights
+            <div className="cf-rise mb-4 inline-flex items-center gap-2 rounded-full bg-secondary px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+              <span className="relative flex size-2">
+                <span className="cf-ping absolute inset-0 rounded-full bg-success" />
+                <span className="relative size-2 rounded-full bg-success" />
+              </span>{" "}
+              Live global traffic insights
             </div>
             <h1 className="text-5xl font-extrabold leading-[0.98] tracking-normal sm:text-6xl lg:text-7xl">
-              Smarter Roads
-              <br />
-              for a Brighter
-              <br />
-              <span className="text-gradient-brand">Tomorrow</span>
+              <span className="cf-rise block" style={{ "--d": "120ms" } as React.CSSProperties}>
+                Smarter Roads
+              </span>
+              <span className="cf-rise block" style={{ "--d": "240ms" } as React.CSSProperties}>
+                for a Brighter
+              </span>
+              <span
+                className="cf-rise cf-text-shimmer block"
+                style={{ "--d": "360ms" } as React.CSSProperties}
+              >
+                Tomorrow
+              </span>
             </h1>
-            <p className="mt-5 max-w-lg text-base leading-7 text-muted-foreground">
+            <p
+              className="cf-rise mt-5 max-w-lg text-base leading-7 text-muted-foreground"
+              style={{ "--d": "500ms" } as React.CSSProperties}
+            >
               Explore, forecast and understand traffic conditions across cities worldwide. Real
               data. Real insights. Smoother journeys for a smarter world.
             </p>
             <form
               onSubmit={submitSearch}
-              className="glass-panel mt-5 flex h-14 max-w-xl items-center gap-3 rounded-lg px-4 focus-within:ring-2 focus-within:ring-ring"
+              className="cf-rise glass-panel mt-5 flex h-14 max-w-xl items-center gap-3 rounded-lg px-4 focus-within:ring-2 focus-within:ring-ring"
+              style={{ "--d": "620ms" } as React.CSSProperties}
             >
               <Search className="text-brand-cyan" />
               <input
@@ -181,7 +199,10 @@ function CityFlow() {
                 <ArrowRight />
               </Button>
             </form>
-            <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+            <div
+              className="cf-rise mt-3 flex flex-wrap items-center gap-2 text-xs text-muted-foreground"
+              style={{ "--d": "740ms" } as React.CSSProperties}
+            >
               <span>Popular cities:</span>
               {cities.map((city) => (
                 <button
@@ -202,34 +223,22 @@ function CityFlow() {
 
           <div className="relative min-h-[390px] lg:min-h-[485px]">
             <div className="globe-float absolute left-1/2 top-1/2 w-[min(820px,120vw)] max-w-none -translate-x-1/2 -translate-y-1/2">
-              <img
-                src={globeImage}
-                alt="Glowing Earth showing global city connections"
-                width={1536}
-                height={1024}
-                className="globe-rotate w-full object-contain dark:opacity-95"
-              />
+              <GlobeOrbit>
+                <img
+                  src={globeImage}
+                  alt="Glowing Earth showing global city connections"
+                  width={1536}
+                  height={1024}
+                  className="globe-rotate w-full object-contain dark:opacity-95"
+                />
+              </GlobeOrbit>
             </div>
-            <aside className="glass-panel absolute right-0 top-2 z-20 hidden w-48 rounded-lg p-4 xl:block">
-              <div className="flex items-center justify-between border-b border-border pb-3 text-sm font-bold">
-                Live Global Traffic{" "}
-                <span className="flex items-center gap-1 text-xs text-success">
-                  <i className="size-2 rounded-full bg-success" /> Live
-                </span>
-              </div>
-              <div className="mt-4 space-y-4 text-xs">
-                <Metric icon={CarFront} value="500+" label="Cities covered" />
-                <Metric icon={MapPin} value="10M+" label="Road segments" />
-                <Metric icon={BarChart3} value="Real-time" label="Forecast insights" />
-                <Metric icon={CloudSun} value="Weather-aware" label="Analysis" />
-              </div>
-              <Button variant="default" className="mt-5 w-full">
-                Explore Map <ArrowRight />
-              </Button>
-            </aside>
+            <HeroCards />
           </div>
         </div>
       </section>
+
+      <TrafficRoad />
 
       <section
         id="explore"
@@ -239,7 +248,7 @@ function CityFlow() {
           {features.map(({ icon: Icon, title, copy }) => (
             <button
               key={title}
-              className="group flex min-h-20 items-center gap-3 rounded-lg border border-border bg-surface p-3 text-left transition hover:-translate-y-1 hover:border-brand-cyan"
+              className="cf-reveal group flex min-h-20 items-center gap-3 rounded-lg border border-border bg-surface p-3 text-left transition hover:-translate-y-1 hover:border-brand-cyan hover:shadow-brand"
             >
               <span className="grid size-11 shrink-0 place-items-center rounded-lg bg-secondary text-brand-cyan">
                 <Icon />
@@ -256,7 +265,7 @@ function CityFlow() {
 
       <section id="cities" className="mx-auto max-w-[1450px] px-5 py-10 sm:px-8 lg:px-14">
         <div className="grid gap-8 lg:grid-cols-[0.38fr_1fr] lg:items-center">
-          <div>
+          <div className="cf-reveal">
             <p className="text-xs font-bold uppercase tracking-[0.22em] text-brand-cyan">
               Explore the world
             </p>
@@ -283,7 +292,7 @@ function CityFlow() {
                     key={city.name}
                     to="/dashboard/$city"
                     params={{ city: city.slug }}
-                    className="group relative block min-h-52 overflow-hidden rounded-lg border border-border bg-card shadow-sm"
+                    className="cf-reveal group relative block min-h-52 overflow-hidden rounded-lg border border-border bg-card shadow-sm transition hover:-translate-y-1 hover:shadow-brand"
                   >
                     <img
                       src={cityStrip}
@@ -328,7 +337,7 @@ function CityFlow() {
             )}
           </div>
         </div>
-        <div className="mt-9 grid gap-5 border-t border-border pt-7 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="cf-reveal mt-9 grid gap-5 border-t border-border pt-7 sm:grid-cols-2 lg:grid-cols-4">
           <Metric icon={Globe2} value="500+" label="Cities Worldwide" />
           <Metric icon={RouteIcon} value="10M+" label="Road Segments" />
           <Metric icon={Clock3} value="Real-time & Forecast" label="Traffic Insights" />

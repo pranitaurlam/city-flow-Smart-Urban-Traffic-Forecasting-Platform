@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import type { TrafficTier } from "@/lib/locations";
 
 const LEVELS: { level: TrafficTier; color: string }[] = [
@@ -27,7 +28,13 @@ export function TrafficGauge({ level }: { level: TrafficTier }) {
   const levelIndex = LEVELS.findIndex((item) => item.level === level);
   const segmentAngle = 180 / LEVELS.length;
   const needleAngle = -90 + segmentAngle * (levelIndex + 0.5);
-  const needleTip = polarToCartesian(needleAngle);
+  // Start at "Low" and sweep to the level once mounted (and on every change).
+  const [shownAngle, setShownAngle] = useState(-90);
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => setShownAngle(needleAngle));
+    return () => cancelAnimationFrame(frame);
+  }, [needleAngle]);
+  const needleTip = polarToCartesian(0);
 
   return (
     <svg
@@ -48,19 +55,25 @@ export function TrafficGauge({ level }: { level: TrafficTier }) {
             strokeWidth={STROKE}
             strokeLinecap="butt"
             opacity={segLevel === level ? 1 : 0.35}
+            className={segLevel === level ? "cf-soft-pulse" : undefined}
           />
         );
       })}
+      <g
+        className="cf-needle"
+        style={{ transform: `rotate(${shownAngle}deg)`, transformOrigin: `${CX}px ${CY}px` }}
+      >
+        <line
+          x1={CX}
+          y1={CY}
+          x2={needleTip.x}
+          y2={needleTip.y}
+          stroke="var(--foreground)"
+          strokeWidth={3}
+          strokeLinecap="round"
+        />
+      </g>
       <circle cx={CX} cy={CY} r={5} fill="var(--foreground)" />
-      <line
-        x1={CX}
-        y1={CY}
-        x2={needleTip.x}
-        y2={needleTip.y}
-        stroke="var(--foreground)"
-        strokeWidth={3}
-        strokeLinecap="round"
-      />
       <text x={CX - R} y={CY + 18} fontSize="10" fill="var(--muted-foreground)" textAnchor="start">
         Low
       </text>
