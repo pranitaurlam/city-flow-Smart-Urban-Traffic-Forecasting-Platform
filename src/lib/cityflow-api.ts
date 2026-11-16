@@ -6,9 +6,25 @@
  * handle a rejected promise (backend not running) and fall back gracefully.
  */
 
-export const CITYFLOW_API_URL = (
-  (import.meta.env["VITE_CITYFLOW_API_URL"] as string | undefined) ?? "http://localhost:8000"
-).replace(/\/$/, "");
+/**
+ * Backend base URL. When it points at localhost but the page was opened from
+ * another device on the network (e.g. a phone at http://192.168.1.20:8080),
+ * "localhost" would mean the phone itself, so the page's own host is used.
+ */
+function resolveApiUrl() {
+  const configured = (
+    (import.meta.env["VITE_CITYFLOW_API_URL"] as string | undefined) ?? "http://localhost:8000"
+  ).replace(/\/$/, "");
+  if (typeof window === "undefined") return configured;
+  const url = new URL(configured);
+  const local = (host: string) => host === "localhost" || host === "127.0.0.1";
+  if (local(url.hostname) && !local(window.location.hostname)) {
+    url.hostname = window.location.hostname;
+  }
+  return url.toString().replace(/\/$/, "");
+}
+
+export const CITYFLOW_API_URL = resolveApiUrl();
 
 export type PredictedValue = { predicted: number; actual: number | null };
 

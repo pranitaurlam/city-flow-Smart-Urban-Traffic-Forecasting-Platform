@@ -1074,3 +1074,10 @@
     animation-name: cf-cross-amber;
   }
 }
+
+/* Phones: leave room for the bottom tab bar on dashboard pages. */
+@media (width < 64rem) {
+  body:has(.cf-mobile-nav) {
+    padding-bottom: calc(4.25rem + env(safe-area-inset-bottom));
+  }
+}
