@@ -1,7 +1,8 @@
 """Loads the traffic dataset and the ML pipeline's outputs into the database.
 
-Re-running is safe: every table is cleared and reloaded, so the database
-always mirrors the current CSV and ml/outputs/*.json. Run it after
+Re-running is safe: the dataset, forecast and metric tables are cleared and
+reloaded, so they always mirror the current CSV and ml/outputs/*.json.
+Venues are upserted and user-entered events are left untouched. Run it after
 `python ml/forecast.py` produces new forecasts.
 
     python -m app.seed
@@ -19,6 +20,7 @@ from sqlalchemy.orm import Session
 from app.config import settings
 from app.db import Base, SessionLocal, engine
 from app.models import Area, Forecast, ModelMetric, Road, TrafficRecord
+from app.venues import upsert_venues
 
 
 def slugify(name: str) -> str:
@@ -130,6 +132,8 @@ def seed(session: Session) -> dict[str, int]:
     }
     counts["areas"] = len(areas)
     session.commit()
+    # Venues are reference data; events are user-entered and never reset here.
+    counts["venues"] = upsert_venues(session)
     return counts
 
 

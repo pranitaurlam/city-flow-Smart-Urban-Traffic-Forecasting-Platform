@@ -86,6 +86,11 @@ export type ArrivalPlanInput = {
   reliabilityTarget: ReliabilityTarget;
   bufferMin: SafetyBufferMin;
   approximateEndpoints: number;
+  /**
+   * Extra minutes from scheduled events (concerts, matches) for a trip that
+   * departs at `departMinute` and would otherwise take `journeyMin`.
+   */
+  eventDelayAt?: ((offset: number, departMinute: number, journeyMin: number) => number) | undefined;
   now?: Date;
 };
 
@@ -96,6 +101,7 @@ type PreparedContext = {
   weather: WeatherReading | undefined;
   now: Date;
   confidence: number;
+  eventDelayAt: NonNullable<ArrivalPlanInput["eventDelayAt"]>;
 };
 
 function weekdayFactorForOffset(offset: number, now: Date) {
@@ -169,7 +175,15 @@ function prepare(input: ArrivalPlanInput): PreparedContext {
     40,
     95,
   );
-  return { freeFlowMin, corridorFactor, mode, weather: input.weather, now, confidence };
+  return {
+    freeFlowMin,
+    corridorFactor,
+    mode,
+    weather: input.weather,
+    now,
+    confidence,
+    eventDelayAt: input.eventDelayAt ?? (() => 0),
+  };
 }
 
 type MeanPoint = { minutes: number; sigma: number; tier: TrafficTier; spread: number };
@@ -178,10 +192,14 @@ function meanAt(ctx: PreparedContext, offset: number, minute: number): MeanPoint
   const intensity = intensityAtMinute(offset, minute, ctx.now) * ctx.corridorFactor;
   const wx = weatherForOffset(ctx.weather, offset);
   const weatherMul = ctx.mode.trafficSensitivity > 0 ? 1 + wx.pct / 100 : 1;
-  const minutes = Math.max(
+  const baseMinutes = Math.max(
     1,
     ctx.freeFlowMin * (1 + ctx.mode.trafficSensitivity * intensity) * weatherMul,
   );
+  // Walkers aren't held up by event traffic the way vehicles are.
+  const eventMinutes =
+    ctx.mode.trafficSensitivity > 0 ? ctx.eventDelayAt(offset, minute, baseMinutes) : 0;
+  const minutes = baseMinutes + eventMinutes;
   const spreadPct = 0.08 + (100 - ctx.confidence) / 400;
   const spread = minutes * spreadPct;
   const sigma = spread / Z_SCORE[90];
@@ -413,6 +431,16 @@ function buildFactors(
       label: "Historical Traffic Pattern",
       pct: 30,
       detail: "Based on citywide hourly traffic patterns (no tracked corridor matched this route).",
+    });
+  }
+
+  const baseJourney = meanAt({ ...ctx, eventDelayAt: () => 0 }, offset, departureMinute).minutes;
+  const eventMin = ctx.eventDelayAt(offset, departureMinute, baseJourney);
+  if (eventMin >= 1 && ctx.mode.trafficSensitivity > 0) {
+    raw.push({
+      label: "Scheduled Event",
+      pct: Math.min(40, 10 + eventMin),
+      detail: `A concert, match or other big event near your route adds about ${Math.round(eventMin)} min.`,
     });
   }
 

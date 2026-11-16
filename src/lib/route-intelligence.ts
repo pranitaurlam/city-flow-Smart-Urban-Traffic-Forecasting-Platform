@@ -86,18 +86,39 @@ export function plannerMode(key: PlannerMode) {
   return PLANNER_MODES.find((m) => m.key === key) ?? PLANNER_MODES[0]!;
 }
 
-export function googleMapsDirectionsUrl(origin: string, destination: string, mode: PlannerMode) {
+export function googleMapsDirectionsUrl(
+  origin: string,
+  destination: string,
+  mode: PlannerMode,
+  /** [lat, lon] points the route should pass through, e.g. a detour around an event. */
+  waypoints: [number, number][] = [],
+) {
   const params = new URLSearchParams({
     api: "1",
     origin: origin.trim(),
     destination: destination.trim(),
     travelmode: plannerMode(mode).googleMode,
   });
+  if (waypoints.length) {
+    params.set(
+      "waypoints",
+      waypoints.map(([lat, lon]) => `${lat.toFixed(5)},${lon.toFixed(5)}`).join("|"),
+    );
+  }
   return `https://www.google.com/maps/dir/?${params.toString()}`;
 }
 
-export function openInGoogleMaps(origin: string, destination: string, mode: PlannerMode) {
-  window.open(googleMapsDirectionsUrl(origin, destination, mode), "_blank", "noopener,noreferrer");
+export function openInGoogleMaps(
+  origin: string,
+  destination: string,
+  mode: PlannerMode,
+  waypoints: [number, number][] = [],
+) {
+  window.open(
+    googleMapsDirectionsUrl(origin, destination, mode, waypoints),
+    "_blank",
+    "noopener,noreferrer",
+  );
 }
 
 // ---------------------------------------------------------------------------

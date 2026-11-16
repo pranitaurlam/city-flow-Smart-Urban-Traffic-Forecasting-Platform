@@ -26,8 +26,9 @@ export function WhyThisDeparture({ plan }: { plan: ArrivalPlanResult }) {
         ))}
       </div>
       <p className="mt-4 text-[11px] text-muted-foreground">
-        No live event or road-closure feed is connected yet, so those factors aren&apos;t shown —
-        CityFlow won&apos;t invent a cause it can&apos;t back with data.
+        Scheduled events come from the Events page. There&apos;s no live road-closure feed, so
+        closures aren&apos;t shown — CityFlow won&apos;t invent a cause it can&apos;t back with
+        data.
       </p>
     </section>
   );

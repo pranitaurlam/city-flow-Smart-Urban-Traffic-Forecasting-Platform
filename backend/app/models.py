@@ -114,3 +114,47 @@ class ModelMetric(Base):
     is_chosen: Mapped[bool] = mapped_column(Boolean, default=False)
     train_rows: Mapped[int] = mapped_column(Integer)
     test_rows: Mapped[int] = mapped_column(Integer)
+
+
+class Venue(Base):
+    """A place that hosts large events (stadium, concert ground, expo centre)."""
+
+    __tablename__ = "venues"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    slug: Mapped[str] = mapped_column(String(64), unique=True, index=True)
+    name: Mapped[str] = mapped_column(String(128))
+    lat: Mapped[float] = mapped_column(Float)
+    lon: Mapped[float] = mapped_column(Float)
+    # Approximate full-house attendance; the default when an event doesn't say.
+    capacity: Mapped[int] = mapped_column(Integer)
+    # Roads within this distance of the venue are treated as affected.
+    impact_radius_km: Mapped[float] = mapped_column(Float, default=2.0)
+
+    events: Mapped[list["Event"]] = relationship(
+        back_populates="venue", cascade="all, delete-orphan"
+    )
+
+
+class Event(Base):
+    """A scheduled event (concert, match, expo) that can congest nearby roads.
+
+    Times are stored as naive UTC; the API accepts and returns timezone-aware
+    ISO timestamps.
+    """
+
+    __tablename__ = "events"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    venue_id: Mapped[int] = mapped_column(ForeignKey("venues.id", ondelete="CASCADE"), index=True)
+    title: Mapped[str] = mapped_column(String(200))
+    # "concert", "sports", "expo", "festival", "other"
+    category: Mapped[str] = mapped_column(String(32), default="other")
+    starts_at: Mapped[datetime] = mapped_column(DateTime, index=True)
+    ends_at: Mapped[datetime] = mapped_column(DateTime, index=True)
+    expected_attendance: Mapped[int] = mapped_column(Integer)
+    # Where the listing came from, e.g. a BookMyShow page URL pasted by hand.
+    url: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow)
+
+    venue: Mapped[Venue] = relationship(back_populates="events")

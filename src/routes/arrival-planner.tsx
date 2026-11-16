@@ -14,11 +14,14 @@ import { WhyThisDeparture } from "@/components/route/why-this-departure";
 import { ArrivalTimeline } from "@/components/route/arrival-timeline";
 import { RouteReliabilityCard } from "@/components/route/route-reliability";
 import { SavedArrivalPlans, type ArrivalPlanDraft } from "@/components/route/saved-arrival-plans";
+import { EventImpactCard } from "@/components/route/event-impact-card";
 import { getRoute } from "@/lib/route-server";
 import { getLiveWeather } from "@/lib/weather-server";
 import { corridorsAlongRoute, plannerMode } from "@/lib/route-intelligence";
 import { buildArrivalPlan, type ArrivalPlanResult } from "@/lib/arrival-planner";
 import type { ArrivalPlan } from "@/lib/arrival-plans-store";
+import { cityflowApi } from "@/lib/cityflow-api";
+import { dateAtMinute, downsample, eventDelayForTrip } from "@/lib/event-traffic";
 
 export const Route = createFileRoute("/arrival-planner")({
   ssr: false,
@@ -105,8 +108,41 @@ function ArrivalPlannerPage() {
     [routeQuery.data],
   );
 
+  // Scheduled events along the route in the hours before the deadline. The
+  // planner adds their estimated delay to any departure that overlaps them.
+  const deadlineMinute = submitted ? submitted.arrivalHour * 60 + submitted.arrivalMinute : 0;
+  const eventsQuery = useQuery({
+    queryKey: [
+      "arrival-events",
+      submitted?.date,
+      deadlineMinute,
+      routeQuery.data?.primary.distanceKm,
+      routeQuery.data?.primary.geometry.length,
+    ],
+    enabled: !!submitted && !!routeQuery.data,
+    queryFn: () =>
+      cityflowApi.routeImpact(
+        [{ id: "primary", geometry: downsample(routeQuery.data!.primary.geometry) }],
+        dateAtMinute(submitted!.date, deadlineMinute - 8 * 60),
+        dateAtMinute(submitted!.date, deadlineMinute),
+      ),
+    retry: false,
+    staleTime: 60_000,
+  });
+  const routeEvents = eventsQuery.data?.routes[0]?.events;
+  const eventDelayAt = useMemo(() => {
+    if (!routeEvents?.length || !submitted) return undefined;
+    return (_offset: number, departMinute: number, journeyMin: number) =>
+      eventDelayForTrip(
+        routeEvents,
+        dateAtMinute(submitted.date, departMinute),
+        dateAtMinute(submitted.date, departMinute + journeyMin),
+      );
+  }, [routeEvents, submitted]);
+
   const plan: ArrivalPlanResult | null = useMemo(() => {
-    if (!submitted || !routeQuery.data) return null;
+    // Wait for the event check (success or failure) so the plan doesn't jump once it lands.
+    if (!submitted || !routeQuery.data || !eventsQuery.isFetched) return null;
     return buildArrivalPlan({
       route: routeQuery.data,
       mode: submitted.mode,
@@ -119,8 +155,16 @@ function ArrivalPlannerPage() {
       bufferMin: submitted.bufferMin,
       approximateEndpoints:
         Number(submitted.origin?.approximate) + Number(submitted.destination?.approximate),
+      eventDelayAt,
     });
-  }, [submitted, routeQuery.data, weatherQuery.data, corridors]);
+  }, [
+    submitted,
+    routeQuery.data,
+    weatherQuery.data,
+    corridors,
+    eventsQuery.isFetched,
+    eventDelayAt,
+  ]);
 
   const draft: ArrivalPlanDraft | null = useMemo(() => {
     if (!submitted?.origin || !submitted?.destination || !routeQuery.data) return null;
@@ -181,7 +225,9 @@ function ArrivalPlannerPage() {
   };
 
   const loading =
-    routeQuery.isFetching || (!!submitted && weatherQuery.isFetching && !weatherQuery.data);
+    routeQuery.isFetching ||
+    (!!submitted && weatherQuery.isFetching && !weatherQuery.data) ||
+    (eventsQuery.isFetching && !eventsQuery.isFetched);
   const routeError = routeQuery.isError
     ? "Couldn't reach the routing service. Please try again in a moment."
     : null;
@@ -225,7 +271,7 @@ function ArrivalPlannerPage() {
             error={error ?? routeError}
           />
 
-          {!routeQuery.data && submitted && loading && (
+          {!plan && submitted && loading && (
             <section className="glass-panel rounded-2xl p-6 text-center text-sm text-muted-foreground">
               Calculating your departure window…
             </section>
@@ -238,6 +284,14 @@ function ArrivalPlannerPage() {
                 originText={submitted!.originText}
                 destinationText={submitted!.destinationText}
                 mode={submitted!.mode}
+              />
+              <EventImpactCard
+                origin={submitted!.origin!}
+                destination={submitted!.destination!}
+                mode={submitted!.mode}
+                route={routeQuery.data!}
+                tripStart={dateAtMinute(submitted!.date, plan.recommended.departureMinute)}
+                tripDurationMin={plan.recommended.journeyMin}
               />
               <DepartureComparison plan={plan} />
               <div className="grid gap-4 lg:grid-cols-2">

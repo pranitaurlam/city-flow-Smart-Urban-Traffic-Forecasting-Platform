@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AlertsRouteImport } from './routes/alerts'
 import { Route as ArrivalPlannerRouteImport } from './routes/arrival-planner'
 import { Route as ClusterAnalysisRouteImport } from './routes/cluster-analysis'
+import { Route as EventsRouteImport } from './routes/events'
 import { Route as ForecastRouteImport } from './routes/forecast'
 import { Route as InsightsRouteImport } from './routes/insights'
 import { Route as LocationsRouteImport } from './routes/locations'
@@ -42,6 +43,11 @@ const ArrivalPlannerRoute = ArrivalPlannerRouteImport.update({
 const ClusterAnalysisRoute = ClusterAnalysisRouteImport.update({
   id: '/cluster-analysis',
   path: '/cluster-analysis',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EventsRoute = EventsRouteImport.update({
+  id: '/events',
+  path: '/events',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ForecastRoute = ForecastRouteImport.update({
@@ -100,6 +106,7 @@ export interface FileRoutesByFullPath {
   '/alerts': typeof AlertsRoute
   '/arrival-planner': typeof ArrivalPlannerRoute
   '/cluster-analysis': typeof ClusterAnalysisRoute
+  '/events': typeof EventsRoute
   '/forecast': typeof ForecastRoute
   '/insights': typeof InsightsRoute
   '/locations': typeof LocationsRoute
@@ -116,6 +123,7 @@ export interface FileRoutesByTo {
   '/alerts': typeof AlertsRoute
   '/arrival-planner': typeof ArrivalPlannerRoute
   '/cluster-analysis': typeof ClusterAnalysisRoute
+  '/events': typeof EventsRoute
   '/forecast': typeof ForecastRoute
   '/insights': typeof InsightsRoute
   '/locations': typeof LocationsRoute
@@ -133,6 +141,7 @@ export interface FileRoutesById {
   '/alerts': typeof AlertsRoute
   '/arrival-planner': typeof ArrivalPlannerRoute
   '/cluster-analysis': typeof ClusterAnalysisRoute
+  '/events': typeof EventsRoute
   '/forecast': typeof ForecastRoute
   '/insights': typeof InsightsRoute
   '/locations': typeof LocationsRoute
@@ -151,6 +160,7 @@ export interface FileRouteTypes {
     | '/alerts'
     | '/arrival-planner'
     | '/cluster-analysis'
+    | '/events'
     | '/forecast'
     | '/insights'
     | '/locations'
@@ -167,6 +177,7 @@ export interface FileRouteTypes {
     | '/alerts'
     | '/arrival-planner'
     | '/cluster-analysis'
+    | '/events'
     | '/forecast'
     | '/insights'
     | '/locations'
@@ -183,6 +194,7 @@ export interface FileRouteTypes {
     | '/alerts'
     | '/arrival-planner'
     | '/cluster-analysis'
+    | '/events'
     | '/forecast'
     | '/insights'
     | '/locations'
@@ -200,6 +212,7 @@ export interface RootRouteChildren {
   AlertsRoute: typeof AlertsRoute
   ArrivalPlannerRoute: typeof ArrivalPlannerRoute
   ClusterAnalysisRoute: typeof ClusterAnalysisRoute
+  EventsRoute: typeof EventsRoute
   ForecastRoute: typeof ForecastRoute
   InsightsRoute: typeof InsightsRoute
   LocationsRoute: typeof LocationsRoute
@@ -240,6 +253,13 @@ declare module '@tanstack/react-router' {
       path: '/cluster-analysis'
       fullPath: '/cluster-analysis'
       preLoaderRoute: typeof ClusterAnalysisRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/events': {
+      id: '/events'
+      path: '/events'
+      fullPath: '/events'
+      preLoaderRoute: typeof EventsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/forecast': {
@@ -320,6 +340,7 @@ const rootRouteChildren: RootRouteChildren = {
   AlertsRoute: AlertsRoute,
   ArrivalPlannerRoute: ArrivalPlannerRoute,
   ClusterAnalysisRoute: ClusterAnalysisRoute,
+  EventsRoute: EventsRoute,
   ForecastRoute: ForecastRoute,
   InsightsRoute: InsightsRoute,
   LocationsRoute: LocationsRoute,
