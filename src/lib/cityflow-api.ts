@@ -61,11 +61,91 @@ export class ApiError extends Error {
   }
 }
 
-async function getJson<T>(path: string): Promise<T> {
-  const res = await fetch(`${CITYFLOW_API_URL}${path}`, { signal: AbortSignal.timeout(6000) });
-  if (!res.ok) throw new ApiError(res.status, `CityFlow API ${res.status} on ${path}`);
-  return (await res.json()) as T;
+/** Turns FastAPI's `detail` (a string, a list of strings, or validation objects) into a message. */
+function errorMessage(detail: unknown, fallback: string): string {
+  if (typeof detail === "string") return detail;
+  if (Array.isArray(detail)) {
+    return detail
+      .map((d) => (typeof d === "string" ? d : ((d as { msg?: string }).msg ?? JSON.stringify(d))))
+      .join("\n");
+  }
+  return fallback;
 }
+
+async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
+  const res = await fetch(`${CITYFLOW_API_URL}${path}`, {
+    ...init,
+    signal: AbortSignal.timeout(8000),
+  });
+  if (!res.ok) {
+    const body = (await res.json().catch(() => null)) as { detail?: unknown } | null;
+    throw new ApiError(
+      res.status,
+      errorMessage(body?.detail, `CityFlow API ${res.status} on ${path}`),
+    );
+  }
+  return (res.status === 204 ? undefined : await res.json()) as T;
+}
+
+const getJson = <T>(path: string) => request<T>(path);
+
+const sendJson = <T>(path: string, method: "POST" | "PUT", body: unknown) =>
+  request<T>(path, {
+    method,
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(body),
+  });
+
+export type ApiVenue = {
+  slug: string;
+  name: string;
+  lat: number;
+  lon: number;
+  capacity: number;
+  impact_radius_km: number;
+};
+
+export type EventCategory = "concert" | "sports" | "expo" | "festival" | "comedy" | "other";
+
+export type ApiEvent = {
+  id: number;
+  venue: ApiVenue;
+  title: string;
+  category: EventCategory;
+  /** ISO timestamps with timezone. */
+  starts_at: string;
+  ends_at: string;
+  expected_attendance: number;
+  url: string | null;
+  peak_delay_min: number;
+};
+
+export type EventInput = {
+  venue: string;
+  title: string;
+  category: EventCategory;
+  /** ISO timestamp; without an offset it's read as Bengaluru time. */
+  starts_at: string;
+  ends_at: string;
+  expected_attendance: number | null;
+  url: string | null;
+};
+
+export type ImpactWindow = {
+  start: string;
+  end: string;
+  delay_min: number;
+  phase: "arrival" | "during" | "dispersal";
+};
+
+export type EventOnRoute = {
+  event: ApiEvent;
+  distance_km: number;
+  windows: ImpactWindow[];
+  delay_min: number;
+};
+
+export type RouteImpact = { id: string; events: EventOnRoute[]; delay_min: number };
 
 export const cityflowApi = {
   areas: () => getJson<ApiAreaSummary[]>("/api/areas"),
@@ -79,6 +159,33 @@ export const cityflowApi = {
       `/api/areas/${encodeURIComponent(slug)}/history${qs.size ? `?${qs}` : ""}`,
     );
   },
+  venues: () => getJson<ApiVenue[]>("/api/venues"),
+  events: (params: { start?: string; end?: string } = {}) => {
+    const qs = new URLSearchParams(
+      Object.entries(params).filter((e): e is [string, string] => Boolean(e[1])),
+    );
+    return getJson<ApiEvent[]>(`/api/events${qs.size ? `?${qs}` : ""}`);
+  },
+  createEvent: (input: EventInput) => sendJson<ApiEvent>("/api/events", "POST", input),
+  updateEvent: (id: number, input: EventInput) =>
+    sendJson<ApiEvent>(`/api/events/${id}`, "PUT", input),
+  deleteEvent: (id: number) => request<void>(`/api/events/${id}`, { method: "DELETE" }),
+  importEvents: (csvText: string) =>
+    request<{ created: number }>("/api/events/import", {
+      method: "POST",
+      headers: { "content-type": "text/csv" },
+      body: csvText,
+    }),
+  routeImpact: (
+    routes: { id: string; geometry: [number, number][] }[],
+    windowStart: Date,
+    windowEnd: Date,
+  ) =>
+    sendJson<{ estimate: boolean; routes: RouteImpact[] }>("/api/events/route-impact", "POST", {
+      routes,
+      window_start: windowStart.toISOString(),
+      window_end: windowEnd.toISOString(),
+    }),
   trendReportUrl: (slug?: string, days = 30) =>
     `${CITYFLOW_API_URL}/api/reports/trend.csv?${new URLSearchParams({
       ...(slug ? { area: slug } : {}),

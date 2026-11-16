@@ -3,6 +3,8 @@ uvicorn[standard]==0.32.1
 sqlalchemy==2.0.36
 pydantic-settings==2.6.1
 psycopg[binary]==3.2.3
+# IANA time zones for zoneinfo on systems without a tz database (e.g. slim images)
+tzdata==2025.2
 
 # tests
 pytest==8.3.4

@@ -54,9 +54,15 @@ async function fetchOsrm(
   toLat: number,
   toLon: number,
   mode: TravelMode,
+  via?: [number, number],
 ): Promise<{ primary: RouteOption; alternatives: RouteOption[] } | null> {
   const { host, profile } = OSRM_PROFILE[mode];
-  const url = `https://routing.openstreetmap.de/${host}/route/v1/${profile}/${fromLon},${fromLat};${toLon},${toLat}?alternatives=${mode === "car" ? "true" : "false"}&geometries=geojson&overview=full`;
+  const coords = [[fromLat, fromLon], ...(via ? [via] : []), [toLat, toLon]]
+    .map(([lat, lon]) => `${lon},${lat}`)
+    .join(";");
+  // OSRM only returns alternatives for plain two-point routes.
+  const alternatives = mode === "car" && !via;
+  const url = `https://routing.openstreetmap.de/${host}/route/v1/${profile}/${coords}?alternatives=${alternatives}&geometries=geojson&overview=full`;
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 8000);
   try {
@@ -90,11 +96,25 @@ async function fetchOsrm(
 
 export const getRoute = createServerFn({ method: "GET" })
   .validator(
-    (data: { fromLat: number; fromLon: number; toLat: number; toLon: number; mode: TravelMode }) =>
-      data,
+    (data: {
+      fromLat: number;
+      fromLon: number;
+      toLat: number;
+      toLon: number;
+      mode: TravelMode;
+      /** Optional [lat, lon] the route must pass through, e.g. to detour around an event. */
+      via?: [number, number];
+    }) => data,
   )
   .handler(async ({ data }): Promise<RouteResult> => {
-    const result = await fetchOsrm(data.fromLat, data.fromLon, data.toLat, data.toLon, data.mode);
+    const result = await fetchOsrm(
+      data.fromLat,
+      data.fromLon,
+      data.toLat,
+      data.toLon,
+      data.mode,
+      data.via,
+    );
     if (result) {
       return {
         mode: data.mode,

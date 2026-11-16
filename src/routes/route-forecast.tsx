@@ -40,6 +40,7 @@ import { useTheme } from "@/hooks/use-theme";
 import { useIncidents } from "@/hooks/use-incidents";
 import { TierBadge } from "@/components/locations/panels";
 import { PersonalRouteAlerts } from "@/components/route/personal-route-alerts";
+import { EventImpactCard } from "@/components/route/event-impact-card";
 import { RouteAlertAnalysisDialog } from "@/components/route/route-alert-analysis";
 import { NotificationCenter } from "@/components/route/notification-center";
 import { useRouteMonitor } from "@/hooks/use-route-monitor";
@@ -125,6 +126,14 @@ const TIER_SPEED_FACTOR: Record<string, number> = {
   High: 0.9,
   "Very High": 0.75,
 };
+
+/** Local Date for the selected departure: `dayOffset` days from today at `hour`:00. */
+function departureDate(dayOffset: number, hour: number) {
+  const d = new Date();
+  d.setDate(d.getDate() + dayOffset);
+  d.setHours(hour, 0, 0, 0);
+  return d;
+}
 
 function formatMin(min: number) {
   if (min < 60) return `${Math.round(min)} min`;
@@ -812,6 +821,21 @@ function RouteForecastPage() {
                   historicalPct={historicalDiffPct}
                   confidence={selectedDayForecast.confidence}
                   factors={explain}
+                />
+              )}
+
+              {mode === "car" && activeRoute && selectedDayForecast && (
+                <EventImpactCard
+                  origin={{ lat: source.lat, lon: source.lon, label: source.name }}
+                  destination={{
+                    lat: destination.lat,
+                    lon: destination.lon,
+                    label: destination.name,
+                  }}
+                  mode="driving"
+                  route={activeRoute}
+                  tripStart={departureDate(dayOffset, hour)}
+                  tripDurationMin={selectedDayForecast.travelTime}
                 />
               )}
 

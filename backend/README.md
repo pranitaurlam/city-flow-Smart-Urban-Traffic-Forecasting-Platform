@@ -69,16 +69,48 @@ a port other than 5173, 8080 or 3000, add its origin to `CORS_ORIGINS`
 | GET | `/api/forecasts?area=&target=&horizon=` | One row per forecast, filterable |
 | GET | `/api/metrics?target=` | Baseline vs Random Forest vs XGBoost scores for each target and horizon |
 | GET | `/api/reports/trend.csv?area=&days=30` | CSV export of historical and forecast rows |
+| GET | `/api/venues` | Major Bengaluru event venues (stadiums, concert grounds, expo centres) |
+| POST | `/api/venues` | Add a venue |
+| GET | `/api/events?start=&end=&venue=` | Events overlapping a time range (default: next 30 days) |
+| POST / PUT / DELETE | `/api/events`, `/api/events/{id}` | Add, edit or remove an event |
+| POST | `/api/events/import` | Bulk-add events from CSV (`text/csv` body). Nothing is saved unless every row is valid |
+| POST | `/api/events/route-impact` | For route geometries and a time window: nearby events and estimated delays |
 
 Area slugs match the frontend's location slugs (`mg-road`,
 `electronic-city`, `koramangala`, …).
 
+## Event traffic (concerts, matches, expos)
+
+BookMyShow has no public API, and scraping it would break its terms of use.
+So events are added on the dashboard's **Events** page, or imported from a
+CSV built from the listings. The route pages then check each trip against
+them:
+
+- A venue affects roads within its impact radius (1–3 km depending on size).
+  The full effect applies within 0.5 km of the venue and fades to nothing at
+  the radius.
+- Peak delay grows with crowd size: 3 min for up to 2k people, then 8, 15
+  and 22 min, up to 30 min above 50k.
+- The delay is highest while the crowd arrives (90 min before the start
+  until 15 min after) and leaves (the hour after it ends). A smaller delay
+  (35% of the peak) applies while the event is on.
+- If the usual route is affected, the dashboard compares OSRM's alternative
+  routes with detours on each side of the venue. It suggests one only if it
+  saves at least 5 minutes.
+
+These are rule-based estimates, not measurements (see `app/event_impact.py`).
+Event times without a timezone are read as Bengaluru time (IST).
+
+**No authentication yet:** anyone who can reach the API can add or delete
+events. Add auth before deploying it anywhere public.
+
 ## Database tables
 
 `areas`, `roads`, `traffic_records` (every row of the raw CSV),
-`forecasts`, and `model_metrics`. The tables are created automatically.
-`python -m app.seed` clears and reloads all of them, so it is safe to re-run
-after retraining:
+`forecasts`, `model_metrics`, `venues` and `events`. The tables are created automatically.
+`python -m app.seed` clears and reloads the dataset, forecast and metric
+tables, updates the venue list, and never touches events, so it is safe to
+re-run after retraining:
 
 ```bash
 python3 ml/train.py && python3 ml/forecast.py
