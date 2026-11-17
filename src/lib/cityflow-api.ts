@@ -6,15 +6,32 @@
  * handle a rejected promise (backend not running) and fall back gracefully.
  */
 
+const CONFIGURED_API_URL = (
+  (import.meta.env["VITE_CITYFLOW_API_URL"] as string | undefined) ?? ""
+).trim();
+
 /**
- * Backend base URL. When it points at localhost but the page was opened from
- * another device on the network (e.g. a phone at http://192.168.1.20:8080),
- * "localhost" would mean the phone itself, so the page's own host is used.
+ * A deployed site must be built with VITE_CITYFLOW_API_URL. Without it, falling
+ * back to localhost would make every visitor's browser call a backend on their
+ * own device, which fails in confusing ways; instead every call fails with
+ * this message.
+ */
+export const API_NOT_CONFIGURED_MESSAGE =
+  "This site isn't connected to its backend: VITE_CITYFLOW_API_URL wasn't set when it was built.";
+const apiConfigured = Boolean(CONFIGURED_API_URL) || !import.meta.env.PROD;
+
+if (!apiConfigured && typeof window !== "undefined") {
+  console.error(`[CityFlow] ${API_NOT_CONFIGURED_MESSAGE}`);
+}
+
+/**
+ * Backend base URL. Local development defaults to http://localhost:8000. When
+ * that points at localhost but the page was opened from another device on the
+ * network (e.g. a phone at http://192.168.1.20:8080), "localhost" would mean
+ * the phone itself, so the page's own host is used.
  */
 function resolveApiUrl() {
-  const configured = (
-    (import.meta.env["VITE_CITYFLOW_API_URL"] as string | undefined) ?? "http://localhost:8000"
-  ).replace(/\/$/, "");
+  const configured = (CONFIGURED_API_URL || "http://localhost:8000").replace(/\/$/, "");
   if (typeof window === "undefined") return configured;
   const url = new URL(configured);
   const local = (host: string) => host === "localhost" || host === "127.0.0.1";
@@ -24,7 +41,7 @@ function resolveApiUrl() {
   return url.toString().replace(/\/$/, "");
 }
 
-export const CITYFLOW_API_URL = resolveApiUrl();
+export const CITYFLOW_API_URL = apiConfigured ? resolveApiUrl() : "";
 
 export type PredictedValue = { predicted: number; actual: number | null };
 
@@ -89,6 +106,7 @@ function errorMessage(detail: unknown, fallback: string): string {
 }
 
 async function request<T>(path: string, init: RequestInit = {}, timeoutMs = 8000): Promise<T> {
+  if (!apiConfigured) throw new ApiError(0, API_NOT_CONFIGURED_MESSAGE);
   const res = await fetch(`${CITYFLOW_API_URL}${path}`, {
     ...init,
     signal: AbortSignal.timeout(timeoutMs),
@@ -105,12 +123,42 @@ async function request<T>(path: string, init: RequestInit = {}, timeoutMs = 8000
 
 const getJson = <T>(path: string) => request<T>(path);
 
-const sendJson = <T>(path: string, method: "POST" | "PUT", body: unknown) =>
+const sendJson = <T>(
+  path: string,
+  method: "POST" | "PUT",
+  body: unknown,
+  headers: Record<string, string> = {},
+) =>
   request<T>(path, {
     method,
-    headers: { "content-type": "application/json" },
+    headers: { "content-type": "application/json", ...headers },
     body: JSON.stringify(body),
   });
+
+const ADMIN_KEY_STORAGE = "cityflow-admin-key";
+
+/** Admin key for changing events, kept only in this browser. */
+export function getAdminKey(): string {
+  try {
+    return localStorage.getItem(ADMIN_KEY_STORAGE) ?? "";
+  } catch {
+    return "";
+  }
+}
+
+export function setAdminKey(key: string) {
+  try {
+    if (key) localStorage.setItem(ADMIN_KEY_STORAGE, key);
+    else localStorage.removeItem(ADMIN_KEY_STORAGE);
+  } catch {
+    // Storage blocked (private mode): the key just isn't remembered.
+  }
+}
+
+const adminHeaders = (): Record<string, string> => {
+  const key = getAdminKey();
+  return key ? { "x-admin-token": key } : {};
+};
 
 export type ApiVenue = {
   slug: string;
@@ -210,14 +258,16 @@ export const cityflowApi = {
     );
     return getJson<ApiEvent[]>(`/api/events${qs.size ? `?${qs}` : ""}`);
   },
-  createEvent: (input: EventInput) => sendJson<ApiEvent>("/api/events", "POST", input),
+  createEvent: (input: EventInput) =>
+    sendJson<ApiEvent>("/api/events", "POST", input, adminHeaders()),
   updateEvent: (id: number, input: EventInput) =>
-    sendJson<ApiEvent>(`/api/events/${id}`, "PUT", input),
-  deleteEvent: (id: number) => request<void>(`/api/events/${id}`, { method: "DELETE" }),
+    sendJson<ApiEvent>(`/api/events/${id}`, "PUT", input, adminHeaders()),
+  deleteEvent: (id: number) =>
+    request<void>(`/api/events/${id}`, { method: "DELETE", headers: adminHeaders() }),
   importEvents: (csvText: string) =>
     request<{ created: number }>("/api/events/import", {
       method: "POST",
-      headers: { "content-type": "text/csv" },
+      headers: { "content-type": "text/csv", ...adminHeaders() },
       body: csvText,
     }),
   routeImpact: (

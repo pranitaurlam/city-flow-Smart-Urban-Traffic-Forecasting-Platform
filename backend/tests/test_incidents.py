@@ -170,3 +170,22 @@ def test_cors_allows_dev_server_on_another_port(client):
             },
         )
         assert (r.status_code == 200) is allowed, origin
+
+
+def test_rate_limit_behind_proxy_is_per_visitor(client, photo_check, monkeypatch):
+    """Behind a load balancer all connections share the proxy's address; the
+    limit must still apply per visitor, and a made-up X-Forwarded-For entry
+    from the visitor must not get them a fresh limit."""
+    from app.config import settings
+
+    monkeypatch.setattr(settings, "trusted_proxy_hops", 1)
+    # The proxy appends the address it saw: "<whatever the client sent>, <real ip>".
+    for n in range(incidents.RATE_LIMIT):
+        spoofed = {"X-Forwarded-For": f"10.0.0.{n}, 203.0.113.7"}
+        assert client.post("/api/incidents", json=REPORT, headers=spoofed).status_code == 201
+    blocked = {"X-Forwarded-For": "10.9.9.9, 203.0.113.7"}
+    assert client.post("/api/incidents", json=REPORT, headers=blocked).status_code == 429
+
+    # Another visitor through the same proxy still has their own limit.
+    other = {"X-Forwarded-For": "198.51.100.4"}
+    assert client.post("/api/incidents", json=REPORT, headers=other).status_code == 201
