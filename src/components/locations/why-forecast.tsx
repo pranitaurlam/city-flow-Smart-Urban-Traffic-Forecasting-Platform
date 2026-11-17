@@ -1,5 +1,3 @@
-import { ArrowRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { explainabilityFactors } from "@/lib/location-forecast";
 import type { BengaluruLocation } from "@/lib/locations";
 
@@ -34,9 +32,6 @@ export function WhyForecastCard({
       <p className="mt-4 text-xs leading-5 text-muted-foreground">
         Forecast is influenced by historical traffic patterns and contextual conditions.
       </p>
-      <Button variant="outline" size="sm" className="mt-4 w-full">
-        View Analysis <ArrowRight className="size-4" />
-      </Button>
     </div>
   );
 }

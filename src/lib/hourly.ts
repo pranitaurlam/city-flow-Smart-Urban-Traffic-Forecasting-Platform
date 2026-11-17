@@ -37,15 +37,19 @@ export const DAY_SHAPE = [
   0.92, 1.0, 0.86, 0.66, 0.52, 0.42, 0.34,
 ];
 
-export const NOW_HOUR_INDEX = 14;
+/** Index of the current hour (0..23) in the viewer's local time. */
+export function nowHourIndex() {
+  return new Date().getHours();
+}
 
-/** Builds a 24-point intraday curve: an actual-so-far "historical" line up to NOW_HOUR_INDEX, then a "forecast" line for the remaining hours — both scaled off a single evening-peak volume. */
+/** Builds a 24-point intraday curve: an actual-so-far "historical" line up to the current hour, then a "forecast" line for the remaining hours — both scaled off a single evening-peak volume. */
 export function buildHourly(peakVolume: number): HourlyPoint[] {
+  const now = nowHourIndex();
   return DAY_SHAPE.map((factor, h) => {
-    const historical = h <= NOW_HOUR_INDEX ? Math.round(factor * peakVolume * 0.85) : null;
+    const historical = h <= now ? Math.round(factor * peakVolume * 0.85) : null;
     let forecast: number | null = null;
-    if (h === NOW_HOUR_INDEX) forecast = historical;
-    else if (h > NOW_HOUR_INDEX) forecast = Math.round(factor * peakVolume);
+    if (h === now) forecast = historical;
+    else if (h > now) forecast = Math.round(factor * peakVolume);
     return { hour: HOUR_LABELS[h] ?? "", historical, forecast };
   });
 }

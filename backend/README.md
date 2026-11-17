@@ -57,6 +57,27 @@ URL, set `VITE_CITYFLOW_API_URL` in the root `.env`. If the dashboard runs on
 a port other than 5173, 8080 or 3000, add its origin to `CORS_ORIGINS`
 (comma-separated).
 
+## Incident photo checks
+
+Commuters can report a blocked road from the Plan Journey page. A photo is
+required, and the API asks a vision model (Google Gemini, OpenAI or Claude)
+whether it is a genuine picture of a road
+that is blocked or heavily congested before the report is stored. Rejected
+photos return 422 with the reason. The photo itself is never stored.
+
+Put one API key in `backend/.env` to turn the check on, then restart the
+backend. If more than one is set, the first in this list is used:
+
+```bash
+GEMINI_API_KEY=...         # Google AI Studio; model GEMINI_IMAGE_CHECK_MODEL (default gemini-3.8-flash)
+OPENAI_API_KEY=sk-...      # model OPENAI_IMAGE_CHECK_MODEL (default gpt-4.1-mini)
+ANTHROPIC_API_KEY=sk-ant-  # model IMAGE_CHECK_MODEL (default claude-opus-5-5)
+```
+
+Without a key, reports are refused. Only reports whose photo passed the
+check are stored and shown to other drivers. The check judges only what is visible, so
+it cannot prove a photo is recent or was taken at the reported spot.
+
 ## Endpoints
 
 | Method | Path | Returns |
@@ -69,6 +90,8 @@ a port other than 5173, 8080 or 3000, add its origin to `CORS_ORIGINS`
 | GET | `/api/forecasts?area=&target=&horizon=` | One row per forecast, filterable |
 | GET | `/api/metrics?target=` | Baseline vs Random Forest vs XGBoost scores for each target and horizon |
 | GET | `/api/reports/trend.csv?area=&days=30` | CSV export of historical and forecast rows |
+| GET | `/api/incidents` | Incident reports that have not expired (3 hours), newest first |
+| POST | `/api/incidents` | Report a blockage with a required photo (`image_base64`); stored only if the photo check accepts it |
 | GET | `/api/venues` | Major Bengaluru event venues (stadiums, concert grounds, expo centres) |
 | POST | `/api/venues` | Add a venue |
 | GET | `/api/events?start=&end=&venue=` | Events overlapping a time range (default: next 30 days) |

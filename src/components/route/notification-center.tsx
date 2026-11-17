@@ -158,7 +158,7 @@ export function NotificationCenter() {
                           }}
                           asChild
                         >
-                          <Link to="/arrival-planner">Open Arrival Planner</Link>
+                          <Link to="/arrival-planner">Open arrival plan</Link>
                         </Button>
                       )}
                       {!a.read && (

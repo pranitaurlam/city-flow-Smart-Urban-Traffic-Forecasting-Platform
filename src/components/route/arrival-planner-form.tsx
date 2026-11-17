@@ -43,7 +43,7 @@ export function ArrivalPlannerForm({
       <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-brand-cyan">
         Arrival Time Reliability Window
       </p>
-      <h2 className="mt-1 text-2xl font-extrabold sm:text-[28px]">Arrival Planner</h2>
+      <h2 className="mt-1 text-2xl font-extrabold sm:text-[28px]">Arrive by a set time</h2>
       <p className="mt-1 text-sm text-muted-foreground">
         Tell CityFlow when you need to arrive — it works backward through route, traffic, forecast,
         and weather data to recommend when to leave.

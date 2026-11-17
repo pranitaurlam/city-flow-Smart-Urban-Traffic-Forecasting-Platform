@@ -1,13 +1,12 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import {
   ArrowRight,
   BarChart3,
-  ChartNoAxesCombined,
-  Clock3,
-  Globe2,
-  Leaf,
-  Map,
+  CalendarDays,
+  Database,
+  FileBarChart,
+  MapPin,
   Menu,
   Moon,
   Navigation,
@@ -18,26 +17,25 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/hooks/use-theme";
-import { cities } from "@/lib/cities";
+import { bengaluruLocations } from "@/lib/locations";
+import { bangaloreTrafficHistory } from "@/data/bangalore-traffic-history";
+import { TierBadge } from "@/components/locations/panels";
 import { GlobeOrbit, HeroBackdrop, HeroCards } from "@/components/landing/hero-orbit";
 import { StreetScene } from "@/components/motion/street-scene";
 import globeImage from "@/assets/cityflow-globe-transparent.png";
-import cityStrip from "@/assets/cityflow-cities.jpg";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "CityFlow | Live Global Traffic Insights" },
+      { title: "CityFlow | Bengaluru Traffic Forecasts" },
       {
         name: "description",
-        content:
-          "Explore live traffic, city forecasts and data insights for smarter journeys worldwide.",
+        content: "Forecast Bengaluru road congestion ahead of time and plan journeys around it.",
       },
-      { property: "og:title", content: "CityFlow | Live Global Traffic Insights" },
+      { property: "og:title", content: "CityFlow | Bengaluru Traffic Forecasts" },
       {
         property: "og:description",
-        content:
-          "Explore live traffic, city forecasts and data insights for smarter journeys worldwide.",
+        content: "Forecast Bengaluru road congestion ahead of time and plan journeys around it.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -47,34 +45,73 @@ export const Route = createFileRoute("/")({
 });
 
 const features = [
-  { icon: Map, title: "Explore Locations", copy: "Search any city or road across the globe" },
-  { icon: BarChart3, title: "Traffic Forecast", copy: "Know tomorrow's traffic before you travel" },
-  { icon: ChartNoAxesCombined, title: "Data Analytics", copy: "Visualize patterns and trends" },
-  { icon: Navigation, title: "Plan Better", copy: "Choose faster, smarter routes" },
-  { icon: Leaf, title: "Sustainable Cities", copy: "Less congestion, cleaner tomorrow" },
-];
+  {
+    icon: BarChart3,
+    title: "Dashboard",
+    copy: "Today's traffic at a glance",
+    to: "/dashboard/$city",
+    params: { city: "bengaluru" },
+  },
+  {
+    icon: CalendarDays,
+    title: "Forecast",
+    copy: "The next 7 days, per location",
+    to: "/forecast",
+    params: {},
+  },
+  {
+    icon: Navigation,
+    title: "Plan Journey",
+    copy: "Find the best time to leave",
+    to: "/route-forecast",
+    params: {},
+  },
+  {
+    icon: FileBarChart,
+    title: "Reports",
+    copy: "Export traffic trends as CSV",
+    to: "/reports",
+    params: {},
+  },
+] as const;
+
+const POPULAR = ["koramangala", "indiranagar", "whitefield", "mg-road"]
+  .map((slug) => bengaluruLocations.find((location) => location.slug === slug))
+  .filter((location) => !!location);
+
+const datasetAreas = bengaluruLocations.filter((location) => location.hasDataset).length;
+const datasetRecords = bengaluruLocations.reduce(
+  (sum, location) => sum + (bangaloreTrafficHistory[location.slug]?.records ?? 0),
+  0,
+);
 
 function CityFlow() {
   const { dark, toggleDark } = useTheme();
   const [menuOpen, setMenuOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [notice, setNotice] = useState("");
+  const navigate = useNavigate();
 
-  const filteredCities = useMemo(() => {
+  const filteredLocations = useMemo(() => {
     const clean = query.trim().toLowerCase();
     return clean
-      ? cities.filter((city) => `${city.name} ${city.country}`.toLowerCase().includes(clean))
-      : cities;
+      ? bengaluruLocations.filter((location) => location.name.toLowerCase().includes(clean))
+      : bengaluruLocations;
   }, [query]);
 
   const submitSearch = (event: React.FormEvent) => {
     event.preventDefault();
+    const match = query.trim() ? filteredLocations[0] : undefined;
+    if (match) {
+      navigate({ to: "/forecast", search: { loc: match.slug } });
+      return;
+    }
     setNotice(
       query.trim()
-        ? `Showing traffic insights for ${query.trim()}`
-        : "Enter a city or road to explore",
+        ? `No Bengaluru location matches "${query.trim()}" yet`
+        : "Enter a Bengaluru location to explore",
     );
-    document.querySelector("#cities")?.scrollIntoView({ behavior: "smooth" });
+    document.querySelector("#locations")?.scrollIntoView({ behavior: "smooth" });
   };
 
   return (
@@ -98,9 +135,6 @@ function CityFlow() {
             >
               {dark ? <Sun /> : <Moon />}
             </Button>
-            <Button variant="outline" asChild>
-              <Link to="/signin">Sign In</Link>
-            </Button>
             <Button variant="cityflow" className="cf-glow" asChild>
               <Link to="/dashboard/$city" params={{ city: "bengaluru" }}>
                 Get Started
@@ -120,9 +154,6 @@ function CityFlow() {
 
         {menuOpen && (
           <div className="glass-panel absolute left-5 right-5 top-20 z-40 grid gap-2 rounded-lg p-4 sm:hidden">
-            <Button variant="outline" asChild>
-              <Link to="/signin">Sign In</Link>
-            </Button>
             <Button variant="cityflow" asChild>
               <Link to="/dashboard/$city" params={{ city: "bengaluru" }}>
                 Get Started
@@ -140,11 +171,7 @@ function CityFlow() {
         >
           <div className="relative z-20 max-w-xl">
             <div className="cf-rise mb-4 inline-flex items-center gap-2 rounded-full bg-secondary px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
-              <span className="relative flex size-2">
-                <span className="cf-ping absolute inset-0 rounded-full bg-success" />
-                <span className="relative size-2 rounded-full bg-success" />
-              </span>{" "}
-              Live global traffic insights
+              <span className="size-2 rounded-full bg-brand-cyan" /> Bengaluru traffic forecasts
             </div>
             <h1 className="text-5xl font-extrabold leading-[0.98] tracking-normal sm:text-6xl lg:text-7xl">
               <span className="cf-rise block" style={{ "--d": "120ms" } as React.CSSProperties}>
@@ -164,8 +191,9 @@ function CityFlow() {
               className="cf-rise mt-5 max-w-lg text-base leading-7 text-muted-foreground"
               style={{ "--d": "500ms" } as React.CSSProperties}
             >
-              Explore, forecast and understand traffic conditions across cities worldwide. Real
-              data. Real insights. Smoother journeys for a smarter world.
+              See how congested Bengaluru&apos;s roads are likely to be over the next 7 days, and
+              why. Forecasts come from historical traffic, weather and calendar data. They are not
+              live traffic.
             </p>
             <form
               onSubmit={submitSearch}
@@ -177,8 +205,8 @@ function CityFlow() {
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
-                placeholder="Search for a city, road or location..."
-                aria-label="Search a city or road"
+                placeholder="Search a Bengaluru location, e.g. Koramangala"
+                aria-label="Search a Bengaluru location"
               />
               <Button variant="cityflow" size="icon" type="submit" aria-label="Search">
                 <ArrowRight />
@@ -188,15 +216,16 @@ function CityFlow() {
               className="cf-rise mt-3 flex flex-wrap items-center gap-2 text-xs text-muted-foreground"
               style={{ "--d": "740ms" } as React.CSSProperties}
             >
-              <span>Popular cities:</span>
-              {cities.map((city) => (
-                <button
-                  key={city.name}
-                  onClick={() => setQuery(city.name)}
+              <span>Popular:</span>
+              {POPULAR.map((location) => (
+                <Link
+                  key={location.slug}
+                  to="/forecast"
+                  search={{ loc: location.slug }}
                   className="rounded-full border border-border bg-surface px-3 py-1 transition hover:border-brand-cyan hover:text-foreground"
                 >
-                  {city.name}
-                </button>
+                  {location.name}
+                </Link>
               ))}
             </div>
             {notice && (
@@ -211,7 +240,7 @@ function CityFlow() {
               <GlobeOrbit>
                 <img
                   src={globeImage}
-                  alt="Glowing Earth showing global city connections"
+                  alt=""
                   width={1536}
                   height={1024}
                   className="globe-rotate w-full object-contain dark:opacity-95"
@@ -229,10 +258,12 @@ function CityFlow() {
         id="explore"
         className="relative z-20 border-y border-border bg-surface-strong py-4 backdrop-blur-xl"
       >
-        <div className="mx-auto grid max-w-[1450px] gap-3 px-5 sm:grid-cols-2 sm:px-8 lg:grid-cols-5 lg:px-14">
-          {features.map(({ icon: Icon, title, copy }) => (
-            <button
+        <div className="mx-auto grid max-w-[1450px] gap-3 px-5 sm:grid-cols-2 sm:px-8 lg:grid-cols-4 lg:px-14">
+          {features.map(({ icon: Icon, title, copy, to, params }) => (
+            <Link
               key={title}
+              to={to}
+              params={params}
               className="cf-reveal group flex min-h-20 items-center gap-3 rounded-lg border border-border bg-surface p-3 text-left transition hover:-translate-y-1 hover:border-brand-cyan hover:shadow-brand"
             >
               <span className="grid size-11 shrink-0 place-items-center rounded-lg bg-secondary text-brand-cyan">
@@ -243,79 +274,63 @@ function CityFlow() {
                 <span className="mt-1 block text-xs leading-4 text-muted-foreground">{copy}</span>
               </span>
               <ArrowRight className="ml-auto size-4 text-brand-cyan transition group-hover:translate-x-1" />
-            </button>
+            </Link>
           ))}
         </div>
       </section>
 
-      <section id="cities" className="mx-auto max-w-[1450px] px-5 py-10 sm:px-8 lg:px-14">
-        <div className="grid gap-8 lg:grid-cols-[0.38fr_1fr] lg:items-center">
+      <section id="locations" className="mx-auto max-w-[1450px] px-5 py-10 sm:px-8 lg:px-14">
+        <div className="grid gap-8 lg:grid-cols-[0.38fr_1fr] lg:items-start">
           <div className="cf-reveal">
             <p className="text-xs font-bold uppercase tracking-[0.22em] text-brand-cyan">
-              Explore the world
+              Explore Bengaluru
             </p>
             <h2 className="mt-3 text-4xl font-extrabold leading-tight tracking-normal">
               Traffic Insights
               <br />
-              for <span className="text-gradient-brand">Every City</span>
+              for <span className="text-gradient-brand">Every Area</span>
             </h2>
             <p className="mt-3 text-sm leading-6 text-muted-foreground">
-              From daily commuters to city planners, CityFlow provides data-driven insights to
-              reduce congestion, save time and create more livable, sustainable cities.
+              Pick a location to open its own forecast: expected traffic, the busiest hours, the
+              weekly pattern and the factors behind it.
             </p>
-            <Button variant="default" className="mt-5" onClick={() => setQuery("")}>
-              Explore Cities <ArrowRight />
+            <Button variant="default" className="mt-5" asChild>
+              <Link to="/dashboard/$city" params={{ city: "bengaluru" }}>
+                Citywide Dashboard <ArrowRight />
+              </Link>
             </Button>
           </div>
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            {filteredCities.length ? (
-              filteredCities.map((city) => {
-                const imageIndex = cities.findIndex((item) => item.name === city.name);
-                const positions = ["left-0", "left-[-100%]", "left-[-200%]", "left-[-300%]"];
-                return (
-                  <Link
-                    key={city.name}
-                    to="/dashboard/$city"
-                    params={{ city: city.slug }}
-                    className="cf-reveal group relative block min-h-52 overflow-hidden rounded-lg border border-border bg-card shadow-sm transition hover:-translate-y-1 hover:shadow-brand"
-                  >
-                    <img
-                      src={cityStrip}
-                      alt={`${city.name} skyline`}
-                      loading="lazy"
-                      width={1920}
-                      height={640}
-                      className={`absolute top-0 h-full w-[400%] max-w-none object-cover transition duration-500 group-hover:scale-105 ${positions[imageIndex] ?? "left-0"}`}
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-foreground via-foreground/20 to-transparent" />
-                    <div className="absolute inset-x-0 bottom-0 p-4 text-background">
-                      <div className="flex items-end justify-between">
-                        <div>
-                          <h3 className="font-bold">{city.name}</h3>
-                          <p className="text-xs opacity-80">{city.country}</p>
-                        </div>
-                        <span className="grid size-9 place-items-center rounded-md border border-background/60 bg-transparent text-background">
-                          <ArrowRight size={16} />
-                        </span>
-                      </div>
-                      <p className="mt-2 flex items-center gap-2 text-xs">
-                        <i className={`size-2.5 rounded-full ${city.tone}`} />
-                        {city.traffic}
-                      </p>
-                    </div>
-                  </Link>
-                );
-              })
+            {filteredLocations.length ? (
+              filteredLocations.map((location) => (
+                <Link
+                  key={location.slug}
+                  to="/forecast"
+                  search={{ loc: location.slug }}
+                  className="cf-reveal group flex items-center justify-between gap-3 rounded-lg border border-border bg-card p-4 shadow-sm transition hover:-translate-y-1 hover:border-brand-cyan hover:shadow-brand"
+                >
+                  <span className="min-w-0">
+                    <span className="flex items-center gap-1.5 text-sm font-bold">
+                      <MapPin size={14} className="shrink-0 text-brand-cyan" />
+                      <span className="truncate">{location.name}</span>
+                    </span>
+                    <span className="mt-2 block">
+                      <TierBadge tier={location.baseTier} />
+                    </span>
+                  </span>
+                  <ArrowRight className="size-4 shrink-0 text-brand-cyan transition group-hover:translate-x-1" />
+                </Link>
+              ))
             ) : (
               <div className="col-span-full grid min-h-52 place-items-center rounded-lg border border-dashed border-border text-center text-muted-foreground">
                 <div>
                   <Search className="mx-auto mb-2" />
-                  <p>No matching city yet.</p>
+                  <p>No matching location yet.</p>
                   <button
                     className="mt-2 text-sm font-semibold text-brand-cyan"
                     onClick={() => setQuery("")}
                   >
-                    View all cities
+                    View all locations
                   </button>
                 </div>
               </div>
@@ -323,10 +338,18 @@ function CityFlow() {
           </div>
         </div>
         <div className="cf-reveal mt-9 grid gap-5 border-t border-border pt-7 sm:grid-cols-2 lg:grid-cols-4">
-          <Metric icon={Globe2} value="500+" label="Cities Worldwide" />
-          <Metric icon={RouteIcon} value="10M+" label="Road Segments" />
-          <Metric icon={Clock3} value="Real-time & Forecast" label="Traffic Insights" />
-          <Metric icon={Leaf} value="Greener, Smarter" label="More Sustainable Cities" />
+          <Metric
+            icon={MapPin}
+            value={`${bengaluruLocations.length}`}
+            label="Bengaluru locations"
+          />
+          <Metric
+            icon={Database}
+            value={datasetRecords.toLocaleString()}
+            label={`Dataset records across ${datasetAreas} areas`}
+          />
+          <Metric icon={CalendarDays} value="7 days" label="Forecast horizon" />
+          <Metric icon={RouteIcon} value="Forecast, not live" label="Every figure is labelled" />
         </div>
       </section>
     </main>
@@ -338,7 +361,7 @@ function Metric({
   value,
   label,
 }: {
-  icon: typeof Globe2;
+  icon: typeof MapPin;
   value: string;
   label: string;
 }) {

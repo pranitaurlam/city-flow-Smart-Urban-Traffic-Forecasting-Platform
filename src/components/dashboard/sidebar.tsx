@@ -1,25 +1,14 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { useState } from "react";
 import {
-  AlertTriangle,
-  CalendarClock,
   FileBarChart,
-  HelpCircle,
   LayoutDashboard,
-  Lightbulb,
   Milestone,
   Ticket,
-  Settings,
   TrendingUp,
-  Timer,
-  Activity,
   Route as RouteIcon,
-  User,
-  MoreHorizontal,
   Home,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 
 const navItems = [
   {
@@ -27,43 +16,44 @@ const navItems = [
     icon: LayoutDashboard,
     to: "/dashboard/$city" as const,
     params: { city: "bengaluru" },
+    match: ["/dashboard"],
   },
-  { label: "Traffic Analysis", icon: Activity, to: "/traffic-analysis" as const, params: {} },
-  { label: "Forecast", icon: TrendingUp, to: "/forecast" as const, params: {} },
-  { label: "Route Forecast", icon: Milestone, to: "/route-forecast" as const, params: {} },
   {
-    label: "Arrival Planner",
-    icon: CalendarClock,
-    to: "/arrival-planner" as const,
+    label: "Forecast",
+    icon: TrendingUp,
+    to: "/forecast" as const,
     params: {},
+    match: ["/forecast"],
   },
-  { label: "Events", icon: Ticket, to: "/events" as const, params: {} },
-  { label: "Peak Hours", icon: Timer, to: "/peak-hours" as const, params: {} },
-  { label: "Reports", icon: FileBarChart, to: "/reports" as const, params: {} },
-  { label: "Insights", icon: Lightbulb, to: "/insights" as const, params: {} },
-  { label: "Alerts", icon: AlertTriangle, to: "/alerts" as const, params: {} },
+  {
+    label: "Plan Journey",
+    icon: Milestone,
+    to: "/route-forecast" as const,
+    params: {},
+    // "Arrive by" mode lives on its own route but is part of the same page.
+    match: ["/route-forecast", "/arrival-planner"],
+  },
+  {
+    label: "Reports",
+    icon: FileBarChart,
+    to: "/reports" as const,
+    params: {},
+    match: ["/reports"],
+  },
 ];
 
-const bottomItems = [
-  { label: "Settings", icon: Settings },
-  { label: "Help & Support", icon: HelpCircle },
+// Managing events is an admin task, so it sits apart from the everyday pages.
+const manageItems = [
+  { label: "Events", icon: Ticket, to: "/events" as const, params: {}, match: ["/events"] },
 ];
 
-const isActive = (pathname: string, to: string) => pathname.startsWith(to.split("$")[0] ?? to);
+const isActive = (pathname: string, match: string[]) =>
+  match.some((prefix) => pathname.startsWith(prefix));
 
-// Bottom tab bar on phones: Home plus the three most-used pages; the rest
-// sit under "More".
-const TAB_LABELS = new Set(["Dashboard", "Forecast", "Route Forecast"]);
-const SHORT_LABEL: Record<string, string> = {
-  "Route Forecast": "Route",
-  "Arrival Planner": "Arrive",
-};
+const SHORT_LABEL: Record<string, string> = { "Plan Journey": "Journey" };
 
+// Bottom tab bar on phones: Home plus every page.
 function MobileNav({ pathname }: { pathname: string }) {
-  const [open, setOpen] = useState(false);
-  const tabs = navItems.filter((item) => TAB_LABELS.has(item.label));
-  const more = navItems.filter((item) => !TAB_LABELS.has(item.label));
-  const moreActive = more.some((item) => isActive(pathname, item.to));
   const tabClass = (active: boolean) =>
     cn(
       "flex flex-1 flex-col items-center gap-0.5 rounded-xl py-1.5 text-[10px] font-semibold transition-colors",
@@ -81,8 +71,8 @@ function MobileNav({ pathname }: { pathname: string }) {
           <Home size={20} />
           Home
         </Link>
-        {tabs.map(({ label, icon: Icon, to, params }) => {
-          const active = isActive(pathname, to);
+        {[...navItems, ...manageItems].map(({ label, icon: Icon, to, params, match }) => {
+          const active = isActive(pathname, match);
           return (
             <Link key={label} to={to} params={params} className={tabClass(active)}>
               <Icon size={20} className={active ? "drop-shadow-[0_0_6px_var(--brand-cyan)]" : ""} />
@@ -90,37 +80,6 @@ function MobileNav({ pathname }: { pathname: string }) {
             </Link>
           );
         })}
-        <Sheet open={open} onOpenChange={setOpen}>
-          <SheetTrigger className={tabClass(moreActive)}>
-            <MoreHorizontal size={20} />
-            More
-          </SheetTrigger>
-          <SheetContent
-            side="bottom"
-            className="rounded-t-3xl pb-[max(1.5rem,env(safe-area-inset-bottom))]"
-          >
-            <SheetTitle className="text-base font-extrabold">More</SheetTitle>
-            <div className="mt-4 grid grid-cols-3 gap-2">
-              {more.map(({ label, icon: Icon, to, params }) => (
-                <Link
-                  key={label}
-                  to={to}
-                  params={params}
-                  onClick={() => setOpen(false)}
-                  className={cn(
-                    "flex flex-col items-center gap-1.5 rounded-2xl border border-border p-3 text-center text-xs font-semibold",
-                    isActive(pathname, to)
-                      ? "border-brand-cyan bg-[color-mix(in_oklab,var(--brand-cyan)_12%,transparent)] text-brand-cyan"
-                      : "bg-surface",
-                  )}
-                >
-                  <Icon size={20} />
-                  {label}
-                </Link>
-              ))}
-            </div>
-          </SheetContent>
-        </Sheet>
       </div>
     </nav>
   );
@@ -141,51 +100,45 @@ export function DashboardSidebar() {
         </Link>
 
         <nav className="flex-1 space-y-1 overflow-y-auto px-3" aria-label="Dashboard navigation">
-          {navItems.map(({ label, icon: Icon, to, params }) => {
-            const active = isActive(pathname, to);
-            const itemClass = cn(
-              "group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
-              active
-                ? "cf-sheen bg-gradient-brand text-primary-foreground shadow-brand"
-                : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-            );
-
-            return (
-              <Link key={label} to={to} params={params} className={itemClass}>
-                <Icon
-                  size={18}
-                  className="transition-transform duration-200 group-hover:translate-x-0.5 group-hover:scale-110"
-                />
-                {label}
-              </Link>
-            );
-          })}
-        </nav>
-
-        <div className="space-y-1 px-3 pb-4">
-          {bottomItems.map(({ label, icon: Icon }) => (
-            <a
-              key={label}
-              href="#"
-              onClick={(event) => event.preventDefault()}
-              className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-            >
-              <Icon size={18} />
-              {label}
-            </a>
+          {navItems.map((item) => (
+            <NavLink key={item.label} item={item} pathname={pathname} />
           ))}
-        </div>
-
-        <div className="flex items-center gap-3 border-t border-sidebar-border px-4 py-4">
-          <span className="grid size-9 place-items-center rounded-full bg-secondary text-secondary-foreground">
-            <User size={16} />
-          </span>
-          <div className="min-w-0">
-            <p className="truncate text-sm font-semibold">Admin User</p>
-            <p className="truncate text-xs text-sidebar-foreground/60">admin@cityflow.io</p>
-          </div>
-        </div>
+          <p className="px-3 pb-1 pt-5 text-[11px] font-bold uppercase tracking-wide text-sidebar-foreground/50">
+            Manage
+          </p>
+          {manageItems.map((item) => (
+            <NavLink key={item.label} item={item} pathname={pathname} />
+          ))}
+        </nav>
       </aside>
     </>
+  );
+}
+
+function NavLink({
+  item: { label, icon: Icon, to, params, match },
+  pathname,
+}: {
+  item: (typeof navItems)[number] | (typeof manageItems)[number];
+  pathname: string;
+}) {
+  const active = isActive(pathname, match);
+  return (
+    <Link
+      to={to}
+      params={params}
+      className={cn(
+        "group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+        active
+          ? "cf-sheen bg-gradient-brand text-primary-foreground shadow-brand"
+          : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+      )}
+    >
+      <Icon
+        size={18}
+        className="transition-transform duration-200 group-hover:translate-x-0.5 group-hover:scale-110"
+      />
+      {label}
+    </Link>
   );
 }

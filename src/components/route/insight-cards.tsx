@@ -1,6 +1,6 @@
 import { AlertTriangle, TrendingUp } from "lucide-react";
 import { TierBadge } from "@/components/locations/panels";
-import { backtestWeekdayModel, type RouteFactor } from "@/lib/route-forecast";
+import type { RouteFactor } from "@/lib/route-forecast";
 import type { TrafficTier } from "@/lib/locations";
 
 function formatMin(min: number) {
@@ -124,50 +124,6 @@ export function RouteAlertsCard({ alerts }: { alerts: Alert[] }) {
   );
 }
 export type { Alert as RouteAlert };
-
-export function ForecastAccuracyCard() {
-  const { mae, rmse, mape, samples } = backtestWeekdayModel();
-  const example = samples[Math.floor(samples.length / 2)];
-  return (
-    <div className="glass-panel rounded-2xl p-5 sm:p-6">
-      <h3 className="text-sm font-bold">Forecast Performance</h3>
-      <p className="text-xs text-muted-foreground">
-        Backtest of CityFlow&apos;s day-of-week traffic model against real observed volumes across
-        the Kaggle-covered areas.
-      </p>
-      <div className="mt-4 grid grid-cols-3 gap-3 text-center text-sm">
-        <div className="rounded-lg border border-border bg-surface p-3">
-          <p className="text-xs text-muted-foreground">MAE</p>
-          <p className="text-lg font-extrabold">{mae.toLocaleString()}</p>
-        </div>
-        <div className="rounded-lg border border-border bg-surface p-3">
-          <p className="text-xs text-muted-foreground">RMSE</p>
-          <p className="text-lg font-extrabold">{rmse.toLocaleString()}</p>
-        </div>
-        <div className="rounded-lg border border-border bg-surface p-3">
-          <p className="text-xs text-muted-foreground">MAPE</p>
-          <p className="text-lg font-extrabold">{mape}%</p>
-        </div>
-      </div>
-      {example && (
-        <div className="mt-4 flex items-center justify-between rounded-lg border border-border bg-surface p-3 text-sm">
-          <span className="text-xs text-muted-foreground">
-            {example.area} · {example.day}
-          </span>
-          <span>
-            Predicted <b>{example.predicted.toLocaleString()}</b> · Actual{" "}
-            <b>{example.actual.toLocaleString()}</b> · Error{" "}
-            <b>{Math.abs(example.predicted - example.actual).toLocaleString()}</b>
-          </span>
-        </div>
-      )}
-      <p className="mt-3 text-[11px] text-muted-foreground">
-        Volumes (vehicles/day), not minutes — this validates the day-of-week shape our travel-time
-        model applies, not the route-specific time estimate itself.
-      </p>
-    </div>
-  );
-}
 
 export function JourneyIntelligenceCard({
   routeLabel,

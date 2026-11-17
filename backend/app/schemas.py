@@ -207,3 +207,35 @@ class RouteImpact(BaseModel):
 class RouteImpactResponse(BaseModel):
     estimate: bool = True
     routes: list[RouteImpact]
+
+
+# ---------------------------------------------------------------------------
+# Incident reports
+# ---------------------------------------------------------------------------
+
+IncidentType = Literal["accident", "closure", "construction", "congestion", "other"]
+
+
+class IncidentIn(BaseModel):
+    lat: float = Field(ge=-90, le=90)
+    lon: float = Field(ge=-180, le=180)
+    road_hint: str = Field(min_length=1, max_length=128)
+    type: IncidentType
+    note: str | None = Field(default=None, max_length=300)
+    # The photo is required: base64 without a data: prefix.
+    image_base64: str = Field(min_length=1)
+    image_media_type: Literal["image/jpeg", "image/png", "image/webp", "image/gif"]
+
+
+class IncidentOut(BaseModel):
+    id: int
+    lat: float
+    lon: float
+    road_hint: str
+    type: IncidentType
+    note: str | None
+    status: Literal["verified", "unverified"]
+    severity: str | None
+    photo_summary: str | None
+    reported_at: datetime
+    expires_at: datetime

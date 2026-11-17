@@ -1,5 +1,4 @@
-import { cities } from "@/lib/cities";
-import { bengaluruLocations, type TrafficBaseline, type TrafficTier } from "@/lib/locations";
+import { bengaluruLocations, type TrafficBaseline } from "@/lib/locations";
 import { bangaloreTrafficHistory } from "@/data/bangalore-traffic-history";
 
 export type DashboardTarget = TrafficBaseline & {
@@ -8,22 +7,9 @@ export type DashboardTarget = TrafficBaseline & {
   lat: number;
   lon: number;
   hasDataset?: boolean;
-  /** Shown in the alert card; the specific road/junction driving the alert. */
+  /** The busiest recorded road/junction for this location. */
   alertRoad: string;
 };
-
-const cityTargets: DashboardTarget[] = cities
-  .filter((city) => city.slug !== "bengaluru")
-  .map((city) => ({
-    slug: city.slug,
-    name: city.name,
-    country: city.country,
-    lat: city.lat,
-    lon: city.lon,
-    baseTier: city.baseTier,
-    basePeakVolume: city.basePeakVolume,
-    alertRoad: `${city.name} Downtown`,
-  }));
 
 const bengaluruAggregate = bangaloreTrafficHistory["bengaluru"];
 
@@ -33,8 +19,8 @@ const bengaluruTarget: DashboardTarget = {
   country: "India",
   lat: 12.9716,
   lon: 77.5946,
-  baseTier: cities.find((c) => c.slug === "bengaluru")?.baseTier ?? ("High" as TrafficTier),
-  basePeakVolume: cities.find((c) => c.slug === "bengaluru")?.basePeakVolume ?? 4592,
+  baseTier: "High",
+  basePeakVolume: 4592,
   hasDataset: !!bengaluruAggregate,
   alertRoad: bengaluruAggregate?.busiestRoad ?? "Main Road",
 };
@@ -55,11 +41,7 @@ const bengaluruAreaTargets: DashboardTarget[] = bengaluruLocations.map((location
   return target;
 });
 
-export const dashboardTargets: DashboardTarget[] = [
-  bengaluruTarget,
-  ...bengaluruAreaTargets,
-  ...cityTargets,
-];
+export const dashboardTargets: DashboardTarget[] = [bengaluruTarget, ...bengaluruAreaTargets];
 
 export function findDashboardTarget(slug: string) {
   return dashboardTargets.find((target) => target.slug === slug);
