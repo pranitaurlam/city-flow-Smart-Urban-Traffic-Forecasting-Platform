@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import {
@@ -10,7 +10,6 @@ import {
   ComposedChart,
   Legend,
   Line,
-  LineChart,
   ReferenceLine,
   ResponsiveContainer,
   Tooltip,
@@ -20,10 +19,8 @@ import {
 import {
   AlertTriangle,
   ArrowLeftRight,
-  ArrowRight,
   Bike,
   Bus,
-  CalendarClock,
   Car,
   CloudRain,
   Droplets,
@@ -32,7 +29,6 @@ import {
   Moon,
   PersonStanding,
   Sun,
-  User,
   ExternalLink,
   Zap,
 } from "lucide-react";
@@ -53,11 +49,11 @@ import { RouteMap, type HeatmapSegment, type RouteLine } from "@/components/rout
 import { IncidentReportButton } from "@/components/route/incident-report";
 import { WhatIfSimulator } from "@/components/route/what-if-simulator";
 import { SavedJourneys } from "@/components/route/saved-journeys";
+import { JourneyModeSwitch } from "@/components/route/journey-mode-switch";
 import { RecurringJourney } from "@/components/route/recurring-journey";
 import { WeatherAlongRoute } from "@/components/route/weather-along-route";
 import {
   DelayBreakdownCard,
-  ForecastAccuracyCard,
   HistoricalComparisonCard,
   JourneyIntelligenceCard,
   RouteAlertsCard,
@@ -80,11 +76,11 @@ import {
   routeExplainability,
   typicalDayAverageMinutes,
 } from "@/lib/route-forecast";
-import { incidentsOnRoute, INCIDENT_LABEL } from "@/lib/incidents";
+import { formatReportedAt, incidentsOnRoute, INCIDENT_LABEL } from "@/lib/incidents";
 
 export const Route = createFileRoute("/route-forecast")({
   ssr: false,
-  head: () => ({ meta: [{ title: "Route Forecast | CityFlow" }] }),
+  head: () => ({ meta: [{ title: "Plan Journey | CityFlow" }] }),
   component: RouteForecastPage,
 });
 
@@ -196,7 +192,7 @@ function nearestKnown(lat: number, lon: number) {
 
 function RouteForecastPage() {
   const { dark, toggleDark } = useTheme();
-  const { incidents, refresh: refreshIncidents } = useIncidents();
+  const { incidents, available: incidentsAvailable, refresh: refreshIncidents } = useIncidents();
   const [sourceSlug, setSourceSlug] = useState("marathahalli");
   const [destSlug, setDestSlug] = useState("mg-road");
   const [mode, setMode] = useState<TravelMode>("car");
@@ -340,11 +336,53 @@ function RouteForecastPage() {
     [routeLines, incidents],
   );
   const primaryIncidents = useMemo(() => routeIncidents[0] ?? [], [routeIncidents]);
+  const clearAlternateIndex = routeIncidents.findIndex((list, i) => i > 0 && list.length === 0);
+
+  // Where a new incident report gets pinned: the midpoint of the currently
+  // recommended route, tagged with the nearest known location for display.
+  const reportTarget = useMemo(() => {
+    const geo = routeLines[0]?.geometry;
+    if (!geo || geo.length < 2) return null;
+    const mid = geo[Math.floor(geo.length / 2)]!;
+    return { lat: mid[0], lon: mid[1], roadHint: nearestKnown(mid[0], mid[1]).name };
+  }, [routeLines]);
+
+  const mapIncidents = useMemo(() => {
+    const seen = new Set<number>();
+    return routeIncidents.flat().flatMap((incident) => {
+      if (seen.has(incident.id)) return [];
+      seen.add(incident.id);
+      return [
+        {
+          lat: incident.lat,
+          lon: incident.lon,
+          label: `${INCIDENT_LABEL[incident.type]} near ${incident.roadHint}, reported at ${formatReportedAt(incident.reportedAt)}`,
+          ...(incident.note ? { note: incident.note } : {}),
+        },
+      ];
+    });
+  }, [routeIncidents]);
+
+  // A Google Maps link per displayed car route. Each link passes a point that
+  // only that route goes through, so Google follows the same road rather than
+  // picking its own.
+  const routeMapUrls = useMemo(() => {
+    if (mode !== "car" || !activeRoute) return [];
+    const all = [activeRoute.primary, ...activeRoute.alternatives];
+    return all.map((route, index) => {
+      const others = all.filter((_, i) => i !== index).flatMap((r) => r.geometry);
+      const via = others.length ? distinctivePoint(route.geometry, others) : null;
+      return googleMapsDirectionsUrl(
+        `${source.lat},${source.lon}`,
+        `${destination.lat},${destination.lon}`,
+        "driving",
+        via ? [via] : [],
+      );
+    });
+  }, [mode, activeRoute, source, destination]);
 
   // The quickest displayed car route for the selected departure, skipping
-  // routes with a reported incident unless every route has one. Its Google
-  // Maps link passes a point that only this route goes through, so Google
-  // follows the same road rather than picking its own.
+  // routes with a reported blockage unless every route has one.
   const fastestRoute = useMemo(() => {
     if (mode !== "car" || !activeRoute) return null;
     const options = [activeRoute.primary, ...activeRoute.alternatives].map((route, index) => ({
@@ -361,46 +399,8 @@ function RouteForecastPage() {
     const best = [...(clear.length ? clear : options)].sort(
       (a, b) => a.minutes - b.minutes || a.route.durationMin - b.route.durationMin,
     )[0]!;
-    const others = options.filter((o) => o.index !== best.index).flatMap((o) => o.route.geometry);
-    const via = others.length ? distinctivePoint(best.route.geometry, others) : null;
-    return {
-      ...best,
-      url: googleMapsDirectionsUrl(
-        `${source.lat},${source.lon}`,
-        `${destination.lat},${destination.lon}`,
-        "driving",
-        via ? [via] : [],
-      ),
-    };
-  }, [mode, activeRoute, routeIncidents, dayOffset, hour, source, destination]);
-  const clearAlternateIndex = routeIncidents.findIndex((list, i) => i > 0 && list.length === 0);
-
-  // Where a new incident report gets pinned: the midpoint of the currently
-  // recommended route, tagged with the nearest known location for display.
-  const reportTarget = useMemo(() => {
-    const geo = routeLines[0]?.geometry;
-    if (!geo || geo.length < 2) return null;
-    const mid = geo[Math.floor(geo.length / 2)]!;
-    return { lat: mid[0], lon: mid[1], roadHint: nearestKnown(mid[0], mid[1]).name };
-  }, [routeLines]);
-
-  const mapIncidents = useMemo(() => {
-    const seen = new Set<string>();
-    return routeIncidents
-      .flat()
-      .reduce<{ lat: number; lon: number; label: string; note?: string }[]>((list, incident) => {
-        if (seen.has(incident.id)) return list;
-        seen.add(incident.id);
-        list.push({
-          lat: incident.lat,
-          lon: incident.lon,
-          label: `${INCIDENT_LABEL[incident.type]} near ${incident.roadHint}`,
-          ...(incident.note ? { note: incident.note } : {}),
-        });
-        return list;
-      }, []);
-  }, [routeIncidents]);
-
+    return best;
+  }, [mode, activeRoute, routeIncidents, dayOffset, hour]);
   const swap = () => {
     setSourceSlug(destSlug);
     setDestSlug(sourceSlug);
@@ -431,23 +431,6 @@ function RouteForecastPage() {
 
   // --- Advanced features: derived data ---------------------------------
 
-  const departureChartData = useMemo(
-    () =>
-      carBaseDurationMin
-        ? HOURS.map((h) => ({
-            hour: h,
-            label: `${h % 12 === 0 ? 12 : h % 12}${h < 12 ? "AM" : "PM"}`,
-            travelTime: estimateTravelTime(carBaseDurationMin, dayOffset, h).travelTime,
-          }))
-        : [],
-    [carBaseDurationMin, dayOffset],
-  );
-
-  const evolutionData = useMemo(
-    () => forecast7Day.map((d) => ({ label: d.relative, travelTime: d.travelTime, tier: d.tier })),
-    [forecast7Day],
-  );
-
   const typicalDayMin = carBaseDurationMin
     ? typicalDayAverageMinutes(carBaseDurationMin, dayOffset)
     : 0;
@@ -472,15 +455,16 @@ function RouteForecastPage() {
       effect: string;
     }[] = [];
     primaryIncidents.forEach((incident) => {
-      alerts.unshift({
+      const time = formatReportedAt(incident.reportedAt);
+      alerts.push({
         icon: AlertTriangle,
-        title: `${INCIDENT_LABEL[incident.type]} Reported`,
-        time: new Date(incident.reportedAt).toLocaleTimeString(undefined, {
-          hour: "numeric",
-          minute: "2-digit",
-        }),
+        title: `${INCIDENT_LABEL[incident.type]} reported at ${time}`,
+        time: "Photo verified",
         location: `Near ${incident.roadHint} on ${source.name} → ${destination.name}`,
-        effect: incident.note || "Reported by a traveller on this route — consider an alternate.",
+        effect:
+          incident.note ||
+          incident.photoSummary ||
+          "Reported by a traveller on this route. Consider an alternate.",
       });
     });
     if (!selectedDayForecast) return alerts;
@@ -583,17 +567,12 @@ function RouteForecastPage() {
                 {dark ? <Sun /> : <Moon />}
               </Button>
               <NotificationCenter />
-              <span className="grid size-9 place-items-center rounded-full bg-secondary text-secondary-foreground">
-                <User size={16} />
-              </span>
             </div>
           </div>
         </header>
 
         <main className="cf-stagger mx-auto w-full max-w-[1400px] flex-1 space-y-6 px-5 py-6 sm:px-8">
-          <p className="text-xs font-bold uppercase tracking-wide text-brand-violet">
-            Route Forecast — plan your journey around tomorrow&apos;s traffic
-          </p>
+          <JourneyModeSwitch active="depart" />
 
           {/* 3. Source / Destination */}
           <section className="glass-panel rounded-2xl p-5">
@@ -684,13 +663,17 @@ function RouteForecastPage() {
                     <AlertTriangle className="mt-0.5 size-4 shrink-0 text-destructive" />
                     <span>
                       <strong>
-                        {primaryIncidents.length} incident{primaryIncidents.length > 1 ? "s" : ""}{" "}
-                        reported
+                        {INCIDENT_LABEL[primaryIncidents[0]!.type]} reported at{" "}
+                        {formatReportedAt(primaryIncidents[0]!.reportedAt)}
                       </strong>{" "}
-                      on Route A near {primaryIncidents[0]!.roadHint}.{" "}
+                      on Route A near {primaryIncidents[0]!.roadHint} (photo verified)
+                      {primaryIncidents.length > 1
+                        ? `, plus ${primaryIncidents.length - 1} more report${primaryIncidents.length > 2 ? "s" : ""}`
+                        : ""}
+                      .{" "}
                       {clearAlternateIndex >= 0
-                        ? `Route ${String.fromCharCode(65 + clearAlternateIndex)} has no reports — it may be the better choice right now.`
-                        : "Every routed alternative also has a report nearby — check details before heading out."}
+                        ? `Route ${String.fromCharCode(65 + clearAlternateIndex)} has no reports, so it may be the better choice right now.`
+                        : "Every routed alternative also has a report nearby."}
                     </span>
                   </div>
                   {clearAlternateIndex >= 0 && (
@@ -754,7 +737,16 @@ function RouteForecastPage() {
                     </button>
                   ))}
                   <div className="mx-0.5 w-px self-stretch bg-border" />
-                  <IncidentReportButton target={reportTarget} onReported={refreshIncidents} />
+                  <IncidentReportButton
+                    target={reportTarget}
+                    onReported={refreshIncidents}
+                    {...(incidentsAvailable
+                      ? {}
+                      : {
+                          disabledReason:
+                            "Reporting needs the CityFlow backend, which isn't reachable.",
+                        })}
+                  />
                 </div>
                 {heatmapMode !== "off" && (
                   <div className="glass-panel pointer-events-none absolute bottom-4 left-4 z-[400] rounded-xl px-3 py-1.5 text-[11px] font-bold text-brand-cyan">
@@ -933,46 +925,6 @@ function RouteForecastPage() {
                 </div>
               </section>
 
-              {/* Departure Time Simulator */}
-              <section className="glass-panel rounded-2xl p-5 sm:p-6">
-                <h3 className="text-sm font-bold">Departure Time Simulator</h3>
-                <p className="text-xs text-muted-foreground">
-                  Estimated travel time by departure time — {dayLabel(dayOffset).relative}. Click a
-                  bar to select that time.
-                </p>
-                <div className="mt-4 h-48">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={departureChartData}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                      <XAxis dataKey="label" stroke="var(--muted-foreground)" fontSize={11} />
-                      <YAxis
-                        stroke="var(--muted-foreground)"
-                        fontSize={11}
-                        width={44}
-                        unit=" min"
-                      />
-                      <Tooltip
-                        contentStyle={{
-                          background: "var(--card)",
-                          border: "1px solid var(--border)",
-                          borderRadius: 8,
-                          fontSize: 12,
-                        }}
-                      />
-                      <Bar dataKey="travelTime" radius={[4, 4, 0, 0]} cursor="pointer">
-                        {departureChartData.map((d) => (
-                          <Cell
-                            key={d.hour}
-                            fill={d.hour === hour ? "var(--destructive)" : "var(--brand-cyan)"}
-                            onClick={() => setHour(d.hour)}
-                          />
-                        ))}
-                      </Bar>
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              </section>
-
               {/* 8. 7-day route forecast */}
               <section>
                 <h3 className="text-sm font-bold">7-Day Route Forecast</h3>
@@ -1022,45 +974,12 @@ function RouteForecastPage() {
                     label="Likely Range"
                     value={`${formatMin(selectedDayForecast.rangeLow)} – ${formatMin(selectedDayForecast.rangeHigh)}`}
                   />
+                  <p className="text-xs text-muted-foreground sm:col-span-4">
+                    {selectedDayForecast.confidence}% forecast confidence. Confidence drops the
+                    further ahead the day is.
+                  </p>
                 </section>
               )}
-
-              {/* Forecast Evolution */}
-              <section className="glass-panel rounded-2xl p-5 sm:p-6">
-                <h3 className="text-sm font-bold">Forecast Evolution</h3>
-                <p className="text-xs text-muted-foreground">
-                  How the estimated travel time changes across the next 7 days.
-                </p>
-                <div className="mt-4 h-48">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={evolutionData}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                      <XAxis dataKey="label" stroke="var(--muted-foreground)" fontSize={11} />
-                      <YAxis
-                        stroke="var(--muted-foreground)"
-                        fontSize={11}
-                        width={44}
-                        unit=" min"
-                      />
-                      <Tooltip
-                        contentStyle={{
-                          background: "var(--card)",
-                          border: "1px solid var(--border)",
-                          borderRadius: 8,
-                          fontSize: 12,
-                        }}
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="travelTime"
-                        stroke="var(--brand-cyan)"
-                        strokeWidth={2.5}
-                        dot={{ r: 4 }}
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </div>
-              </section>
 
               {/* 9. Future traffic graph */}
               <section className="glass-panel rounded-2xl p-5 sm:p-6">
@@ -1277,7 +1196,8 @@ function RouteForecastPage() {
                           dayOffset,
                           hour,
                         );
-                        const blocked = (routeIncidents[i]?.length ?? 0) > 0;
+                        const reports = routeIncidents[i] ?? [];
+                        const blocked = reports.length > 0;
                         return (
                           <div
                             key={i}
@@ -1301,7 +1221,7 @@ function RouteForecastPage() {
                               </div>
                               {blocked ? (
                                 <span className="flex items-center gap-1 rounded-full bg-destructive/15 px-2 py-0.5 text-[10px] font-bold text-destructive">
-                                  <AlertTriangle size={10} /> Incident
+                                  <AlertTriangle size={10} /> Blockage reported
                                 </span>
                               ) : (
                                 fastestRoute?.index === i && (
@@ -1324,6 +1244,25 @@ function RouteForecastPage() {
                               Delay: {est.delay >= 0 ? "+" : ""}
                               {est.delay} min · {est.confidence}% confidence
                             </p>
+                            {blocked && (
+                              <p className="mt-1 text-xs font-semibold text-destructive">
+                                {INCIDENT_LABEL[reports[0]!.type]} near {reports[0]!.roadHint},
+                                reported at {formatReportedAt(reports[0]!.reportedAt)}
+                              </p>
+                            )}
+                            {routeMapUrls[i] && (
+                              <Button
+                                variant={fastestRoute?.index === i ? "cityflow" : "outline"}
+                                size="sm"
+                                className="mt-3 w-full rounded-lg"
+                                asChild
+                              >
+                                <a href={routeMapUrls[i]} target="_blank" rel="noopener noreferrer">
+                                  Open Route {String.fromCharCode(65 + i)} in Google Maps{" "}
+                                  <ExternalLink className="size-4" />
+                                </a>
+                              </Button>
+                            )}
                           </div>
                         );
                       })}
@@ -1340,146 +1279,17 @@ function RouteForecastPage() {
                           <p className="mt-0.5 text-xs text-muted-foreground">
                             {source.name} → {destination.name} · {dayLabel(dayOffset).relative} at{" "}
                             {`${hour % 12 === 0 ? 12 : hour % 12}:00 ${hour < 12 ? "AM" : "PM"}`}
-                            {fastestRoute.blocked
-                              ? " · every route has a reported incident"
-                              : routeIncidents.some((list) => list.length > 0)
-                                ? " · avoids the reported incident"
-                                : ""}
                           </p>
                         </div>
-                        <Button variant="cityflow" className="rounded-xl" asChild>
-                          <a href={fastestRoute.url} target="_blank" rel="noopener noreferrer">
-                            Open fastest route in Google Maps <ExternalLink className="size-4" />
-                          </a>
-                        </Button>
                       </div>
                     )}
-                  </section>
-
-                  <section className="glass-panel overflow-x-auto rounded-2xl p-5">
-                    <h3 className="text-sm font-bold">Route Comparison</h3>
-                    <table className="mt-3 w-full min-w-[640px] text-left text-sm">
-                      <thead>
-                        <tr className="border-b border-border text-xs text-muted-foreground">
-                          <th className="py-2 pr-4 font-semibold">Route</th>
-                          <th className="py-2 pr-4 font-semibold">Distance</th>
-                          <th className="py-2 pr-4 font-semibold">Current Time</th>
-                          <th className="py-2 pr-4 font-semibold">Forecast Time</th>
-                          <th className="py-2 pr-4 font-semibold">Expected Delay</th>
-                          <th className="py-2 pr-4 font-semibold">Traffic</th>
-                          <th className="py-2 pr-4 font-semibold">Historical Average</th>
-                          <th className="py-2 font-semibold">Confidence</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {[activeRoute.primary, ...activeRoute.alternatives].map((r, i) => {
-                          const routeTypicalSpeed = typicalSpeedForDistance(r.distanceKm);
-                          const routeBaseDuration = durationFromDistance(
-                            r.distanceKm,
-                            routeTypicalSpeed,
-                          );
-                          const est = estimateTravelTime(routeBaseDuration, dayOffset, hour);
-                          const routeCurrentSpeed =
-                            routeTypicalSpeed *
-                            (TIER_SPEED_FACTOR[worstSample?.tier ?? "Moderate"] ?? 1);
-                          const currentTime = Math.round(
-                            durationFromDistance(r.distanceKm, routeCurrentSpeed),
-                          );
-                          const blocked = (routeIncidents[i]?.length ?? 0) > 0;
-                          return (
-                            <tr key={i} className="border-b border-border last:border-0">
-                              <td className="py-2.5 pr-4 font-medium">
-                                <span className="flex items-center gap-1.5">
-                                  Route {String.fromCharCode(65 + i)}
-                                  {blocked && (
-                                    <span className="flex items-center gap-1 rounded-full bg-destructive/15 px-2 py-0.5 text-[10px] font-bold text-destructive">
-                                      <AlertTriangle size={10} /> Incident
-                                    </span>
-                                  )}
-                                </span>
-                              </td>
-                              <td className="py-2.5 pr-4">{r.distanceKm.toFixed(1)} km</td>
-                              <td className="py-2.5 pr-4">{formatMin(currentTime)}</td>
-                              <td className="py-2.5 pr-4">{formatMin(est.travelTime)}</td>
-                              <td className="py-2.5 pr-4">
-                                {est.delay >= 0 ? "+" : ""}
-                                {est.delay} min
-                              </td>
-                              <td className="py-2.5 pr-4">
-                                <TierBadge tier={est.tier} />
-                              </td>
-                              <td className="py-2.5 pr-4">
-                                {formatMin(Math.round(routeBaseDuration))}
-                              </td>
-                              <td className="py-2.5">{est.confidence}%</td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
                   </section>
                 </>
               )}
 
-              {/* 15. Travel mode comparison */}
-              <section className="glass-panel rounded-2xl p-5">
-                <h3 className="text-sm font-bold">Travel Mode Forecast</h3>
-                <div className="mt-3 grid gap-3 sm:grid-cols-4">
-                  <ModeSummary
-                    icon={Car}
-                    label="Car"
-                    duration={currentTravelTime || undefined}
-                    tier={selectedDayForecast?.tier}
-                  />
-                  <ModeSummary
-                    icon={Bike}
-                    label="Bike"
-                    duration={bikeRoute.data?.primary.durationMin}
-                    tier={undefined}
-                  />
-                  <ModeSummary
-                    icon={Bus}
-                    label="Bus"
-                    duration={currentTravelTime ? busDuration : undefined}
-                    tier={selectedDayForecast?.tier}
-                  />
-                  <ModeSummary
-                    icon={PersonStanding}
-                    label="Walk"
-                    duration={footRoute.data?.primary.durationMin}
-                    tier={undefined}
-                  />
-                </div>
-                <p className="mt-3 text-[11px] text-muted-foreground">
-                  Walking and cycling estimates are based on route/network data, not traffic
-                  forecasting. Bus time is a rough estimate (no live transit routing available) —
-                  not a real schedule.
-                </p>
-              </section>
-
               {selectedDayForecast && (
                 <WhatIfSimulator baselineMin={selectedDayForecast.travelTime} />
               )}
-
-              <section className="glass-panel flex flex-wrap items-center justify-between gap-4 rounded-2xl p-5 sm:p-6">
-                <div className="flex items-center gap-3">
-                  <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[color-mix(in_oklab,var(--brand-cyan)_14%,transparent)] text-brand-cyan">
-                    <CalendarClock size={18} />
-                  </span>
-                  <div>
-                    <p className="text-sm font-bold">Need to arrive by a specific time?</p>
-                    <p className="text-xs text-muted-foreground">
-                      Use the Arrival Planner for a recommended departure window, reliability
-                      target, and risk indicator.
-                    </p>
-                  </div>
-                </div>
-                <Button variant="cityflow" className="rounded-xl" asChild>
-                  <Link to="/arrival-planner">
-                    Open Arrival Planner <ArrowRight className="size-4" />
-                  </Link>
-                </Button>
-              </section>
 
               <RecurringJourney
                 baseDurationMin={carBaseDurationMin}
@@ -1492,7 +1302,7 @@ function RouteForecastPage() {
                 <h3 className="text-sm font-bold">Traffic Pattern for Selected Date</h3>
                 <p className="text-xs text-muted-foreground">
                   {dayLabel(dayOffset).relative}, {dayLabel(dayOffset).monthDay} — lower bars mean a
-                  lower estimated travel time.
+                  lower estimated travel time. Click a bar to pick that departure time.
                 </p>
                 <div className="mt-4 h-64">
                   <ResponsiveContainer width="100%" height="100%">
@@ -1513,77 +1323,17 @@ function RouteForecastPage() {
                           fontSize: 12,
                         }}
                       />
-                      <Bar dataKey="forecast" radius={[4, 4, 0, 0]}>
+                      <Bar dataKey="forecast" radius={[4, 4, 0, 0]} cursor="pointer">
                         {graphData.map((d) => (
                           <Cell
                             key={d.hour}
                             fill={d.hourNum === hour ? "var(--destructive)" : "var(--brand-cyan)"}
+                            onClick={() => setHour(d.hourNum)}
                           />
                         ))}
                       </Bar>
                     </BarChart>
                   </ResponsiveContainer>
-                </div>
-              </section>
-
-              {/* 18. Forecast confidence */}
-              {selectedDayForecast && (
-                <section className="glass-panel rounded-2xl p-5 sm:p-6">
-                  <h3 className="text-sm font-bold">Forecast Confidence</h3>
-                  <div className="mt-3 flex flex-wrap items-center gap-6">
-                    <p className="text-4xl font-extrabold text-brand-cyan">
-                      {selectedDayForecast.confidence}%
-                    </p>
-                    <div>
-                      <p className="text-xs text-muted-foreground">Estimated Travel Time</p>
-                      <p className="text-lg font-extrabold">
-                        {formatMin(selectedDayForecast.travelTime)}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground">Likely Range</p>
-                      <p className="text-lg font-extrabold">
-                        {formatMin(selectedDayForecast.rangeLow)} –{" "}
-                        {formatMin(selectedDayForecast.rangeHigh)}
-                      </p>
-                    </div>
-                  </div>
-                  <p className="mt-3 text-xs text-muted-foreground">
-                    Forecast confidence represents model uncertainty based on historical validation
-                    and available future inputs. Confidence decreases the further out the forecast —{" "}
-                    {dayLabel(0).relative} is
-                    {CONFIDENCE_TODAY}% confident, {dayLabel(7).relative} is {CONFIDENCE_WEEK}%.
-                  </p>
-                </section>
-              )}
-
-              <ForecastAccuracyCard />
-
-              <section className="glass-panel overflow-x-auto rounded-2xl p-5">
-                <h3 className="text-sm font-bold">How CityFlow Forecasts This Journey</h3>
-                <div className="mt-3 flex min-w-max flex-wrap items-center gap-2 text-[11px] font-semibold text-muted-foreground">
-                  {[
-                    "Source + Destination",
-                    "Geocoding",
-                    "Route Generation",
-                    "Route Segments",
-                    "Live Traffic",
-                    "Historical Traffic",
-                    "Weather Forecast",
-                    "Date + Time",
-                    "CityFlow Forecast Model",
-                    "Segment-Level Forecast",
-                    "Route Travel-Time Estimation",
-                    "Confidence Range",
-                    "Journey Intelligence",
-                  ].map((step, i, arr) => (
-                    <span key={step} className="flex items-center gap-2">
-                      <span className="rounded-full border border-border bg-surface px-2.5 py-1">
-                        {step}
-                      </span>
-                      {i < arr.length - 1 && <span className="text-brand-cyan">→</span>}
-                    </span>
-                  ))}
                 </div>
               </section>
             </>
@@ -1594,9 +1344,6 @@ function RouteForecastPage() {
     </div>
   );
 }
-
-const CONFIDENCE_TODAY = 95;
-const CONFIDENCE_WEEK = 64;
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
@@ -1656,27 +1403,6 @@ function ModeButton({
       <p className="mt-2 text-sm font-bold">{label}</p>
       <p className="text-lg font-extrabold">{time}</p>
     </button>
-  );
-}
-
-function ModeSummary({
-  icon: Icon,
-  label,
-  duration,
-  tier,
-}: {
-  icon: typeof Car;
-  label: string;
-  duration: number | undefined;
-  tier: import("@/lib/locations").TrafficTier | undefined;
-}) {
-  return (
-    <div className="rounded-xl border border-border bg-surface p-3 text-center">
-      <Icon className="mx-auto text-brand-cyan" size={18} />
-      <p className="mt-1 text-xs font-bold">{label}</p>
-      <p className="text-sm font-extrabold">{duration ? formatMin(duration) : "—"}</p>
-      {tier && <p className="mt-1 text-[10px] text-muted-foreground">{tier} traffic</p>}
-    </div>
   );
 }
 

@@ -13,17 +13,14 @@ import {
   YAxis,
 } from "recharts";
 import {
-  AlertTriangle,
   ArrowRight,
   BarChart3,
   CarFront,
   ChevronDown,
   Clock3,
-  Activity,
-  FlaskConical,
-  Lightbulb,
+  Gauge,
   Route as RouteIcon,
-  Search,
+  TrendingDown,
   TrendingUp,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -37,9 +34,9 @@ import {
   findDashboardTarget,
   type DashboardTarget,
 } from "@/lib/dashboard-targets";
-import { PEAK_HOUR_SHARE, type TrafficTier } from "@/lib/locations";
+import { bengaluruLocations, PEAK_HOUR_SHARE, type TrafficTier } from "@/lib/locations";
 import { tomorrowPeakForecast } from "@/lib/location-forecast";
-import { buildHourly, NOW_HOUR_INDEX } from "@/lib/hourly";
+import { buildHourly, nowHourIndex } from "@/lib/hourly";
 import { getLiveTraffic } from "@/lib/traffic-server";
 import { bangaloreTrafficHistory } from "@/data/bangalore-traffic-history";
 import cityIllustration from "@/assets/cityflow-globe-transparent.png";
@@ -72,32 +69,59 @@ export const Route = createFileRoute("/dashboard/$city")({
   ),
 });
 
-const whyCityFlow = [
-  { icon: Search, title: "Analyze", copy: "Understand historical traffic patterns." },
-  { icon: TrendingUp, title: "Forecast", copy: "Estimate future traffic conditions." },
-  { icon: Lightbulb, title: "Explain", copy: "Understand why traffic may increase." },
-  {
-    icon: FlaskConical,
-    title: "Simulate",
-    copy: "Test different conditions with What-If analysis.",
-  },
-];
+/** Citywide takeaways, computed once from the location list and the Kaggle dataset. */
+const cityInsights = (() => {
+  const byVolume = [...bengaluruLocations].sort((a, b) => b.basePeakVolume - a.basePeakVolume);
+  const busiest = byVolume[0]!;
+  const calmest = byVolume[byVolume.length - 1]!;
+  const slowest = bengaluruLocations
+    .flatMap((location) => {
+      const history = bangaloreTrafficHistory[location.slug];
+      return history ? [{ location, speed: history.avgSpeedKph }] : [];
+    })
+    .sort((a, b) => a.speed - b.speed)[0];
+
+  return [
+    {
+      icon: TrendingUp,
+      title: "Busiest location",
+      body: `${busiest.name} has the highest peak volume, around ${busiest.basePeakVolume.toLocaleString()} vehicles/hour.`,
+      slug: busiest.slug,
+    },
+    {
+      icon: TrendingDown,
+      title: "Calmest location",
+      body: `${calmest.name} has the lowest peak volume, around ${calmest.basePeakVolume.toLocaleString()} vehicles/hour.`,
+      slug: calmest.slug,
+    },
+    ...(slowest
+      ? [
+          {
+            icon: Gauge,
+            title: "Slowest average speed",
+            body: `${slowest.location.name} averages ${slowest.speed} km/h in the Kaggle traffic dataset.`,
+            slug: slowest.location.slug,
+          },
+        ]
+      : []),
+  ];
+})();
+
+function greeting(hour: number) {
+  if (hour < 12) return "Good morning";
+  if (hour < 17) return "Good afternoon";
+  return "Good evening";
+}
 
 function getQuickActions(citySlug: string) {
   return [
-    {
-      label: "Traffic Analysis",
-      icon: Activity,
-      to: "/traffic-analysis" as const,
-      search: undefined,
-    },
     {
       label: "Check Forecast",
       icon: TrendingUp,
       to: "/forecast" as const,
       search: { loc: citySlug },
     },
-    { label: "Compare Roads", icon: RouteIcon, to: "/route-forecast" as const, search: undefined },
+    { label: "Plan a Journey", icon: RouteIcon, to: "/route-forecast" as const, search: undefined },
     { label: "Generate Report", icon: BarChart3, to: "/reports" as const, search: undefined },
   ];
 }
@@ -149,7 +173,7 @@ function CityDashboard() {
 
   const currentTrend = pctVsAverage(currentVolume, historicalAverage);
   const forecastTrend = pctVsAverage(forecast.volume, historicalAverage);
-  const nowLabel = hourly[NOW_HOUR_INDEX]?.hour ?? "Now";
+  const nowLabel = hourly[nowHourIndex()]?.hour ?? "Now";
 
   return (
     <div className="flex min-h-screen bg-background text-foreground">
@@ -165,7 +189,7 @@ function CityDashboard() {
             <div className="relative z-10 grid items-center gap-6 lg:grid-cols-[1.3fr_0.7fr]">
               <div>
                 <h2 className="text-2xl font-extrabold tracking-normal sm:text-3xl">
-                  Good morning! Here&apos;s your traffic overview.
+                  {greeting(nowHourIndex())}! Here&apos;s your traffic overview.
                 </h2>
                 <p className="mt-3 max-w-xl text-sm leading-6 text-muted-foreground">
                   CityFlow analyzes historical traffic patterns and forecasts future traffic
@@ -192,7 +216,7 @@ function CityDashboard() {
           </section>
 
           {/* 2. Key metric cards */}
-          <section className="cf-stagger grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+          <section className="cf-stagger grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             <MetricCard
               icon={CarFront}
               label="Current Traffic Volume"
@@ -208,13 +232,6 @@ function CityDashboard() {
               status="Forecast"
               statusTone="text-brand-cyan"
               trend={forecastTrend.label}
-            />
-            <MetricCard
-              icon={AlertTriangle}
-              label="Expected Traffic Level"
-              value={expectedLevel.toUpperCase()}
-              status="Congestion Expected"
-              statusTone="text-warning"
             />
             <MetricCard
               icon={Clock3}
@@ -343,50 +360,43 @@ function CityDashboard() {
                 {forecast.volume.toLocaleString()} vehicles/hour
               </p>
               <p className="mt-3 text-xs leading-5 text-muted-foreground">
-                Expected traffic is above the historical average.
+                Tomorrow&apos;s forecast peak is{" "}
+                {forecastTrend.diff === 0
+                  ? "in line with"
+                  : `${Math.abs(forecastTrend.diff)}% ${forecastTrend.diff > 0 ? "above" : "below"}`}{" "}
+                the historical average. Busiest road: {target.alertRoad}.
               </p>
+              <Button variant="outline" size="sm" className="mt-4" asChild>
+                <Link to="/forecast" search={{ loc: target.slug }}>
+                  View Forecast <ArrowRight className="size-4" />
+                </Link>
+              </Button>
             </div>
           </section>
 
-          {/* 5. Alert */}
-          <section className="glass-panel flex flex-wrap items-center justify-between gap-4 rounded-2xl border-l-4 border-l-destructive p-5">
-            <div className="flex items-start gap-3">
-              <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-destructive/15 text-destructive">
-                <AlertTriangle size={20} />
-              </span>
-              <div>
-                <p className="text-sm font-bold">{expectedLevel} traffic expected today</p>
-                <p className="text-xs text-muted-foreground">
-                  {target.alertRoad} · {nextPeak.window.split("–")[0]?.trim()}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  Forecast: {forecast.volume.toLocaleString()} vehicles/hour
-                </p>
-              </div>
-            </div>
-            <Button variant="outline" size="sm">
-              View Forecast <ArrowRight className="size-4" />
-            </Button>
-          </section>
-
-          {/* 6. Why CityFlow */}
+          {/* 5. Citywide insights */}
           <section>
-            <h3 className="text-base font-bold">Why CityFlow?</h3>
-            <div className="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-              {whyCityFlow.map(({ icon: Icon, title, copy }) => (
-                <div key={title} className="glass-panel rounded-xl p-4">
+            <h3 className="text-base font-bold">Across Bengaluru</h3>
+            <div className="mt-3 grid gap-3 sm:grid-cols-3">
+              {cityInsights.map(({ icon: Icon, title, body, slug }) => (
+                <Link
+                  key={title}
+                  to="/dashboard/$city"
+                  params={{ city: slug }}
+                  className="glass-panel rounded-xl p-4 transition hover:border-brand-cyan"
+                >
                   <span className="grid size-10 place-items-center rounded-lg bg-secondary text-brand-cyan">
                     <Icon size={18} />
                   </span>
                   <p className="mt-3 text-sm font-bold">{title}</p>
-                  <p className="mt-1 text-xs leading-5 text-muted-foreground">{copy}</p>
-                </div>
+                  <p className="mt-1 text-xs leading-5 text-muted-foreground">{body}</p>
+                </Link>
               ))}
             </div>
           </section>
 
           {/* 7. Quick actions */}
-          <section className="grid gap-3 pb-4 sm:grid-cols-2 xl:grid-cols-4">
+          <section className="grid gap-3 pb-4 sm:grid-cols-3">
             {quickActions.map(({ label, icon: Icon, to, search }) => {
               const className =
                 "group flex items-center justify-between rounded-xl border border-border bg-card px-4 py-3.5 text-sm font-semibold shadow-sm transition hover:-translate-y-0.5 hover:border-brand-cyan";

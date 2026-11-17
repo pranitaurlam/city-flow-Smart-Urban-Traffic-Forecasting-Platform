@@ -88,10 +88,10 @@ function errorMessage(detail: unknown, fallback: string): string {
   return fallback;
 }
 
-async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
+async function request<T>(path: string, init: RequestInit = {}, timeoutMs = 8000): Promise<T> {
   const res = await fetch(`${CITYFLOW_API_URL}${path}`, {
     ...init,
-    signal: AbortSignal.timeout(8000),
+    signal: AbortSignal.timeout(timeoutMs),
   });
   if (!res.ok) {
     const body = (await res.json().catch(() => null)) as { detail?: unknown } | null;
@@ -163,6 +163,34 @@ export type EventOnRoute = {
 
 export type RouteImpact = { id: string; events: EventOnRoute[]; delay_min: number };
 
+export type IncidentType = "accident" | "closure" | "construction" | "congestion" | "other";
+
+export type ApiIncident = {
+  id: number;
+  lat: number;
+  lon: number;
+  road_hint: string;
+  type: IncidentType;
+  note: string | null;
+  /** "unverified" means no photo check was available when it was submitted. */
+  status: "verified" | "unverified";
+  severity: string | null;
+  photo_summary: string | null;
+  /** ISO timestamps with timezone. */
+  reported_at: string;
+  expires_at: string;
+};
+
+export type IncidentInput = {
+  lat: number;
+  lon: number;
+  road_hint: string;
+  type: IncidentType;
+  note: string | null;
+  /** Base64 JPEG, no data: prefix. */
+  image_base64: string;
+};
+
 export const cityflowApi = {
   areas: () => getJson<ApiAreaSummary[]>("/api/areas"),
   areaForecast: (slug: string) =>
@@ -202,6 +230,18 @@ export const cityflowApi = {
       window_start: windowStart.toISOString(),
       window_end: windowEnd.toISOString(),
     }),
+  incidents: () => getJson<ApiIncident[]>("/api/incidents"),
+  /** The photo is checked before the report is stored, so this can take a while. */
+  reportIncident: (input: IncidentInput) =>
+    request<ApiIncident>(
+      "/api/incidents",
+      {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ ...input, image_media_type: "image/jpeg" }),
+      },
+      90_000,
+    ),
   trendReportUrl: (slug?: string, days = 30) =>
     `${CITYFLOW_API_URL}/api/reports/trend.csv?${new URLSearchParams({
       ...(slug ? { area: slug } : {}),

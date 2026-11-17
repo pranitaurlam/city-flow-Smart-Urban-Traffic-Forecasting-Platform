@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from app.config import settings
 from app.db import Base, SessionLocal, engine, get_session
 from app.models import Area, Forecast, TrafficRecord
-from app.routers import areas, events, forecasts, reports
+from app.routers import areas, events, forecasts, incidents, reports
 from app.schemas import Health
 from app.venues import upsert_venues
 
@@ -58,3 +58,4 @@ app.include_router(areas.router)
 app.include_router(forecasts.router)
 app.include_router(reports.router)
 app.include_router(events.router)
+app.include_router(incidents.router)

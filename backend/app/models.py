@@ -158,3 +158,31 @@ class Event(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow)
 
     venue: Mapped[Venue] = relationship(back_populates="events")
+
+
+class IncidentReport(Base):
+    """A commuter's report of a blocked or badly congested road.
+
+    A photo is required and is checked by app/image_check.py before the
+    report is stored. The photo itself is not kept, only the verdict.
+    Times are naive UTC.
+    """
+
+    __tablename__ = "incident_reports"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    lat: Mapped[float] = mapped_column(Float)
+    lon: Mapped[float] = mapped_column(Float)
+    # Nearest known place name at report time, for display.
+    road_hint: Mapped[str] = mapped_column(String(128))
+    # "accident", "closure", "construction", "congestion", "other"
+    type: Mapped[str] = mapped_column(String(32))
+    note: Mapped[str | None] = mapped_column(String(300), nullable=True)
+    # "verified": the photo check accepted it. "unverified": no photo check
+    # was available when it was submitted.
+    status: Mapped[str] = mapped_column(String(16))
+    severity: Mapped[str | None] = mapped_column(String(16), nullable=True)
+    # What the photo check saw, in a sentence or two.
+    photo_summary: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    reported_at: Mapped[datetime] = mapped_column(DateTime, index=True)
+    expires_at: Mapped[datetime] = mapped_column(DateTime, index=True)

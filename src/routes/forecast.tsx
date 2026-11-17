@@ -17,12 +17,12 @@ import { Button } from "@/components/ui/button";
 import { useTheme } from "@/hooks/use-theme";
 import { NotificationCenter } from "@/components/route/notification-center";
 import { LocationSearch } from "@/components/locations/location-search";
-import { TierBadge } from "@/components/locations/panels";
+import { HistoricalPreviewChart, TierBadge } from "@/components/locations/panels";
 import { WhyForecastCard } from "@/components/locations/why-forecast";
 import { ModelForecastCard } from "@/components/locations/model-forecast";
 import { bengaluruLocations, findLocation } from "@/lib/locations";
 import { tomorrowPeakForecast } from "@/lib/location-forecast";
-import { buildHourly, NOW_HOUR_INDEX } from "@/lib/hourly";
+import { buildHourly, nowHourIndex } from "@/lib/hourly";
 import { getLiveWeather } from "@/lib/weather-server";
 
 const searchSchema = z.object({ loc: z.string().optional() });
@@ -45,7 +45,10 @@ function ForecastPage() {
 
   const forecast = tomorrowPeakForecast(location);
   const hourly = buildHourly(location.basePeakVolume);
-  const nowLabel = hourly[NOW_HOUR_INDEX]?.hour ?? "Now";
+  const nowLabel = hourly[nowHourIndex()]?.hour ?? "Now";
+  const volumes = hourly.map((h) => ({ hour: h.hour, volume: h.historical ?? h.forecast ?? 0 }));
+  const peak = volumes.reduce((a, b) => (b.volume > a.volume ? b : a));
+  const quietest = volumes.reduce((a, b) => (b.volume < a.volume ? b : a));
 
   const weatherQuery = useQuery({
     queryKey: ["live-weather", location.slug],
@@ -116,7 +119,14 @@ function ForecastPage() {
               </div>
             </div>
 
-            <div className="mt-6 h-64">
+            <p className="mt-4 text-sm text-muted-foreground">
+              Busiest around <strong className="text-foreground">{peak.hour}</strong> (
+              {peak.volume.toLocaleString()} veh/hr), quietest around{" "}
+              <strong className="text-foreground">{quietest.hour}</strong> (
+              {quietest.volume.toLocaleString()} veh/hr).
+            </p>
+
+            <div className="mt-4 h-64">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={hourly} margin={{ left: -12 }}>
                   <defs>
@@ -183,7 +193,10 @@ function ForecastPage() {
 
           <ModelForecastCard location={location} />
 
-          <WhyForecastCard location={location} weatherCondition={weatherQuery.data?.condition} />
+          <section className="grid gap-6 lg:grid-cols-2">
+            <HistoricalPreviewChart location={location} />
+            <WhyForecastCard location={location} weatherCondition={weatherQuery.data?.condition} />
+          </section>
         </main>
       </div>
     </div>

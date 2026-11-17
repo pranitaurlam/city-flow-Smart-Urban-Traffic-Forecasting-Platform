@@ -10,27 +10,16 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AlertsRouteImport } from './routes/alerts'
 import { Route as ArrivalPlannerRouteImport } from './routes/arrival-planner'
 import { Route as EventsRouteImport } from './routes/events'
 import { Route as ForecastRouteImport } from './routes/forecast'
-import { Route as InsightsRouteImport } from './routes/insights'
-import { Route as LoginRouteImport } from './routes/login'
-import { Route as PeakHoursRouteImport } from './routes/peak-hours'
 import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as RouteForecastRouteImport } from './routes/route-forecast'
-import { Route as SigninRouteImport } from './routes/signin'
-import { Route as TrafficAnalysisRouteImport } from './routes/traffic-analysis'
 import { Route as DashboardCityRouteImport } from './routes/dashboard.$city'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AlertsRoute = AlertsRouteImport.update({
-  id: '/alerts',
-  path: '/alerts',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ArrivalPlannerRoute = ArrivalPlannerRouteImport.update({
@@ -48,21 +37,6 @@ const ForecastRoute = ForecastRouteImport.update({
   path: '/forecast',
   getParentRoute: () => rootRouteImport,
 } as any)
-const InsightsRoute = InsightsRouteImport.update({
-  id: '/insights',
-  path: '/insights',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PeakHoursRoute = PeakHoursRouteImport.update({
-  id: '/peak-hours',
-  path: '/peak-hours',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ReportsRoute = ReportsRouteImport.update({
   id: '/reports',
   path: '/reports',
@@ -73,16 +47,6 @@ const RouteForecastRoute = RouteForecastRouteImport.update({
   path: '/route-forecast',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SigninRoute = SigninRouteImport.update({
-  id: '/signin',
-  path: '/signin',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const TrafficAnalysisRoute = TrafficAnalysisRouteImport.update({
-  id: '/traffic-analysis',
-  path: '/traffic-analysis',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const DashboardCityRoute = DashboardCityRouteImport.update({
   id: '/dashboard/$city',
   path: '/dashboard/$city',
@@ -91,111 +55,69 @@ const DashboardCityRoute = DashboardCityRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/alerts': typeof AlertsRoute
   '/arrival-planner': typeof ArrivalPlannerRoute
   '/events': typeof EventsRoute
   '/forecast': typeof ForecastRoute
-  '/insights': typeof InsightsRoute
-  '/login': typeof LoginRoute
-  '/peak-hours': typeof PeakHoursRoute
   '/reports': typeof ReportsRoute
   '/route-forecast': typeof RouteForecastRoute
-  '/signin': typeof SigninRoute
-  '/traffic-analysis': typeof TrafficAnalysisRoute
   '/dashboard/$city': typeof DashboardCityRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/alerts': typeof AlertsRoute
   '/arrival-planner': typeof ArrivalPlannerRoute
   '/events': typeof EventsRoute
   '/forecast': typeof ForecastRoute
-  '/insights': typeof InsightsRoute
-  '/login': typeof LoginRoute
-  '/peak-hours': typeof PeakHoursRoute
   '/reports': typeof ReportsRoute
   '/route-forecast': typeof RouteForecastRoute
-  '/signin': typeof SigninRoute
-  '/traffic-analysis': typeof TrafficAnalysisRoute
   '/dashboard/$city': typeof DashboardCityRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/alerts': typeof AlertsRoute
   '/arrival-planner': typeof ArrivalPlannerRoute
   '/events': typeof EventsRoute
   '/forecast': typeof ForecastRoute
-  '/insights': typeof InsightsRoute
-  '/login': typeof LoginRoute
-  '/peak-hours': typeof PeakHoursRoute
   '/reports': typeof ReportsRoute
   '/route-forecast': typeof RouteForecastRoute
-  '/signin': typeof SigninRoute
-  '/traffic-analysis': typeof TrafficAnalysisRoute
   '/dashboard/$city': typeof DashboardCityRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/alerts'
     | '/arrival-planner'
     | '/events'
     | '/forecast'
-    | '/insights'
-    | '/login'
-    | '/peak-hours'
     | '/reports'
     | '/route-forecast'
-    | '/signin'
-    | '/traffic-analysis'
     | '/dashboard/$city'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/alerts'
     | '/arrival-planner'
     | '/events'
     | '/forecast'
-    | '/insights'
-    | '/login'
-    | '/peak-hours'
     | '/reports'
     | '/route-forecast'
-    | '/signin'
-    | '/traffic-analysis'
     | '/dashboard/$city'
   id:
     | '__root__'
     | '/'
-    | '/alerts'
     | '/arrival-planner'
     | '/events'
     | '/forecast'
-    | '/insights'
-    | '/login'
-    | '/peak-hours'
     | '/reports'
     | '/route-forecast'
-    | '/signin'
-    | '/traffic-analysis'
     | '/dashboard/$city'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AlertsRoute: typeof AlertsRoute
   ArrivalPlannerRoute: typeof ArrivalPlannerRoute
   EventsRoute: typeof EventsRoute
   ForecastRoute: typeof ForecastRoute
-  InsightsRoute: typeof InsightsRoute
-  LoginRoute: typeof LoginRoute
-  PeakHoursRoute: typeof PeakHoursRoute
   ReportsRoute: typeof ReportsRoute
   RouteForecastRoute: typeof RouteForecastRoute
-  SigninRoute: typeof SigninRoute
-  TrafficAnalysisRoute: typeof TrafficAnalysisRoute
   DashboardCityRoute: typeof DashboardCityRoute
 }
 
@@ -206,13 +128,6 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/alerts': {
-      id: '/alerts'
-      path: '/alerts'
-      fullPath: '/alerts'
-      preLoaderRoute: typeof AlertsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/arrival-planner': {
@@ -236,27 +151,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ForecastRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/insights': {
-      id: '/insights'
-      path: '/insights'
-      fullPath: '/insights'
-      preLoaderRoute: typeof InsightsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/peak-hours': {
-      id: '/peak-hours'
-      path: '/peak-hours'
-      fullPath: '/peak-hours'
-      preLoaderRoute: typeof PeakHoursRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/reports': {
       id: '/reports'
       path: '/reports'
@@ -271,20 +165,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RouteForecastRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/signin': {
-      id: '/signin'
-      path: '/signin'
-      fullPath: '/signin'
-      preLoaderRoute: typeof SigninRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/traffic-analysis': {
-      id: '/traffic-analysis'
-      path: '/traffic-analysis'
-      fullPath: '/traffic-analysis'
-      preLoaderRoute: typeof TrafficAnalysisRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/dashboard/$city': {
       id: '/dashboard/$city'
       path: '/dashboard/$city'
@@ -297,17 +177,11 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AlertsRoute: AlertsRoute,
   ArrivalPlannerRoute: ArrivalPlannerRoute,
   EventsRoute: EventsRoute,
   ForecastRoute: ForecastRoute,
-  InsightsRoute: InsightsRoute,
-  LoginRoute: LoginRoute,
-  PeakHoursRoute: PeakHoursRoute,
   ReportsRoute: ReportsRoute,
   RouteForecastRoute: RouteForecastRoute,
-  SigninRoute: SigninRoute,
-  TrafficAnalysisRoute: TrafficAnalysisRoute,
   DashboardCityRoute: DashboardCityRoute,
 }
 export const routeTree = rootRouteImport

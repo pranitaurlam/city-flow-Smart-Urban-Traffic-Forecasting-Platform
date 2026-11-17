@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
-import { Moon, Sun, User } from "lucide-react";
+import { Moon, Sun } from "lucide-react";
 import { DashboardSidebar } from "@/components/dashboard/sidebar";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/hooks/use-theme";
@@ -15,6 +15,7 @@ import { ArrivalTimeline } from "@/components/route/arrival-timeline";
 import { RouteReliabilityCard } from "@/components/route/route-reliability";
 import { SavedArrivalPlans, type ArrivalPlanDraft } from "@/components/route/saved-arrival-plans";
 import { EventImpactCard } from "@/components/route/event-impact-card";
+import { JourneyModeSwitch } from "@/components/route/journey-mode-switch";
 import { getRoute } from "@/lib/route-server";
 import { getLiveWeather } from "@/lib/weather-server";
 import { corridorsAlongRoute, plannerMode } from "@/lib/route-intelligence";
@@ -25,7 +26,7 @@ import { dateAtMinute, downsample, eventDelayForTrip } from "@/lib/event-traffic
 
 export const Route = createFileRoute("/arrival-planner")({
   ssr: false,
-  head: () => ({ meta: [{ title: "Arrival Planner | CityFlow" }] }),
+  head: () => ({ meta: [{ title: "Plan Journey | CityFlow" }] }),
   component: ArrivalPlannerPage,
 });
 
@@ -240,7 +241,7 @@ function ArrivalPlannerPage() {
         <header className="cf-flowline sticky top-0 z-20 border-b border-border bg-surface-strong px-5 py-4 backdrop-blur-xl sm:px-8">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
-              <h1 className="text-2xl font-extrabold tracking-normal">Arrival Planner</h1>
+              <h1 className="text-2xl font-extrabold tracking-normal">Plan Your Journey</h1>
               <p className="text-sm text-muted-foreground">
                 Know when to leave, and how reliable that departure really is.
               </p>
@@ -255,14 +256,13 @@ function ArrivalPlannerPage() {
                 {dark ? <Sun /> : <Moon />}
               </Button>
               <NotificationCenter />
-              <span className="grid size-9 place-items-center rounded-full bg-secondary text-secondary-foreground">
-                <User size={16} />
-              </span>
             </div>
           </div>
         </header>
 
         <main className="cf-stagger mx-auto w-full max-w-[1400px] flex-1 space-y-6 px-5 py-6 sm:px-8">
+          <JourneyModeSwitch active="arrive" />
+
           <ArrivalPlannerForm
             form={form}
             onChange={update}

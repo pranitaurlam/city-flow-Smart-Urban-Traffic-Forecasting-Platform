@@ -115,7 +115,7 @@ function ReportsPage() {
                   >
                     <td className="py-2.5 pr-4 font-medium">
                       <Link
-                        to="/traffic-analysis"
+                        to="/forecast"
                         search={{ loc: row.slug }}
                         className="hover:text-brand-cyan"
                       >

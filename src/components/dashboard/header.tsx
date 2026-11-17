@@ -1,7 +1,7 @@
 import { useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useState, type KeyboardEvent } from "react";
-import { CloudSun, MapPin, Moon, Search, Sun, User } from "lucide-react";
+import { CloudSun, MapPin, Moon, Search, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/hooks/use-theme";
 import { NotificationCenter } from "@/components/route/notification-center";
@@ -142,10 +142,6 @@ export function DashboardHeader({ target }: { target: DashboardTarget }) {
           </Button>
 
           <NotificationCenter />
-
-          <span className="grid size-9 place-items-center rounded-full bg-secondary text-secondary-foreground">
-            <User size={16} />
-          </span>
         </div>
       </div>
     </header>
