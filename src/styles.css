@@ -1081,3 +1081,214 @@
     padding-bottom: calc(4.25rem + env(safe-area-inset-bottom));
   }
 }
+
+/* ---------------------------------------------------------------------------
+   Cute home-page touches: Flowy the mascot car, a skyline with twinkling
+   windows, drifting clouds and flapping birds, sparkles and icon wiggles.
+--------------------------------------------------------------------------- */
+
+@keyframes cf-car-bob {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-5px) rotate(-1.5deg);
+  }
+}
+
+@keyframes cf-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes cf-blink {
+  0%,
+  92%,
+  100% {
+    transform: scaleY(1);
+  }
+  95% {
+    transform: scaleY(0.1);
+  }
+}
+
+@keyframes cf-sway {
+  0%,
+  100% {
+    transform: rotate(-12deg);
+  }
+  50% {
+    transform: rotate(12deg);
+  }
+}
+
+@keyframes cf-puff {
+  0% {
+    opacity: 0.7;
+    transform: translate(0, 0) scale(0.4);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-26px, -10px) scale(1.4);
+  }
+}
+
+@keyframes cf-bubble-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes cf-cloud {
+  from {
+    left: -18%;
+  }
+  to {
+    left: 108%;
+  }
+}
+
+@keyframes cf-fly {
+  0% {
+    left: -6%;
+    transform: translateY(0);
+  }
+  25% {
+    transform: translateY(-10px);
+  }
+  50% {
+    transform: translateY(4px);
+  }
+  75% {
+    transform: translateY(-6px);
+  }
+  100% {
+    left: 106%;
+    transform: translateY(0);
+  }
+}
+
+@keyframes cf-flap {
+  0%,
+  100% {
+    transform: scaleY(1);
+  }
+  50% {
+    transform: scaleY(-0.4);
+  }
+}
+
+@keyframes cf-sparkle {
+  0%,
+  100% {
+    opacity: 0;
+    transform: scale(0.2) rotate(0deg);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1) rotate(90deg);
+  }
+}
+
+@keyframes cf-wiggle {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  20% {
+    transform: rotate(-14deg) scale(1.1);
+  }
+  40% {
+    transform: rotate(10deg) scale(1.1);
+  }
+  60% {
+    transform: rotate(-6deg);
+  }
+  80% {
+    transform: rotate(3deg);
+  }
+}
+
+.cf-window {
+  opacity: 0.25;
+}
+
+.cf-cloud,
+.cf-bird {
+  position: absolute;
+}
+
+.cf-cloud {
+  left: var(--x, 20%);
+}
+
+.cf-bird {
+  left: var(--x, 40%);
+}
+
+.cf-sparkle {
+  position: absolute;
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .cf-car-bob {
+    animation: cf-car-bob 1.6s ease-in-out infinite;
+  }
+  .cf-wheel {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: cf-spin 1s linear infinite;
+  }
+  .cf-eyes {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: cf-blink 4s ease-in-out infinite;
+  }
+  .cf-antenna {
+    transform-box: fill-box;
+    transform-origin: bottom center;
+    animation: cf-sway 1.8s ease-in-out infinite;
+  }
+  .cf-puff {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: cf-puff 1.6s ease-out infinite;
+    animation-delay: var(--d, 0s);
+  }
+  .cf-bubble {
+    animation: cf-bubble-in 0.45s cubic-bezier(0.3, 1.4, 0.6, 1) both;
+  }
+  .cf-window {
+    animation: cf-twinkle var(--t, 5s) ease-in-out infinite;
+    animation-delay: var(--d, 0s);
+  }
+  .cf-cloud {
+    animation: cf-cloud var(--dur, 60s) linear infinite;
+    animation-delay: var(--delay, 0s);
+  }
+  .cf-bird {
+    animation: cf-fly var(--dur, 22s) linear infinite;
+    animation-delay: var(--delay, 0s);
+  }
+  .cf-wing {
+    transform-box: fill-box;
+    transform-origin: bottom center;
+    animation: cf-flap 0.5s ease-in-out infinite;
+  }
+  .cf-sparkle {
+    animation: cf-sparkle var(--t, 2.6s) ease-in-out infinite;
+    animation-delay: var(--d, 0s);
+  }
+  .group:hover .cf-wiggle {
+    animation: cf-wiggle 0.7s ease-in-out;
+  }
+}

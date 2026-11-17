@@ -21,6 +21,7 @@ import { useTheme } from "@/hooks/use-theme";
 import { cities } from "@/lib/cities";
 import { GlobeOrbit, HeroBackdrop, HeroCards } from "@/components/landing/hero-orbit";
 import { StreetScene } from "@/components/motion/street-scene";
+import { CitySkyline, Mascot, Sparkles } from "@/components/landing/cute";
 import globeImage from "@/assets/cityflow-globe-transparent.png";
 import cityStrip from "@/assets/cityflow-cities.jpg";
 
@@ -154,10 +155,11 @@ function CityFlow() {
                 for a Brighter
               </span>
               <span
-                className="cf-rise cf-text-shimmer block"
+                className="cf-rise relative inline-block"
                 style={{ "--d": "360ms" } as React.CSSProperties}
               >
-                Tomorrow
+                <span className="cf-text-shimmer">Tomorrow</span>
+                <Sparkles />
               </span>
             </h1>
             <p
@@ -204,6 +206,7 @@ function CityFlow() {
                 {notice}
               </p>
             )}
+            <Mascot className="cf-rise mt-6" style={{ "--d": "880ms" } as React.CSSProperties} />
           </div>
 
           <div className="relative min-h-[390px] lg:min-h-[485px]">
@@ -223,7 +226,10 @@ function CityFlow() {
         </div>
       </section>
 
-      <StreetScene />
+      <div className="bg-gradient-to-b from-transparent via-[color-mix(in_oklab,var(--brand-cyan)_8%,transparent)] to-transparent">
+        <CitySkyline />
+        <StreetScene />
+      </div>
 
       <section
         id="explore"
@@ -235,7 +241,7 @@ function CityFlow() {
               key={title}
               className="cf-reveal group flex min-h-20 items-center gap-3 rounded-lg border border-border bg-surface p-3 text-left transition hover:-translate-y-1 hover:border-brand-cyan hover:shadow-brand"
             >
-              <span className="grid size-11 shrink-0 place-items-center rounded-lg bg-secondary text-brand-cyan">
+              <span className="cf-wiggle grid size-11 shrink-0 place-items-center rounded-lg bg-secondary text-brand-cyan">
                 <Icon />
               </span>
               <span className="min-w-0">
