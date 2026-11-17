@@ -28,6 +28,14 @@ class Settings(BaseSettings):
     forecast_json: Path = REPO_ROOT / "ml" / "outputs" / "forecast_next_7_days.json"
     metrics_json: Path = REPO_ROOT / "ml" / "outputs" / "metrics.json"
 
+    # Also allow the dashboard when opened from a phone or another computer on
+    # the same private network (10.x, 172.16–31.x, 192.168.x), e.g. to use it as
+    # a home-screen app over Wi-Fi.
+    cors_origin_regex: str = (
+        r"^http://(10\.\d+\.\d+\.\d+|172\.(1[6-9]|2\d|3[01])\.\d+\.\d+"
+        r"|192\.168\.\d+\.\d+):(5173|8080|3000)$"
+    )
+
     @property
     def cors_origin_list(self) -> list[str]:
         return [o.strip() for o in self.cors_origins.split(",") if o.strip()]
