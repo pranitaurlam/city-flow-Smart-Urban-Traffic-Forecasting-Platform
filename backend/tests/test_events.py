@@ -177,3 +177,37 @@ def test_peak_delay_tiers():
     assert event_impact.peak_delay_min(1_500) == 3
     assert event_impact.peak_delay_min(40_000) == 22
     assert event_impact.peak_delay_min(80_000) == event_impact.MAX_DELAY_MIN
+
+
+@pytest.fixture()
+def locked(client, monkeypatch):
+    from app.config import settings
+
+    monkeypatch.setattr(settings, "admin_token", "s3cret")
+    return client
+
+
+def test_writes_need_admin_key_when_set(locked):
+    assert locked.post("/api/events", json=CONCERT).status_code == 401
+    wrong = {"X-Admin-Token": "nope"}
+    assert locked.post("/api/events", json=CONCERT, headers=wrong).status_code == 401
+    r = locked.post(
+        "/api/events/import",
+        content="venue,title,starts_at,ends_at\n",
+        headers={"content-type": "text/csv"},
+    )
+    assert r.status_code == 401
+    venue = {"name": "X", "lat": 12.9, "lon": 77.6, "capacity": 100, "impact_radius_km": 1}
+    assert locked.post("/api/venues", json=venue).status_code == 401
+
+    ok = {"X-Admin-Token": "s3cret"}
+    event_id = locked.post("/api/events", json=CONCERT, headers=ok).json()["id"]
+    assert locked.put(f"/api/events/{event_id}", json=CONCERT).status_code == 401
+    assert locked.delete(f"/api/events/{event_id}").status_code == 401
+    assert locked.delete(f"/api/events/{event_id}", headers=ok).status_code == 204
+
+
+def test_reads_stay_open_when_locked(locked):
+    assert locked.get("/api/events").status_code == 200
+    assert locked.get("/api/venues").status_code == 200
+    impact(locked, {"a": THROUGH_CHINNASWAMY}, "2026-12-05T18:00:00", "2026-12-05T20:00:00")

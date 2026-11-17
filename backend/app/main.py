@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from app.auth import warn_if_open
 from app.config import settings
 from app.db import Base, SessionLocal, engine, get_session
 from app.models import Area, Forecast, TrafficRecord
@@ -15,6 +16,7 @@ from app.venues import upsert_venues
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
+    warn_if_open()
     Base.metadata.create_all(engine)
     with SessionLocal() as session:
         upsert_venues(session)

@@ -78,6 +78,15 @@ Without a key, reports are refused. Only reports whose photo passed the
 check are stored and shown to other drivers. The check judges only what is visible, so
 it cannot prove a photo is recent or was taken at the reported spot.
 
+Each check is a paid model call, so one visitor (by IP address) can send at
+most 5 reports per 10 minutes. When the API runs behind a load balancer (e.g.
+on Render), set `TRUSTED_PROXY_HOPS=1` so the visitor's address is read from
+the proxy's `X-Forwarded-For` entry; otherwise every visitor looks like the
+proxy and they all share one limit. Only entries added by the trusted proxies
+are used, so a visitor can't dodge the limit by sending a fake header. The
+count is kept in memory: it resets on restart and isn't shared between
+several server instances.
+
 ## Endpoints
 
 | Method | Path | Returns |
@@ -124,8 +133,12 @@ them:
 These are rule-based estimates, not measurements (see `app/event_impact.py`).
 Event times without a timezone are read as Bengaluru time (IST).
 
-**No authentication yet:** anyone who can reach the API can add or delete
-events. Add auth before deploying it anywhere public.
+**Admin key:** set `ADMIN_TOKEN` (in `backend/.env` locally, or as a secret
+on your host) and adding, editing, importing or deleting events and adding
+venues then require that key in the `X-Admin-Token` header. On the Events
+page, type it into the "Admin key" box; it's remembered in that browser only.
+Reading events stays open. Without `ADMIN_TOKEN` anyone who can reach the API
+can change events (the server logs a warning), so always set it when deployed.
 
 ## Database tables
 

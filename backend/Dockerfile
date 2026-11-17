@@ -13,4 +13,5 @@ COPY ml/outputs/forecast_next_7_days.json ml/outputs/metrics.json /srv/ml/output
 
 EXPOSE 8000
 # Seed on start so the database always reflects the bundled data, then serve.
-CMD ["sh", "-c", "python -m app.seed && uvicorn app.main:app --host 0.0.0.0 --port 8000"]
+# Hosts like Render pass the port to listen on in $PORT.
+CMD ["sh", "-c", "python -m app.seed && uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
