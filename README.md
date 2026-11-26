@@ -1,5 +1,12 @@
 # CityFlow: Smart Urban Traffic Forecasting Platform 🌎
 
+## Live demo
+
+Website: https://cityflow-navy.vercel.app
+Backend API: https://cityflow-api.vercel.app
+API docs: https://cityflow-api.vercel.app/docs
+
+
 CityFlow is a data-driven platform that forecasts urban road congestion ahead of time and explains the factors behind each forecast. Unlike live navigation tools that only show current conditions, CityFlow analyzes historical traffic, weather, and calendar data to project how congestion will look hours or days into the future, then presents the results through an interactive monitoring dashboard.
 
 This repository holds the CityFlow web application (`src/`), the forecasting models (`ml/`), and a backend API with a database (`backend/`). Remaining work is tracked in the roadmap below.

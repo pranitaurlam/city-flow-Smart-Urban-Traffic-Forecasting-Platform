@@ -15,6 +15,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session, joinedload
 
 from app import event_impact
+from app.auth import require_admin
 from app.bookmyshow import parse_listing
 from app.db import get_session
 from app.models import Event, Venue
@@ -37,6 +38,7 @@ from app.seed import slugify
 from app.timeutil import CITY_TZ, from_utc_naive, to_utc_naive
 
 router = APIRouter(prefix="/api", tags=["events"])
+admin = [Depends(require_admin)]
 
 CSV_COLUMNS = ["venue", "title", "category", "starts_at", "ends_at", "expected_attendance", "url"]
 
@@ -92,7 +94,7 @@ def list_venues(session: Session = Depends(get_session)):
     return [venue_out(v) for v in session.scalars(select(Venue).order_by(Venue.name))]
 
 
-@router.post("/venues", response_model=VenueOut, status_code=201)
+@router.post("/venues", response_model=VenueOut, status_code=201, dependencies=admin)
 def create_venue(data: VenueIn, session: Session = Depends(get_session)):
     slug = slugify(data.name)
     if session.scalar(select(Venue).where(Venue.slug == slug)):
@@ -135,7 +137,7 @@ def get_event(event_id: int, session: Session = Depends(get_session)):
     return event_out(event)
 
 
-@router.post("/events", response_model=EventOut, status_code=201)
+@router.post("/events", response_model=EventOut, status_code=201, dependencies=admin)
 def create_event(data: EventIn, session: Session = Depends(get_session)):
     event = _apply(Event(), data, _venue_by_slug(session, data.venue))
     session.add(event)
@@ -143,7 +145,7 @@ def create_event(data: EventIn, session: Session = Depends(get_session)):
     return event_out(event)
 
 
-@router.put("/events/{event_id}", response_model=EventOut)
+@router.put("/events/{event_id}", response_model=EventOut, dependencies=admin)
 def update_event(event_id: int, data: EventIn, session: Session = Depends(get_session)):
     event = session.get(Event, event_id)
     if event is None:
@@ -153,7 +155,7 @@ def update_event(event_id: int, data: EventIn, session: Session = Depends(get_se
     return event_out(event)
 
 
-@router.delete("/events/{event_id}", status_code=204)
+@router.delete("/events/{event_id}", status_code=204, dependencies=admin)
 def delete_event(event_id: int, session: Session = Depends(get_session)):
     event = session.get(Event, event_id)
     if event is None:
@@ -163,7 +165,7 @@ def delete_event(event_id: int, session: Session = Depends(get_session)):
     return Response(status_code=204)
 
 
-@router.post("/events/import", response_model=ImportResult, status_code=201)
+@router.post("/events/import", response_model=ImportResult, status_code=201, dependencies=admin)
 def import_events(
     csv_text: str = Body(..., media_type="text/csv"),
     session: Session = Depends(get_session),
@@ -218,7 +220,12 @@ def import_events(
     return ImportResult(created=len(parsed))
 
 
-@router.post("/events/import/bookmyshow", response_model=PasteImportResult, status_code=200)
+@router.post(
+    "/events/import/bookmyshow",
+    response_model=PasteImportResult,
+    status_code=200,
+    dependencies=admin,
+)
 def import_from_bookmyshow(
     payload: PasteImportIn,
     session: Session = Depends(get_session),

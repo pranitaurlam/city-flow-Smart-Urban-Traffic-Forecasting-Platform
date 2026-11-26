@@ -97,9 +97,17 @@ def test_forecast_filters(client):
 
 def test_metrics_model_beats_baseline(client):
     metrics = client.get("/api/metrics").json()
-    assert len(metrics) == 14  # 2 targets x 7 horizons
+    assert len(metrics) == 14  # 2 targets x 7 horizons, single-day family only
     for m in metrics:
-        assert {s["model"] for s in m["models"]} == {"baseline", "random_forest", "xgboost"}
+        # Every candidate train.py evaluates, including the reference models.
+        assert {s["model"] for s in m["models"]} == {
+            "seasonal_naive",
+            "train_mean",
+            "climatology",
+            "ridge",
+            "random_forest",
+            "xgboost",
+        }
         assert sum(s["chosen"] for s in m["models"]) == 1
         # Acceptance criterion: beat the seasonal-naive baseline on >= 3 of 4 metrics.
         assert m["beats_baseline_on"] >= 3

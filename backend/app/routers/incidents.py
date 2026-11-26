@@ -18,6 +18,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app import image_check
+from app.client_ip import client_ip
 from app.db import get_session
 from app.models import IncidentReport
 from app.schemas import IncidentIn, IncidentOut
@@ -90,7 +91,7 @@ def report_incident(
     if len(image) > MAX_IMAGE_BYTES:
         raise HTTPException(413, "The photo is too large. Please upload one under 5 MB.")
 
-    _check_rate_limit(request.client.host if request.client else "unknown")
+    _check_rate_limit(client_ip(request))
 
     note = body.note.strip() if body.note and body.note.strip() else None
     try:

@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useRef, useState, type FormEvent } from "react";
-import { ExternalLink, FileUp, Moon, Pencil, Sun, Ticket, Trash2 } from "lucide-react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
+import { ExternalLink, FileUp, KeyRound, Moon, Pencil, Sun, Ticket, Trash2 } from "lucide-react";
 import { DashboardSidebar } from "@/components/dashboard/sidebar";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/hooks/use-theme";
@@ -10,6 +10,8 @@ import { BookMyShowImport } from "@/components/events/bookmyshow-import";
 import { LeaveEarlyAdvice } from "@/components/events/leave-early-advice";
 import {
   cityflowApi,
+  getAdminKey,
+  setAdminKey,
   type ApiEvent,
   type ApiVenue,
   type EventCategory,
@@ -124,6 +126,7 @@ function EventsPage() {
               </p>
             </div>
             <div className="flex items-center gap-3">
+              <AdminKeyField />
               <Button
                 variant="ghost"
                 size="icon"
@@ -159,6 +162,29 @@ function EventsPage() {
         </main>
       </div>
     </div>
+  );
+}
+
+/** Changing events needs the server's admin key; it's remembered in this browser only. */
+function AdminKeyField() {
+  const [key, setKey] = useState("");
+  useEffect(() => setKey(getAdminKey()), []);
+  return (
+    <label className="flex items-center gap-2 rounded-xl border border-border bg-secondary/60 px-3 py-1.5 text-sm">
+      <KeyRound className="size-4 shrink-0 text-muted-foreground" aria-hidden />
+      <span className="sr-only">Admin key</span>
+      <input
+        type="password"
+        value={key}
+        onChange={(e) => {
+          setKey(e.target.value);
+          setAdminKey(e.target.value.trim());
+        }}
+        placeholder="Admin key"
+        autoComplete="off"
+        className="w-28 bg-transparent outline-none placeholder:text-muted-foreground sm:w-36"
+      />
+    </label>
   );
 }
 

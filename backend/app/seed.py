@@ -97,8 +97,22 @@ def load_forecasts(session: Session, json_path: Path, areas: dict[str, Area]) ->
 
 
 def load_metrics(session: Session, json_path: Path) -> int:
+    """Loads ml/outputs/metrics.json into model_metrics.
+
+    train.py reports two target families: a single day and the 7-day mean.
+    model_metrics is unique on (target, horizon_days, model_name), so only the
+    single-day family is loaded here — it is the one /api/metrics describes.
+    The weekly-outlook figures stay in metrics.json; serving those too needs a
+    window column on this table.
+    """
+    payload = json.loads(json_path.read_text())
+    # Older runs wrote a bare list; current runs wrap it with config + ceiling.
+    entries = payload["runs"] if isinstance(payload, dict) else payload
+
     rows = []
-    for entry in json.loads(json_path.read_text()):
+    for entry in entries:
+        if entry.get("window", 1) != 1:
+            continue
         for model_name, m in entry["metrics"].items():
             rows.append(
                 {
