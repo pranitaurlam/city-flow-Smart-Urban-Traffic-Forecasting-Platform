@@ -19,10 +19,10 @@ import { Button } from "@/components/ui/button";
 import { useTheme } from "@/hooks/use-theme";
 import { bengaluruLocations } from "@/lib/locations";
 import { bangaloreTrafficHistory } from "@/data/bangalore-traffic-history";
-import { TierBadge } from "@/components/locations/panels";
 import { GlobeOrbit, HeroBackdrop, HeroCards } from "@/components/landing/hero-orbit";
 import { StreetScene } from "@/components/motion/street-scene";
-import { CitySkyline, Mascot, Sparkles } from "@/components/landing/cute";
+import { Sparkles } from "@/components/landing/cute";
+import { NammaBengaluru } from "@/components/landing/namma-bengaluru";
 import globeImage from "@/assets/cityflow-globe-transparent.png";
 
 export const Route = createFileRoute("/")({
@@ -116,17 +116,18 @@ function CityFlow() {
   };
 
   return (
-    <main className="min-h-screen overflow-hidden bg-background text-foreground transition-colors duration-500">
-      <section className="relative mx-auto min-h-[660px] max-w-[1536px] px-5 pb-8 pt-4 sm:px-8 lg:px-14">
+    <main className="cf-onepage bg-background text-foreground transition-colors duration-500">
+      <section className="cf-hero relative mx-auto flex w-full min-h-0 max-w-[1536px] flex-1 flex-col overflow-hidden px-5 pb-4 pt-3 sm:px-8 lg:px-14">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_62%_34%,color-mix(in_oklab,var(--brand-cyan)_16%,transparent),transparent_40%)]" />
         <HeroBackdrop />
-        <header className="relative z-30 flex h-14 items-center justify-between">
+        <header className="relative z-30 flex h-14 shrink-0 items-center justify-between">
           <a href="#top" className="flex items-center gap-2" aria-label="CityFlow home">
             <span className="grid size-10 place-items-center rounded-full bg-gradient-brand text-primary-foreground">
               <RouteIcon size={24} />
             </span>
             <span className="text-2xl font-extrabold tracking-normal">CityFlow</span>
           </a>
+          <NammaBengaluru className="hidden md:inline-flex" />
           <div className="hidden items-center gap-3 sm:flex">
             <Button
               variant="ghost"
@@ -168,13 +169,13 @@ function CityFlow() {
 
         <div
           id="top"
-          className="relative z-10 grid items-center gap-8 pt-10 lg:grid-cols-[0.82fr_1.18fr] lg:pt-12"
+          className="relative z-10 grid min-h-0 flex-1 items-center gap-6 pt-6 lg:grid-cols-[0.82fr_1.18fr] lg:pt-2"
         >
           <div className="relative z-20 max-w-xl">
             <div className="cf-rise mb-4 inline-flex items-center gap-2 rounded-full bg-secondary px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
               <span className="size-2 rounded-full bg-brand-cyan" /> Bengaluru traffic forecasts
             </div>
-            <h1 className="text-5xl font-extrabold leading-[0.98] tracking-normal sm:text-6xl lg:text-7xl">
+            <h1 className="text-[clamp(1.75rem,min(4.4vw,6.4vh),3.75rem)] font-extrabold leading-[0.98] tracking-normal">
               <span className="cf-rise block" style={{ "--d": "120ms" } as React.CSSProperties}>
                 Smarter Roads
               </span>
@@ -190,7 +191,7 @@ function CityFlow() {
               </span>
             </h1>
             <p
-              className="cf-rise mt-5 max-w-lg text-base leading-7 text-muted-foreground"
+              className="cf-rise mt-4 max-w-lg text-sm leading-6 text-muted-foreground"
               style={{ "--d": "500ms" } as React.CSSProperties}
             >
               See how congested Bengaluru&apos;s roads are likely to be over the next 7 days, and
@@ -199,7 +200,7 @@ function CityFlow() {
             </p>
             <form
               onSubmit={submitSearch}
-              className="cf-rise glass-panel mt-5 flex h-14 max-w-xl items-center gap-3 rounded-lg px-4 focus-within:ring-2 focus-within:ring-ring"
+              className="cf-rise glass-panel mt-4 flex h-12 max-w-xl items-center gap-3 rounded-lg px-4 focus-within:ring-2 focus-within:ring-ring"
               style={{ "--d": "620ms" } as React.CSSProperties}
             >
               <Search className="text-brand-cyan" />
@@ -215,7 +216,7 @@ function CityFlow() {
               </Button>
             </form>
             <div
-              className="cf-rise mt-3 flex flex-wrap items-center gap-2 text-xs text-muted-foreground"
+              className="cf-rise cf-hero-chips mt-3 flex flex-wrap items-center gap-2 text-xs text-muted-foreground"
               style={{ "--d": "740ms" } as React.CSSProperties}
             >
               <span>Popular:</span>
@@ -235,11 +236,10 @@ function CityFlow() {
                 {notice}
               </p>
             )}
-            <Mascot className="cf-rise mt-6" style={{ "--d": "880ms" } as React.CSSProperties} />
           </div>
 
-          <div className="relative min-h-[390px] lg:min-h-[485px]">
-            <div className="globe-float absolute left-1/2 top-1/2 w-[min(820px,120vw)] max-w-none -translate-x-1/2 -translate-y-1/2">
+          <div className="relative min-h-[300px] lg:h-full lg:min-h-0">
+            <div className="globe-float absolute left-1/2 top-1/2 w-[min(820px,120vw,88vh)] max-w-none -translate-x-1/2 -translate-y-1/2">
               <GlobeOrbit>
                 <img
                   src={globeImage}
@@ -255,24 +255,61 @@ function CityFlow() {
         </div>
       </section>
 
-      <div className="bg-gradient-to-b from-transparent via-[color-mix(in_oklab,var(--brand-cyan)_8%,transparent)] to-transparent">
-        <CitySkyline />
-        <StreetScene />
-      </div>
+      <section
+        id="locations"
+        className="relative z-20 shrink-0 border-t border-border bg-gradient-to-b from-transparent via-[color-mix(in_oklab,var(--brand-cyan)_8%,transparent)] to-transparent"
+      >
+        <div className="mx-auto grid max-w-[1450px] items-center gap-6 px-5 py-4 sm:px-8 lg:grid-cols-[0.85fr_1.15fr] lg:px-14">
+          <div className="cf-rise">
+            <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-brand-cyan">
+              Explore Bengaluru
+            </p>
+            <h2 className="mt-1 text-2xl font-extrabold leading-tight tracking-normal sm:text-3xl">
+              Traffic Insights for <span className="text-gradient-brand">Every Area</span>
+            </h2>
+            <p className="mt-2 max-w-lg text-xs leading-5 text-muted-foreground">
+              Search a location above to open its own forecast. The citywide dashboard lists every
+              area with its current traffic level.
+            </p>
+            <Button variant="default" size="sm" className="mt-3" asChild>
+              <Link to="/dashboard/$city" params={{ city: "bengaluru" }}>
+                Citywide Dashboard <ArrowRight />
+              </Link>
+            </Button>
+          </div>
+          <div className="cf-rise" style={{ "--d": "140ms" } as React.CSSProperties}>
+            <StreetScene />
+            <div className="mt-1 grid grid-cols-2 gap-x-5 gap-y-2 border-t border-border pt-3 sm:grid-cols-4">
+              <Metric
+                icon={MapPin}
+                value={`${bengaluruLocations.length}`}
+                label="Bengaluru locations"
+              />
+              <Metric
+                icon={Database}
+                value={datasetRecords.toLocaleString()}
+                label={`Records across ${datasetAreas} areas`}
+              />
+              <Metric icon={CalendarDays} value="7 days" label="Forecast horizon" />
+              <Metric icon={RouteIcon} value="Forecast, not live" label="Every figure labelled" />
+            </div>
+          </div>
+        </div>
+      </section>
 
       <section
         id="explore"
-        className="relative z-20 border-y border-border bg-surface-strong py-4 backdrop-blur-xl"
+        className="relative z-20 shrink-0 border-t border-border bg-surface-strong py-3 backdrop-blur-xl"
       >
-        <div className="mx-auto grid max-w-[1450px] gap-3 px-5 sm:grid-cols-2 sm:px-8 lg:grid-cols-4 lg:px-14">
+        <div className="cf-stagger mx-auto grid max-w-[1450px] gap-3 px-5 sm:grid-cols-2 sm:px-8 lg:grid-cols-4 lg:px-14">
           {features.map(({ icon: Icon, title, copy, to, params }) => (
             <Link
               key={title}
               to={to}
               params={params}
-              className="cf-reveal group flex min-h-20 items-center gap-3 rounded-lg border border-border bg-surface p-3 text-left transition hover:-translate-y-1 hover:border-brand-cyan hover:shadow-brand"
+              className="group flex items-center gap-3 rounded-lg border border-border bg-surface p-2.5 text-left transition hover:-translate-y-1 hover:border-brand-cyan hover:shadow-brand"
             >
-              <span className="cf-wiggle grid size-11 shrink-0 place-items-center rounded-lg bg-secondary text-brand-cyan">
+              <span className="cf-wiggle grid size-9 shrink-0 place-items-center rounded-lg bg-secondary text-brand-cyan">
                 <Icon />
               </span>
               <span className="min-w-0">
@@ -282,80 +319,6 @@ function CityFlow() {
               <ArrowRight className="ml-auto size-4 text-brand-cyan transition group-hover:translate-x-1" />
             </Link>
           ))}
-        </div>
-      </section>
-
-      <section id="locations" className="mx-auto max-w-[1450px] px-5 py-10 sm:px-8 lg:px-14">
-        <div className="grid gap-8 lg:grid-cols-[0.38fr_1fr] lg:items-start">
-          <div className="cf-reveal">
-            <p className="text-xs font-bold uppercase tracking-[0.22em] text-brand-cyan">
-              Explore Bengaluru
-            </p>
-            <h2 className="mt-3 text-4xl font-extrabold leading-tight tracking-normal">
-              Traffic Insights
-              <br />
-              for <span className="text-gradient-brand">Every Area</span>
-            </h2>
-            <p className="mt-3 text-sm leading-6 text-muted-foreground">
-              Pick a location to open its own forecast: expected traffic, the busiest hours, the
-              weekly pattern and the factors behind it.
-            </p>
-            <Button variant="default" className="mt-5" asChild>
-              <Link to="/dashboard/$city" params={{ city: "bengaluru" }}>
-                Citywide Dashboard <ArrowRight />
-              </Link>
-            </Button>
-          </div>
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            {filteredLocations.length ? (
-              filteredLocations.map((location) => (
-                <Link
-                  key={location.slug}
-                  to="/forecast"
-                  search={{ loc: location.slug }}
-                  className="cf-reveal group flex items-center justify-between gap-3 rounded-lg border border-border bg-card p-4 shadow-sm transition hover:-translate-y-1 hover:border-brand-cyan hover:shadow-brand"
-                >
-                  <span className="min-w-0">
-                    <span className="flex items-center gap-1.5 text-sm font-bold">
-                      <MapPin size={14} className="shrink-0 text-brand-cyan" />
-                      <span className="truncate">{location.name}</span>
-                    </span>
-                    <span className="mt-2 block">
-                      <TierBadge tier={location.baseTier} />
-                    </span>
-                  </span>
-                  <ArrowRight className="size-4 shrink-0 text-brand-cyan transition group-hover:translate-x-1" />
-                </Link>
-              ))
-            ) : (
-              <div className="col-span-full grid min-h-52 place-items-center rounded-lg border border-dashed border-border text-center text-muted-foreground">
-                <div>
-                  <Search className="mx-auto mb-2" />
-                  <p>No matching location yet.</p>
-                  <button
-                    className="mt-2 text-sm font-semibold text-brand-cyan"
-                    onClick={() => setQuery("")}
-                  >
-                    View all locations
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-        <div className="cf-reveal mt-9 grid gap-5 border-t border-border pt-7 sm:grid-cols-2 lg:grid-cols-4">
-          <Metric
-            icon={MapPin}
-            value={`${bengaluruLocations.length}`}
-            label="Bengaluru locations"
-          />
-          <Metric
-            icon={Database}
-            value={datasetRecords.toLocaleString()}
-            label={`Dataset records across ${datasetAreas} areas`}
-          />
-          <Metric icon={CalendarDays} value="7 days" label="Forecast horizon" />
-          <Metric icon={RouteIcon} value="Forecast, not live" label="Every figure is labelled" />
         </div>
       </section>
     </main>
@@ -372,11 +335,11 @@ function Metric({
   label: string;
 }) {
   return (
-    <div className="flex items-center gap-3">
-      <Icon className="size-7 text-brand-cyan" />
-      <div>
-        <strong className="block text-sm">{value}</strong>
-        <span className="text-xs text-muted-foreground">{label}</span>
+    <div className="flex items-center gap-2">
+      <Icon className="size-5 shrink-0 text-brand-cyan" />
+      <div className="min-w-0">
+        <strong className="block text-xs leading-tight">{value}</strong>
+        <span className="text-[11px] leading-tight text-muted-foreground">{label}</span>
       </div>
     </div>
   );

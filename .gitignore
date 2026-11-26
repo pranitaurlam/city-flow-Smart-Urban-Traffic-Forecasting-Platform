@@ -21,6 +21,9 @@ dist-ssr
 .wrangler/
 .dev.vars
 
+# Vercel (local link + build output)
+.vercel
+
 # Python (ml/, backend/)
 __pycache__/
 *.pyc

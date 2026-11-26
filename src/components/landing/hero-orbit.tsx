@@ -76,7 +76,7 @@ export function HeroCards() {
           </div>
         </div>
       ))}
-      <p className="absolute -bottom-7 right-0 z-20 hidden font-mono text-[10px] tracking-wide text-muted-foreground lg:block">
+      <p className="absolute bottom-0 right-0 z-20 hidden font-mono text-[10px] tracking-wide text-muted-foreground lg:block">
         Illustrative example · sample trip, not live traffic
       </p>
     </>

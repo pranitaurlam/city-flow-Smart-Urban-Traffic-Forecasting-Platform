@@ -106,7 +106,8 @@
   --surface: oklch(0.99 0.008 250 / 82%);
   --surface-strong: oklch(1 0 0 / 94%);
   --brand-cyan: oklch(0.73 0.16 225);
-  --brand-violet: oklch(0.62 0.24 300);
+  /* Sea green — the "violet" in the name is historical. */
+  --brand-violet: oklch(0.58 0.13 168);
   --brand-blue: oklch(0.58 0.19 255);
   --success: oklch(0.76 0.17 165);
   --warning: oklch(0.8 0.17 83);
@@ -135,7 +136,7 @@
   --chart-1: oklch(0.488 0.243 264.376);
   --chart-2: oklch(0.696 0.17 162.48);
   --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-4: oklch(0.7 0.13 168);
   --chart-5: oklch(0.645 0.246 16.439);
   --sidebar: oklch(0.208 0.042 265.755);
   --sidebar-foreground: oklch(0.984 0.003 247.858);
@@ -148,8 +149,9 @@
   --surface: oklch(0.2 0.05 253 / 75%);
   --surface-strong: oklch(0.17 0.045 253 / 92%);
   --brand-cyan: oklch(0.76 0.16 225);
-  --brand-violet: oklch(0.67 0.23 300);
-  --brand-blue: oklch(0.7 0.17 255);
+  /* Sea green, not violet — no purple in either theme. */
+  --brand-violet: oklch(0.68 0.13 168);
+  --brand-blue: oklch(0.62 0.19 255);
   --success: oklch(0.78 0.17 165);
   --warning: oklch(0.82 0.17 83);
 }
@@ -164,6 +166,84 @@
     color: var(--color-foreground);
     font-family: var(--font-sans);
   }
+}
+
+/* The landing page holds a single screen when the viewport is both wide and
+   tall enough for its content. Shorter or narrower viewports scroll normally,
+   so nothing is ever clipped. 100svh keeps mobile browser chrome out of it. */
+.cf-onepage {
+  display: flex;
+  flex-direction: column;
+  min-height: 100svh;
+  overflow-x: clip;
+}
+
+@media (min-width: 1024px) and (min-height: 680px) {
+  .cf-onepage {
+    height: 100svh;
+    min-height: 0;
+    overflow: hidden;
+  }
+}
+
+/* Short viewports: tighten the hero stack so it keeps to its share of the
+   single screen. Paired with the height-aware clamp on the headline. */
+@media (max-height: 860px) {
+  .cf-hero p,
+  .cf-hero form {
+    margin-top: 0.75rem;
+  }
+
+  .cf-hero form {
+    height: 2.75rem;
+  }
+
+  .cf-hero .cf-hero-chips {
+    margin-top: 0.5rem;
+  }
+}
+
+@media (max-height: 740px) {
+  .cf-hero p,
+  .cf-hero form {
+    margin-top: 0.5rem;
+  }
+
+  .cf-hero .cf-hero-chips {
+    margin-top: 0.375rem;
+  }
+}
+
+/* Short viewports: shrink the junction so the landing page still holds one
+   screen without the content below it being squeezed. */
+@media (max-height: 820px) {
+  .cf-street[data-size="full"] {
+    --cross-w: 46px;
+    --car-w: 25px;
+    --car-h: 13px;
+    --gap: 8px;
+    height: 92px;
+  }
+}
+
+@media (max-height: 700px) {
+  .cf-street[data-size="full"] {
+    height: 76px;
+  }
+}
+
+/* "Namma Bengaluru" lockup. Kannada/script faces fall back to system fonts
+   if the Google Fonts stylesheet is unavailable. */
+@utility namma-script {
+  font-family: "Playfair Display", Georgia, "Times New Roman", serif;
+  font-style: italic;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+@utility namma-kannada {
+  font-family: "Noto Sans Kannada", "Kannada MN", "Nirmala UI", "Tunga", sans-serif;
+  font-weight: 700;
 }
 
 @utility bg-gradient-brand {
@@ -1290,5 +1370,106 @@
   }
   .group:hover .cf-wiggle {
     animation: cf-wiggle 0.7s ease-in-out;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Arrival timeline trip: the traveller drives from home (--from) to its
+   typical arrival (--to) on a 6 s loop, leaving a trail; the deadline flag
+   waves. Without motion it rests at the arrival point with the full trail.
+--------------------------------------------------------------------------- */
+
+.cf-trip-road {
+  background:
+    repeating-linear-gradient(
+        90deg,
+        color-mix(in oklab, var(--foreground) 28%, transparent) 0 14px,
+        transparent 14px 28px
+      )
+      center / 100% 2px no-repeat,
+    color-mix(in oklab, var(--foreground) 8%, transparent);
+}
+
+.cf-trip-trail {
+  width: var(--trail);
+  opacity: 0.85;
+}
+
+@keyframes cf-trip-drive {
+  0% {
+    left: var(--from);
+    opacity: 0;
+  }
+  6% {
+    left: var(--from);
+    opacity: 1;
+  }
+  62% {
+    left: var(--to);
+  }
+  88% {
+    left: var(--to);
+    opacity: 1;
+  }
+  100% {
+    left: var(--to);
+    opacity: 0;
+  }
+}
+
+@keyframes cf-trip-grow {
+  0%,
+  6% {
+    width: 0;
+    opacity: 0.85;
+  }
+  62%,
+  88% {
+    width: var(--trail);
+    opacity: 0.85;
+  }
+  100% {
+    width: var(--trail);
+    opacity: 0;
+  }
+}
+
+@keyframes cf-trip-road-move {
+  to {
+    background-position:
+      -28px center,
+      0 0;
+  }
+}
+
+@keyframes cf-flag-wave {
+  0%,
+  100% {
+    transform: rotate(-8deg);
+  }
+  50% {
+    transform: rotate(8deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .cf-trip-road {
+    animation: cf-trip-road-move 0.8s linear infinite;
+  }
+  .cf-trip-vehicle {
+    animation: cf-trip-drive 6s cubic-bezier(0.45, 0, 0.25, 1) infinite;
+  }
+  .cf-trip-trail {
+    animation: cf-trip-grow 6s cubic-bezier(0.45, 0, 0.25, 1) infinite;
+  }
+  .cf-trip-bob {
+    animation: cf-car-bob 0.6s ease-in-out infinite;
+  }
+  .cf-trip-puff {
+    animation: cf-puff 1.2s ease-out infinite;
+  }
+  .cf-flag {
+    transform-origin: bottom center;
+    animation: cf-flag-wave 1.4s ease-in-out infinite;
   }
 }
