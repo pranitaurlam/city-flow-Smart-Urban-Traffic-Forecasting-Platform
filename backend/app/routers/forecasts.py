@@ -59,7 +59,11 @@ def list_metrics(target: Target | None = None, session: Session = Depends(get_se
 
     result = []
     for (tgt, horizon), rows in grouped.items():
-        baseline = next((r for r in rows if r.model_name == "baseline"), None)
+        # The seasonal-naive reference was called "baseline" before train.py
+        # started reporting several reference models by name.
+        baseline = next(
+            (r for r in rows if r.model_name in ("seasonal_naive", "baseline")), None
+        )
         chosen = next((r for r in rows if r.is_chosen), None)
         beats = 0
         if baseline and chosen:

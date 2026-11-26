@@ -24,12 +24,13 @@ import {
   Car,
   CloudRain,
   Droplets,
+  ExternalLink,
   Gauge,
   MapPin,
   Moon,
   PersonStanding,
   Sun,
-  ExternalLink,
+  Ticket,
   Zap,
 } from "lucide-react";
 import { DashboardSidebar } from "@/components/dashboard/sidebar";
@@ -78,8 +79,36 @@ import {
 } from "@/lib/route-forecast";
 import { formatReportedAt, incidentsOnRoute, INCIDENT_LABEL } from "@/lib/incidents";
 
+/** Lets the Events page hand a trip over already set up to beat an event crowd. */
+type JourneySearch = {
+  from?: string | undefined;
+  to?: string | undefined;
+  /** Days from today, 0-6. */
+  day?: number | undefined;
+  hour?: number | undefined;
+  /** Title of the event this trip is planned around, shown as a notice. */
+  event?: string | undefined;
+};
+
 export const Route = createFileRoute("/route-forecast")({
   ssr: false,
+  validateSearch: (search: Record<string, unknown>): JourneySearch => {
+    const slug = (value: unknown) =>
+      typeof value === "string" && bengaluruLocations.some((l) => l.slug === value)
+        ? value
+        : undefined;
+    const clamp = (value: unknown, min: number, max: number) => {
+      const n = Number(value);
+      return Number.isFinite(n) ? Math.min(max, Math.max(min, Math.round(n))) : undefined;
+    };
+    return {
+      from: slug(search["from"]),
+      to: slug(search["to"]),
+      day: clamp(search["day"], 0, 6),
+      hour: clamp(search["hour"], 0, 23),
+      event: typeof search["event"] === "string" ? search["event"].slice(0, 200) : undefined,
+    };
+  },
   head: () => ({ meta: [{ title: "Plan Journey | CityFlow" }] }),
   component: RouteForecastPage,
 });
@@ -193,12 +222,13 @@ function nearestKnown(lat: number, lon: number) {
 function RouteForecastPage() {
   const { dark, toggleDark } = useTheme();
   const { incidents, available: incidentsAvailable, refresh: refreshIncidents } = useIncidents();
-  const [sourceSlug, setSourceSlug] = useState("marathahalli");
-  const [destSlug, setDestSlug] = useState("mg-road");
+  const search = Route.useSearch();
+  const [sourceSlug, setSourceSlug] = useState(search.from ?? "marathahalli");
+  const [destSlug, setDestSlug] = useState(search.to ?? "mg-road");
   const [mode, setMode] = useState<TravelMode>("car");
   const [planned, setPlanned] = useState(true);
-  const [dayOffset, setDayOffset] = useState(1);
-  const [hour, setHour] = useState(18);
+  const [dayOffset, setDayOffset] = useState(search.day ?? 1);
+  const [hour, setHour] = useState(search.hour ?? 18);
   const [heatmapMode, setHeatmapMode] = useState<"off" | "live" | "forecast" | "historical">("off");
   const monitor = useRouteMonitor();
 
@@ -573,6 +603,20 @@ function RouteForecastPage() {
 
         <main className="cf-stagger mx-auto w-full max-w-[1400px] flex-1 space-y-6 px-5 py-6 sm:px-8">
           <JourneyModeSwitch active="depart" />
+
+          {search.event && (
+            <section
+              role="status"
+              className="flex flex-wrap items-center gap-2 rounded-xl border border-brand-cyan/40 bg-surface p-3 text-xs"
+            >
+              <Ticket className="size-4 shrink-0 text-brand-cyan" />
+              <span className="font-bold">Planned around &ldquo;{search.event}&rdquo;</span>
+              <span className="text-muted-foreground">
+                The destination and departure below are set to get you past the venue before the
+                crowd arrives. Adjust them freely.
+              </span>
+            </section>
+          )}
 
           {/* 3. Source / Destination */}
           <section className="glass-panel rounded-2xl p-5">

@@ -105,7 +105,8 @@ class ModelMetric(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     target: Mapped[str] = mapped_column(String(32))
     horizon_days: Mapped[int] = mapped_column(Integer)
-    # "baseline", "random_forest" or "xgboost"
+    # "seasonal_naive", "train_mean", "climatology", "ridge", "xgboost" or
+    # "random_forest" — see ml/train.py for what each one is.
     model_name: Mapped[str] = mapped_column(String(32))
     mae: Mapped[float] = mapped_column(Float)
     rmse: Mapped[float] = mapped_column(Float)

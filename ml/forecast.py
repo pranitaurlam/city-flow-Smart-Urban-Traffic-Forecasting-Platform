@@ -103,8 +103,11 @@ def forecast_from(as_of_date: pd.Timestamp, daily: pd.DataFrame) -> pd.DataFrame
                 pred = float(model.predict(row_df[cols])[0])
 
                 actual = None
-                if target_date in area_series.set_index("date").index:
-                    actual = float(area_series.set_index("date")[target_col].get(target_date))
+                actual_is_interpolated = None
+                indexed = area_series.set_index("date")
+                if target_date in indexed.index:
+                    actual = float(indexed[target_col].get(target_date))
+                    actual_is_interpolated = bool(indexed["is_interpolated"].get(target_date))
 
                 rows.append(
                     {
@@ -115,6 +118,9 @@ def forecast_from(as_of_date: pd.Timestamp, daily: pd.DataFrame) -> pd.DataFrame
                         "horizon_days": horizon,
                         "predicted": round(pred, 2),
                         "actual": round(actual, 2) if actual is not None else None,
+                        # An interpolated actual is a blend of its neighbours, not
+                        # a reading, so error against it is not a fair score.
+                        "actual_is_interpolated": actual_is_interpolated,
                         "weather_forecast_persisted": feat_dict["weather_is_persisted"],
                     }
                 )
@@ -135,7 +141,16 @@ def main():
     print(
         cong.pivot_table(index="area", columns="horizon_days", values="abs_err", aggfunc="first").round(1)
     )
-    print(f"\nMean absolute error across all area/day combos: {cong['abs_err'].mean():.2f} points")
+    observed = cong[cong["actual_is_interpolated"] == False]  # noqa: E712 - pandas mask
+    print(
+        f"\nMean absolute error on observed actuals: {observed['abs_err'].mean():.2f} points "
+        f"({len(observed.dropna(subset=['abs_err']))} area/day pairs)"
+    )
+    print(
+        f"Including interpolated actuals: {cong['abs_err'].mean():.2f} points "
+        f"({len(cong.dropna(subset=['abs_err']))} pairs) — a one-week sample, so noisy; "
+        "ml/outputs/metrics.json has the 90-day held-out figures."
+    )
     print(f"\nFull forecast saved to {OUT_DIR / 'forecast_next_7_days.json'}")
 
 

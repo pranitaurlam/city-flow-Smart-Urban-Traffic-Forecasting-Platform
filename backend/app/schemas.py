@@ -160,6 +160,38 @@ class ImportResult(BaseModel):
     created: int
 
 
+class PasteImportIn(BaseModel):
+    """Raw text copied from BookMyShow's Bengaluru events listing."""
+
+    text: str = Field(min_length=10, max_length=200_000)
+    dry_run: bool = Field(
+        default=True, description="Preview the parsed rows without saving them"
+    )
+    source_url: str | None = Field(default=None, max_length=500)
+
+
+class ParsedEventOut(BaseModel):
+    """One row read out of a paste, saved only when `venue` resolved."""
+
+    title: str
+    category: EventCategory
+    starts_at: datetime
+    ends_at: datetime
+    expected_attendance: int | None = None
+    venue_text: str
+    venue: str | None = None
+    venue_name: str | None = None
+    issues: list[str] = []
+
+
+class PasteImportResult(BaseModel):
+    events: list[ParsedEventOut]
+    created: int = 0
+    skipped: int = 0
+    duplicates: int = 0
+    dry_run: bool = True
+
+
 class RouteGeometry(BaseModel):
     id: str = Field(max_length=40)
     # [lat, lon] pairs in travel order.

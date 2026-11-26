@@ -43,10 +43,22 @@ def _add_calendar_features(df: pd.DataFrame, date_col: str, prefix: str) -> pd.D
     return df
 
 
-def build_supervised(daily: pd.DataFrame, horizon: int, target_col: str) -> pd.DataFrame:
+def build_supervised(
+    daily: pd.DataFrame, horizon: int, target_col: str, window: int = 1
+) -> pd.DataFrame:
     """One row per (area, date) with features known as-of `date` plus the
-    target value `horizon` days later."""
+    target for the days starting `horizon` days later.
+
+    `window` sets what is predicted:
+      - 1 (default): that single day's value.
+      - 7: the mean over those 7 days — the "next week's level" outlook.
+
+    A single day in this dataset is mostly noise (see ml/README.md), so the
+    averaged target is both easier to predict and closer to what a planner
+    actually asks. It is a different question, not a better-trained model.
+    """
     assert target_col in VALUE_COLS
+    assert window >= 1
 
     frames = []
     for area, g in daily.groupby("area"):
@@ -76,7 +88,22 @@ def build_supervised(daily: pd.DataFrame, horizon: int, target_col: str) -> pd.D
         feat = feat.drop(columns=["weather_now"])
 
         feat["horizon"] = horizon
-        feat["target"] = g[target_col].shift(-horizon).to_numpy()
+        feat["window"] = window
+
+        # Target: the value at t+h, or the mean over t+h .. t+h+window-1.
+        future = g[target_col].shift(-horizon)
+        observed = (~g["is_interpolated"]).astype(float).shift(-horizon)
+        if window > 1:
+            future = future.rolling(window).mean().shift(-(window - 1))
+            observed = observed.rolling(window).mean().shift(-(window - 1))
+        feat["target"] = future.to_numpy()
+
+        # Share of the target period that was really observed rather than filled
+        # in by data.py's interpolation. An interpolated target is a blend of
+        # neighbouring observed days that the lag features already contain, so
+        # scoring on it measures the interpolation rather than forecasting skill.
+        # Kept out of the feature matrix and used only to filter evaluation rows.
+        feat["target_observed_share"] = observed.to_numpy()
 
         frames.append(feat)
 
@@ -85,5 +112,14 @@ def build_supervised(daily: pd.DataFrame, horizon: int, target_col: str) -> pd.D
     return out.dropna().reset_index(drop=True)
 
 
+NON_FEATURE_COLS = ("date", "target_date", "target", "target_observed_share")
+
+
 def feature_columns(df: pd.DataFrame) -> list[str]:
-    return [c for c in df.columns if c not in ("date", "target_date", "target")]
+    return [c for c in df.columns if c not in NON_FEATURE_COLS]
+
+
+def area_columns(df: pd.DataFrame) -> list[str]:
+    """The one-hot area columns, i.e. the only genuinely informative features
+    in this dataset (see ml/README.md on why)."""
+    return [c for c in df.columns if c.startswith("area_")]

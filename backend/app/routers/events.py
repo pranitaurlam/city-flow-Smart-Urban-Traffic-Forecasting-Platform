@@ -16,6 +16,7 @@ from sqlalchemy.orm import Session, joinedload
 
 from app import event_impact
 from app.auth import require_admin
+from app.bookmyshow import parse_listing
 from app.db import get_session
 from app.models import Event, Venue
 from app.schemas import (
@@ -24,6 +25,9 @@ from app.schemas import (
     EventOut,
     ImpactWindowOut,
     ImportResult,
+    ParsedEventOut,
+    PasteImportIn,
+    PasteImportResult,
     RouteImpact,
     RouteImpactRequest,
     RouteImpactResponse,
@@ -31,7 +35,7 @@ from app.schemas import (
     VenueOut,
 )
 from app.seed import slugify
-from app.timeutil import from_utc_naive, to_utc_naive
+from app.timeutil import CITY_TZ, from_utc_naive, to_utc_naive
 
 router = APIRouter(prefix="/api", tags=["events"])
 admin = [Depends(require_admin)]
@@ -214,6 +218,97 @@ def import_events(
         session.add(_apply(Event(), data, venue))
     session.commit()
     return ImportResult(created=len(parsed))
+
+
+@router.post(
+    "/events/import/bookmyshow",
+    response_model=PasteImportResult,
+    status_code=200,
+    dependencies=admin,
+)
+def import_from_bookmyshow(
+    payload: PasteImportIn,
+    session: Session = Depends(get_session),
+):
+    """Read events out of text copied from BookMyShow's Bengaluru listing.
+
+    BookMyShow has no public API and 403s automated requests, so the listing is
+    pasted in rather than fetched. Defaults to a dry run: the parsed rows come
+    back for review and nothing is saved until `dry_run` is false. Rows whose
+    venue is not one of the tracked venues are reported and never saved, since
+    the delay estimate needs the venue's location and capacity.
+    """
+    venues = list(session.scalars(select(Venue)))
+    parsed = parse_listing(
+        payload.text,
+        [(v.slug, v.name) for v in venues],
+        today=datetime.now(CITY_TZ).date(),
+    )
+    by_slug = {v.slug: v for v in venues}
+    # The same listing gets pasted again as it is refreshed, so match what is
+    # already stored and leave it alone rather than stacking up copies.
+    existing = {
+        (e.venue_id, e.title.strip().lower(), e.starts_at)
+        for e in session.scalars(select(Event))
+    }
+
+    rows: list[ParsedEventOut] = []
+    to_save: list[tuple[EventIn, Venue]] = []
+    duplicates = 0
+    for item in parsed:
+        venue = by_slug.get(item.venue_slug) if item.venue_slug else None
+        issues = list(item.issues)
+        attendance = venue.capacity if venue else None
+        if venue is not None:
+            try:
+                data = EventIn(
+                    venue=venue.slug,
+                    title=item.title,
+                    category=item.category,
+                    starts_at=item.starts_at,
+                    ends_at=item.ends_at,
+                    url=payload.source_url,
+                )
+            except ValidationError as exc:
+                issues.extend(e["msg"] for e in exc.errors())
+                venue = None
+            else:
+                key = (venue.id, data.title.strip().lower(), data.starts_at)
+                if key in existing:
+                    duplicates += 1
+                    issues.append("already in CityFlow, left as it is")
+                else:
+                    existing.add(key)
+                    to_save.append((data, venue))
+
+        rows.append(
+            ParsedEventOut(
+                title=item.title,
+                category=item.category,
+                starts_at=from_utc_naive(to_utc_naive(item.starts_at)),
+                ends_at=from_utc_naive(to_utc_naive(item.ends_at)),
+                expected_attendance=attendance,
+                venue_text=item.venue_text,
+                venue=venue.slug if venue else None,
+                venue_name=venue.name if venue else None,
+                issues=issues,
+            )
+        )
+
+    created = 0
+    if not payload.dry_run and to_save:
+        for data, venue in to_save:
+            session.add(_apply(Event(), data, venue))
+        session.commit()
+        created = len(to_save)
+
+    return PasteImportResult(
+        events=rows,
+        created=created,
+        skipped=len(rows) - len(to_save) - duplicates,
+        duplicates=duplicates,
+        dry_run=payload.dry_run,
+    )
 
 
 # --- route impact ---------------------------------------------------------
