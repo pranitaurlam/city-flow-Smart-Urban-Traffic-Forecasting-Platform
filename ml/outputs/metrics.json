@@ -1,422 +1,1701 @@
-[
-  {
-    "target": "congestion_pct",
-    "horizon": 1,
-    "train_rows": 6770,
-    "test_rows": 718,
-    "full_train_rows": 7488,
-    "metrics": {
-      "baseline": {
-        "mae": 18.362783493511923,
-        "rmse": 24.261888050314994,
-        "mape": 31.68268008822538,
-        "r2": -0.19521125510304738
-      },
-      "random_forest": {
-        "mae": 13.066852068483326,
-        "rmse": 17.16291086032897,
-        "mape": 23.586666719914266,
-        "r2": 0.4018950743966645
-      },
-      "xgboost": {
-        "mae": 13.010589464249843,
-        "rmse": 17.08342116884044,
-        "mape": 23.519610775141977,
-        "r2": 0.40742246759324086
-      }
-    },
-    "chosen_model": "xgboost",
-    "beats_baseline_on": 4,
-    "model_path": "outputs/models/congestion_pct_h1_xgboost.joblib"
+{
+  "config": {
+    "test_days": 90,
+    "cv_folds": 4,
+    "windows": [
+      1,
+      7
+    ],
+    "min_observed_share": {
+      "1": 1.0,
+      "7": 0.8
+    }
   },
-  {
-    "target": "congestion_pct",
-    "horizon": 2,
-    "train_rows": 6762,
-    "test_rows": 718,
-    "full_train_rows": 7480,
-    "metrics": {
-      "baseline": {
-        "mae": 17.75534686133569,
-        "rmse": 23.806627094607865,
-        "mape": 30.57707918002735,
-        "r2": -0.1507771336467163
-      },
-      "random_forest": {
-        "mae": 13.618779783982301,
-        "rmse": 17.58942044484314,
-        "mape": 25.01031134263869,
-        "r2": 0.37179911279082045
-      },
-      "xgboost": {
-        "mae": 13.763167830746013,
-        "rmse": 17.755110629040118,
-        "mape": 25.22410904677753,
-        "r2": 0.359908219271437
-      }
-    },
-    "chosen_model": "xgboost",
-    "beats_baseline_on": 4,
-    "model_path": "outputs/models/congestion_pct_h2_xgboost.joblib"
+  "variance_ceiling_r2": {
+    "congestion_pct": 0.3604,
+    "avg_speed_kph": 0.0805,
+    "traffic_volume": 0.4875
   },
-  {
-    "target": "congestion_pct",
-    "horizon": 3,
-    "train_rows": 6754,
-    "test_rows": 718,
-    "full_train_rows": 7472,
-    "metrics": {
-      "baseline": {
-        "mae": 18.22676132899935,
-        "rmse": 24.5351117392088,
-        "mape": 31.99388518834409,
-        "r2": -0.22228242077676286
+  "runs": [
+    {
+      "target": "congestion_pct",
+      "window": 1,
+      "predicts": "the value 1 day(s) ahead",
+      "horizon": 1,
+      "train_rows": 6770,
+      "test_rows": 718,
+      "test_rows_scored": 563,
+      "test_rows_dropped_interpolated": 155,
+      "min_observed_share": 1.0,
+      "full_train_rows": 7488,
+      "cv_r2": {
+        "climatology": 0.3253262980316425,
+        "ridge": 0.31798302523554556,
+        "xgboost": 0.30930004836741104,
+        "random_forest": 0.30538630544303624
       },
-      "random_forest": {
-        "mae": 13.478208429825846,
-        "rmse": 17.467144292619274,
-        "mape": 24.804332873891536,
-        "r2": 0.3805028667477268
+      "metrics": {
+        "seasonal_naive": {
+          "mae": 18.217580131812873,
+          "rmse": 24.335279618824178,
+          "mape": 31.982017715763366,
+          "r2": -0.187034597739135
+        },
+        "train_mean": {
+          "mae": 19.106978389112143,
+          "rmse": 22.368729890289693,
+          "mape": 34.62011886356414,
+          "r2": -0.0029362907063319454
+        },
+        "climatology": {
+          "mae": 14.172034350578064,
+          "rmse": 18.258066333332742,
+          "mape": 26.510286012040503,
+          "r2": 0.3318095613839399
+        },
+        "ridge": {
+          "mae": 14.23033910035025,
+          "rmse": 18.406515967919677,
+          "mape": 26.07287042769675,
+          "r2": 0.3208997668806095
+        },
+        "xgboost": {
+          "mae": 14.37822866078327,
+          "rmse": 18.588431666025517,
+          "mape": 26.63320156435941,
+          "r2": 0.3074100358632189
+        },
+        "random_forest": {
+          "mae": 14.34360542737765,
+          "rmse": 18.599793193672685,
+          "mape": 26.53649279198367,
+          "r2": 0.30656313441873606
+        }
       },
-      "xgboost": {
-        "mae": 13.678180257543916,
-        "rmse": 17.76854136060814,
-        "mape": 25.294200468736506,
-        "r2": 0.358939466938784
-      }
+      "chosen_model": "climatology",
+      "chosen_by": "highest mean R\u00b2 over 4 rolling folds",
+      "beats_seasonal_naive_on": 4,
+      "model_path": "outputs/models/congestion_pct_h1_climatology.joblib"
     },
-    "chosen_model": "xgboost",
-    "beats_baseline_on": 4,
-    "model_path": "outputs/models/congestion_pct_h3_xgboost.joblib"
-  },
-  {
-    "target": "congestion_pct",
-    "horizon": 4,
-    "train_rows": 6746,
-    "test_rows": 718,
-    "full_train_rows": 7464,
-    "metrics": {
-      "baseline": {
-        "mae": 18.065571945852334,
-        "rmse": 24.558248721772383,
-        "mape": 32.19342577510883,
-        "r2": -0.2245887694543749
+    {
+      "target": "congestion_pct",
+      "window": 1,
+      "predicts": "the value 2 day(s) ahead",
+      "horizon": 2,
+      "train_rows": 6762,
+      "test_rows": 718,
+      "test_rows_scored": 563,
+      "test_rows_dropped_interpolated": 155,
+      "min_observed_share": 1.0,
+      "full_train_rows": 7480,
+      "cv_r2": {
+        "climatology": 0.32534835450371036,
+        "ridge": 0.3106445591031576,
+        "xgboost": 0.2980928758807121,
+        "random_forest": 0.304677300329911
       },
-      "random_forest": {
-        "mae": 13.546396115043846,
-        "rmse": 17.47564932348587,
-        "mape": 24.76921023546953,
-        "r2": 0.37989943382321345
+      "metrics": {
+        "seasonal_naive": {
+          "mae": 18.03885359326707,
+          "rmse": 24.51183226660915,
+          "mape": 31.326986476994957,
+          "r2": -0.204320968426142
+        },
+        "train_mean": {
+          "mae": 19.1084817156567,
+          "rmse": 22.36927087275647,
+          "mape": 34.6176003763542,
+          "r2": -0.0029848028491490375
+        },
+        "climatology": {
+          "mae": 14.173052511224505,
+          "rmse": 18.257672082118187,
+          "mape": 26.507447393211304,
+          "r2": 0.3318384178951346
+        },
+        "ridge": {
+          "mae": 14.192679906508541,
+          "rmse": 18.422697192580006,
+          "mape": 26.513147582753092,
+          "r2": 0.3197052438599126
+        },
+        "xgboost": {
+          "mae": 14.555733779852318,
+          "rmse": 18.731419109746863,
+          "mape": 27.204633374905224,
+          "r2": 0.29671386094896857
+        },
+        "random_forest": {
+          "mae": 14.434271390373512,
+          "rmse": 18.50042645116102,
+          "mape": 26.830694101835494,
+          "r2": 0.3139525183065772
+        }
       },
-      "xgboost": {
-        "mae": 13.796037379574962,
-        "rmse": 17.784092067657966,
-        "mape": 25.41897462274344,
-        "r2": 0.3578168866809335
-      }
+      "chosen_model": "climatology",
+      "chosen_by": "highest mean R\u00b2 over 4 rolling folds",
+      "beats_seasonal_naive_on": 4,
+      "model_path": "outputs/models/congestion_pct_h2_climatology.joblib"
     },
-    "chosen_model": "xgboost",
-    "beats_baseline_on": 4,
-    "model_path": "outputs/models/congestion_pct_h4_xgboost.joblib"
-  },
-  {
-    "target": "congestion_pct",
-    "horizon": 5,
-    "train_rows": 6738,
-    "test_rows": 718,
-    "full_train_rows": 7456,
-    "metrics": {
-      "baseline": {
-        "mae": 17.696919412741337,
-        "rmse": 23.84950810402931,
-        "mape": 31.476413691468302,
-        "r2": -0.15492647633935897
+    {
+      "target": "congestion_pct",
+      "window": 1,
+      "predicts": "the value 3 day(s) ahead",
+      "horizon": 3,
+      "train_rows": 6754,
+      "test_rows": 718,
+      "test_rows_scored": 563,
+      "test_rows_dropped_interpolated": 155,
+      "min_observed_share": 1.0,
+      "full_train_rows": 7472,
+      "cv_r2": {
+        "climatology": 0.32530844873578735,
+        "ridge": 0.31730044145165825,
+        "xgboost": 0.30594156140621687,
+        "random_forest": 0.3096235811890657
       },
-      "random_forest": {
-        "mae": 13.685023299817246,
-        "rmse": 17.61969315799866,
-        "mape": 24.995672722375822,
-        "r2": 0.36963489021604057
+      "metrics": {
+        "seasonal_naive": {
+          "mae": 18.56834310604055,
+          "rmse": 25.295688486893663,
+          "mape": 32.8746271406458,
+          "r2": -0.2825777583614768
+        },
+        "train_mean": {
+          "mae": 19.10714984993525,
+          "rmse": 22.36879136837513,
+          "mape": 34.619831619324636,
+          "r2": -0.002941803642292129
+        },
+        "climatology": {
+          "mae": 14.166522200123582,
+          "rmse": 18.25721928896575,
+          "mape": 26.499212201616224,
+          "r2": 0.3318715585098011
+        },
+        "ridge": {
+          "mae": 14.194403053444317,
+          "rmse": 18.37032210159185,
+          "mape": 26.55766647557832,
+          "r2": 0.3235678543387579
+        },
+        "xgboost": {
+          "mae": 14.389818462754132,
+          "rmse": 18.585133436625963,
+          "mape": 27.03186427178616,
+          "r2": 0.3076557927903152
+        },
+        "random_forest": {
+          "mae": 14.329907777987454,
+          "rmse": 18.444528746270368,
+          "mape": 26.69563653108171,
+          "r2": 0.318091941383153
+        }
       },
-      "xgboost": {
-        "mae": 13.648239146831251,
-        "rmse": 17.540196249787343,
-        "mape": 25.026890356252483,
-        "r2": 0.37531024772119936
-      }
+      "chosen_model": "climatology",
+      "chosen_by": "highest mean R\u00b2 over 4 rolling folds",
+      "beats_seasonal_naive_on": 4,
+      "model_path": "outputs/models/congestion_pct_h3_climatology.joblib"
     },
-    "chosen_model": "xgboost",
-    "beats_baseline_on": 4,
-    "model_path": "outputs/models/congestion_pct_h5_xgboost.joblib"
-  },
-  {
-    "target": "congestion_pct",
-    "horizon": 6,
-    "train_rows": 6730,
-    "test_rows": 718,
-    "full_train_rows": 7448,
-    "metrics": {
-      "baseline": {
-        "mae": 18.542677206868024,
-        "rmse": 24.598123326909036,
-        "mape": 32.664166208418955,
-        "r2": -0.22856866526869668
+    {
+      "target": "congestion_pct",
+      "window": 1,
+      "predicts": "the value 4 day(s) ahead",
+      "horizon": 4,
+      "train_rows": 6746,
+      "test_rows": 718,
+      "test_rows_scored": 563,
+      "test_rows_dropped_interpolated": 155,
+      "min_observed_share": 1.0,
+      "full_train_rows": 7464,
+      "cv_r2": {
+        "climatology": 0.3252679090075703,
+        "ridge": 0.31764015184802397,
+        "xgboost": 0.30680287924453986,
+        "random_forest": 0.3120583088017826
       },
-      "random_forest": {
-        "mae": 13.694428126211788,
-        "rmse": 17.707481861712218,
-        "mape": 25.205762458460963,
-        "r2": 0.36333775481705854
+      "metrics": {
+        "seasonal_naive": {
+          "mae": 18.158860952331555,
+          "rmse": 24.930537332813113,
+          "mape": 32.97105762514269,
+          "r2": -0.24581619958361078
+        },
+        "train_mean": {
+          "mae": 19.1083186177143,
+          "rmse": 22.36921196711419,
+          "mape": 34.617873610458524,
+          "r2": -0.0029795204788338747
+        },
+        "climatology": {
+          "mae": 14.166622722068055,
+          "rmse": 18.25661373922372,
+          "mape": 26.495337941391472,
+          "r2": 0.3319158783253665
+        },
+        "ridge": {
+          "mae": 14.203225961527322,
+          "rmse": 18.30573485530535,
+          "mape": 26.481074389732147,
+          "r2": 0.3283159570247939
+        },
+        "xgboost": {
+          "mae": 14.410637201136412,
+          "rmse": 18.610728949243807,
+          "mape": 26.988911841968832,
+          "r2": 0.3057474817632275
+        },
+        "random_forest": {
+          "mae": 14.411836099563436,
+          "rmse": 18.45200935415189,
+          "mape": 26.798700558817096,
+          "r2": 0.3175387018506952
+        }
       },
-      "xgboost": {
-        "mae": 13.833595976394019,
-        "rmse": 17.68391742832354,
-        "mape": 25.394999658512567,
-        "r2": 0.36503111841942903
-      }
+      "chosen_model": "climatology",
+      "chosen_by": "highest mean R\u00b2 over 4 rolling folds",
+      "beats_seasonal_naive_on": 4,
+      "model_path": "outputs/models/congestion_pct_h4_climatology.joblib"
     },
-    "chosen_model": "xgboost",
-    "beats_baseline_on": 4,
-    "model_path": "outputs/models/congestion_pct_h6_xgboost.joblib"
-  },
-  {
-    "target": "congestion_pct",
-    "horizon": 7,
-    "train_rows": 6722,
-    "test_rows": 718,
-    "full_train_rows": 7440,
-    "metrics": {
-      "baseline": {
-        "mae": 18.044110430331674,
-        "rmse": 24.498756279841423,
-        "mape": 31.7857388629599,
-        "r2": -0.218662814976206
+    {
+      "target": "congestion_pct",
+      "window": 1,
+      "predicts": "the value 5 day(s) ahead",
+      "horizon": 5,
+      "train_rows": 6738,
+      "test_rows": 718,
+      "test_rows_scored": 563,
+      "test_rows_dropped_interpolated": 155,
+      "min_observed_share": 1.0,
+      "full_train_rows": 7456,
+      "cv_r2": {
+        "climatology": 0.32523113843939855,
+        "ridge": 0.3155323493691943,
+        "xgboost": 0.3055375679362894,
+        "random_forest": 0.308793539030727
       },
-      "random_forest": {
-        "mae": 13.722882333713596,
-        "rmse": 17.738306367657774,
-        "mape": 25.240459995795845,
-        "r2": 0.3611192710863319
+      "metrics": {
+        "seasonal_naive": {
+          "mae": 17.348415862806284,
+          "rmse": 23.996093662762178,
+          "mape": 31.478750360485463,
+          "r2": -0.15417534422286217
+        },
+        "train_mean": {
+          "mae": 19.10966215145443,
+          "rmse": 22.369698758110367,
+          "mape": 34.61562282033387,
+          "r2": -0.0030231739354782405
+        },
+        "climatology": {
+          "mae": 14.166846268975245,
+          "rmse": 18.25606690535757,
+          "mape": 26.491583777827138,
+          "r2": 0.33195589949874194
+        },
+        "ridge": {
+          "mae": 14.228656982110685,
+          "rmse": 18.335605456722,
+          "mape": 26.48679935210996,
+          "r2": 0.3261221116534999
+        },
+        "xgboost": {
+          "mae": 14.568167415848965,
+          "rmse": 18.615193082314693,
+          "mape": 27.15586954493339,
+          "r2": 0.3054143827922401
+        },
+        "random_forest": {
+          "mae": 14.44361772506416,
+          "rmse": 18.440511137527874,
+          "mape": 26.828034968889842,
+          "r2": 0.31838897704503355
+        }
       },
-      "xgboost": {
-        "mae": 13.891075724639999,
-        "rmse": 17.829073128370943,
-        "mape": 25.361741045044422,
-        "r2": 0.35456424852775326
-      }
+      "chosen_model": "climatology",
+      "chosen_by": "highest mean R\u00b2 over 4 rolling folds",
+      "beats_seasonal_naive_on": 4,
+      "model_path": "outputs/models/congestion_pct_h5_climatology.joblib"
     },
-    "chosen_model": "xgboost",
-    "beats_baseline_on": 4,
-    "model_path": "outputs/models/congestion_pct_h7_xgboost.joblib"
-  },
-  {
-    "target": "avg_speed_kph",
-    "horizon": 1,
-    "train_rows": 6770,
-    "test_rows": 718,
-    "full_train_rows": 7488,
-    "metrics": {
-      "baseline": {
-        "mae": 9.765610939564183,
-        "rmse": 12.442642441406335,
-        "mape": 25.74142096799763,
-        "r2": -0.9998215029463446
+    {
+      "target": "congestion_pct",
+      "window": 1,
+      "predicts": "the value 6 day(s) ahead",
+      "horizon": 6,
+      "train_rows": 6730,
+      "test_rows": 718,
+      "test_rows_scored": 563,
+      "test_rows_dropped_interpolated": 155,
+      "min_observed_share": 1.0,
+      "full_train_rows": 7448,
+      "cv_r2": {
+        "climatology": 0.3251963097472065,
+        "ridge": 0.3150979057653773,
+        "xgboost": 0.30529757914659206,
+        "random_forest": 0.3110094067653363
       },
-      "random_forest": {
-        "mae": 6.411534514459843,
-        "rmse": 8.351144163857176,
-        "mape": 17.13453519158216,
-        "r2": 0.09913865297625002
+      "metrics": {
+        "seasonal_naive": {
+          "mae": 18.46969273290863,
+          "rmse": 25.01576477398407,
+          "mape": 32.70185096760663,
+          "r2": -0.2543486443383194
+        },
+        "train_mean": {
+          "mae": 19.108271237260546,
+          "rmse": 22.36919486459416,
+          "mape": 34.61795298580596,
+          "r2": -0.0029779868109685026
+        },
+        "climatology": {
+          "mae": 14.167079795464133,
+          "rmse": 18.256336027400476,
+          "mape": 26.497138209449467,
+          "r2": 0.3319362033923282
+        },
+        "ridge": {
+          "mae": 14.240495227671696,
+          "rmse": 18.337263545405374,
+          "mape": 26.502330311891388,
+          "r2": 0.32600022859659994
+        },
+        "xgboost": {
+          "mae": 14.599995604866471,
+          "rmse": 18.632955735582787,
+          "mape": 27.288058350306844,
+          "r2": 0.30408820049054575
+        },
+        "random_forest": {
+          "mae": 14.404477546026444,
+          "rmse": 18.493777630009756,
+          "mape": 26.87573965817831,
+          "r2": 0.31444554341201136
+        }
       },
-      "xgboost": {
-        "mae": 6.416245173368906,
-        "rmse": 8.343088622255102,
-        "mape": 17.123545630713213,
-        "r2": 0.10087576250010788
-      }
+      "chosen_model": "climatology",
+      "chosen_by": "highest mean R\u00b2 over 4 rolling folds",
+      "beats_seasonal_naive_on": 4,
+      "model_path": "outputs/models/congestion_pct_h6_climatology.joblib"
     },
-    "chosen_model": "xgboost",
-    "beats_baseline_on": 4,
-    "model_path": "outputs/models/avg_speed_kph_h1_xgboost.joblib"
-  },
-  {
-    "target": "avg_speed_kph",
-    "horizon": 2,
-    "train_rows": 6762,
-    "test_rows": 718,
-    "full_train_rows": 7480,
-    "metrics": {
-      "baseline": {
-        "mae": 9.979736913658355,
-        "rmse": 12.705225602034202,
-        "mape": 26.281814585638134,
-        "r2": -1.0851185577414326
+    {
+      "target": "congestion_pct",
+      "window": 1,
+      "predicts": "the value 7 day(s) ahead",
+      "horizon": 7,
+      "train_rows": 6722,
+      "test_rows": 718,
+      "test_rows_scored": 563,
+      "test_rows_dropped_interpolated": 155,
+      "min_observed_share": 1.0,
+      "full_train_rows": 7440,
+      "cv_r2": {
+        "climatology": 0.3252278172426352,
+        "ridge": 0.31282591320171854,
+        "xgboost": 0.30198172192068273,
+        "random_forest": 0.305783960251344
       },
-      "random_forest": {
-        "mae": 6.772285992836492,
-        "rmse": 8.673358617874197,
-        "mape": 18.00563512680677,
-        "r2": 0.028281214813320577
+      "metrics": {
+        "seasonal_naive": {
+          "mae": 18.51307234238712,
+          "rmse": 25.29317556883301,
+          "mape": 32.681103089679105,
+          "r2": -0.2823229439708763
+        },
+        "train_mean": {
+          "mae": 19.106383329864002,
+          "rmse": 22.368516974980203,
+          "mape": 34.621115752171605,
+          "r2": -0.0029171980286968324
+        },
+        "climatology": {
+          "mae": 14.166654429314645,
+          "rmse": 18.256968315202833,
+          "mape": 26.502092865250177,
+          "r2": 0.3318899273045107
+        },
+        "ridge": {
+          "mae": 14.209547188827388,
+          "rmse": 18.32236022418114,
+          "mape": 26.516931252893134,
+          "r2": 0.3270953487253925
+        },
+        "xgboost": {
+          "mae": 14.469830287863397,
+          "rmse": 18.527947499355005,
+          "mape": 27.023223918025707,
+          "r2": 0.311909885477475
+        },
+        "random_forest": {
+          "mae": 14.307009768380848,
+          "rmse": 18.428696011821824,
+          "mape": 26.743936565116467,
+          "r2": 0.31926213505181456
+        }
       },
-      "xgboost": {
-        "mae": 6.870558372767699,
-        "rmse": 8.789221484585047,
-        "mape": 18.21538274929177,
-        "r2": 0.0021464454143865774
-      }
+      "chosen_model": "climatology",
+      "chosen_by": "highest mean R\u00b2 over 4 rolling folds",
+      "beats_seasonal_naive_on": 4,
+      "model_path": "outputs/models/congestion_pct_h7_climatology.joblib"
     },
-    "chosen_model": "xgboost",
-    "beats_baseline_on": 4,
-    "model_path": "outputs/models/avg_speed_kph_h2_xgboost.joblib"
-  },
-  {
-    "target": "avg_speed_kph",
-    "horizon": 3,
-    "train_rows": 6754,
-    "test_rows": 718,
-    "full_train_rows": 7472,
-    "metrics": {
-      "baseline": {
-        "mae": 9.96740382984218,
-        "rmse": 12.66640872300788,
-        "mape": 26.33947204961535,
-        "r2": -1.0723971536248187
+    {
+      "target": "avg_speed_kph",
+      "window": 1,
+      "predicts": "the value 1 day(s) ahead",
+      "horizon": 1,
+      "train_rows": 6770,
+      "test_rows": 718,
+      "test_rows_scored": 563,
+      "test_rows_dropped_interpolated": 155,
+      "min_observed_share": 1.0,
+      "full_train_rows": 7488,
+      "cv_r2": {
+        "climatology": 0.07471128056102183,
+        "ridge": 0.05866807109186423,
+        "xgboost": 0.07909835762076761,
+        "random_forest": 0.07645027466981358
       },
-      "random_forest": {
-        "mae": 6.765719395344645,
-        "rmse": 8.71433484183559,
-        "mape": 17.963785104565765,
-        "r2": 0.01907799274642419
+      "metrics": {
+        "seasonal_naive": {
+          "mae": 9.723542908980932,
+          "rmse": 12.380573508476273,
+          "mape": 25.79532807443276,
+          "r2": -0.8023054834382901
+        },
+        "train_mean": {
+          "mae": 7.2827168695304305,
+          "rmse": 9.226554090041107,
+          "mape": 19.693890556442618,
+          "r2": -0.0009812489843530336
+        },
+        "climatology": {
+          "mae": 7.148311310738005,
+          "rmse": 9.14415646416409,
+          "mape": 19.15231954887471,
+          "r2": 0.016817420194272015
+        },
+        "ridge": {
+          "mae": 7.099469371601973,
+          "rmse": 9.127487241212116,
+          "mape": 19.104015757064058,
+          "r2": 0.020398713172184668
+        },
+        "xgboost": {
+          "mae": 7.04390520547883,
+          "rmse": 9.034193985751989,
+          "mape": 18.988082979739694,
+          "r2": 0.04032164158982143
+        },
+        "random_forest": {
+          "mae": 7.048391113168306,
+          "rmse": 9.04600010536824,
+          "mape": 18.98000043704762,
+          "r2": 0.037811737390212596
+        }
       },
-      "xgboost": {
-        "mae": 6.839512006868762,
-        "rmse": 8.822176725703347,
-        "mape": 18.13234776589046,
-        "r2": -0.0053504995375397435
-      }
+      "chosen_model": "xgboost",
+      "chosen_by": "highest mean R\u00b2 over 4 rolling folds",
+      "beats_seasonal_naive_on": 4,
+      "model_path": "outputs/models/avg_speed_kph_h1_xgboost.joblib"
     },
-    "chosen_model": "xgboost",
-    "beats_baseline_on": 4,
-    "model_path": "outputs/models/avg_speed_kph_h3_xgboost.joblib"
-  },
-  {
-    "target": "avg_speed_kph",
-    "horizon": 4,
-    "train_rows": 6746,
-    "test_rows": 718,
-    "full_train_rows": 7464,
-    "metrics": {
-      "baseline": {
-        "mae": 10.383718213260027,
-        "rmse": 13.113594120633069,
-        "mape": 27.400338355546754,
-        "r2": -1.221311509061688
+    {
+      "target": "avg_speed_kph",
+      "window": 1,
+      "predicts": "the value 2 day(s) ahead",
+      "horizon": 2,
+      "train_rows": 6762,
+      "test_rows": 718,
+      "test_rows_scored": 563,
+      "test_rows_dropped_interpolated": 155,
+      "min_observed_share": 1.0,
+      "full_train_rows": 7480,
+      "cv_r2": {
+        "climatology": 0.07471121601755995,
+        "ridge": 0.055209262125793634,
+        "xgboost": 0.06422293673439455,
+        "random_forest": 0.06663402109250671
       },
-      "random_forest": {
-        "mae": 6.82983717500288,
-        "rmse": 8.694745927730645,
-        "mape": 18.094952201104462,
-        "r2": 0.023483056452306528
+      "metrics": {
+        "seasonal_naive": {
+          "mae": 10.04752400764013,
+          "rmse": 12.789792808469349,
+          "mape": 26.626480633475214,
+          "r2": -0.9234189743242178
+        },
+        "train_mean": {
+          "mae": 7.282728607590969,
+          "rmse": 9.226485382766127,
+          "mape": 19.695001017882852,
+          "r2": -0.0009663410485880597
+        },
+        "climatology": {
+          "mae": 7.1484824693252635,
+          "rmse": 9.144420161892361,
+          "mape": 19.15374501728789,
+          "r2": 0.016760713651228776
+        },
+        "ridge": {
+          "mae": 7.187475711028649,
+          "rmse": 9.171100355655675,
+          "mape": 19.22895340471787,
+          "r2": 0.01101485255692447
+        },
+        "xgboost": {
+          "mae": 7.159632328123088,
+          "rmse": 9.12936416815555,
+          "mape": 19.21242274391013,
+          "r2": 0.019995791964089182
+        },
+        "random_forest": {
+          "mae": 7.134170580984567,
+          "rmse": 9.128743569890933,
+          "mape": 19.159460313514355,
+          "r2": 0.02012902539148065
+        }
       },
-      "xgboost": {
-        "mae": 6.900668222988612,
-        "rmse": 8.763235805781774,
-        "mape": 18.198156886308684,
-        "r2": 0.008038109566980367
-      }
+      "chosen_model": "climatology",
+      "chosen_by": "highest mean R\u00b2 over 4 rolling folds",
+      "beats_seasonal_naive_on": 4,
+      "model_path": "outputs/models/avg_speed_kph_h2_climatology.joblib"
     },
-    "chosen_model": "xgboost",
-    "beats_baseline_on": 4,
-    "model_path": "outputs/models/avg_speed_kph_h4_xgboost.joblib"
-  },
-  {
-    "target": "avg_speed_kph",
-    "horizon": 5,
-    "train_rows": 6738,
-    "test_rows": 718,
-    "full_train_rows": 7456,
-    "metrics": {
-      "baseline": {
-        "mae": 9.929727081728371,
-        "rmse": 12.583666123011627,
-        "mape": 26.27987366346104,
-        "r2": -1.0454099538040347
+    {
+      "target": "avg_speed_kph",
+      "window": 1,
+      "predicts": "the value 3 day(s) ahead",
+      "horizon": 3,
+      "train_rows": 6754,
+      "test_rows": 718,
+      "test_rows_scored": 563,
+      "test_rows_dropped_interpolated": 155,
+      "min_observed_share": 1.0,
+      "full_train_rows": 7472,
+      "cv_r2": {
+        "climatology": 0.07476416273314068,
+        "ridge": 0.05541170224729275,
+        "xgboost": 0.06072000274190684,
+        "random_forest": 0.06467126066619741
       },
-      "random_forest": {
-        "mae": 6.862197902978571,
-        "rmse": 8.763029184190394,
-        "mape": 18.155909505098233,
-        "r2": 0.008084886427177973
+      "metrics": {
+        "seasonal_naive": {
+          "mae": 10.075972256778392,
+          "rmse": 12.853306817459238,
+          "mape": 26.989849204717213,
+          "r2": -0.9425697744519681
+        },
+        "train_mean": {
+          "mae": 7.282733384702141,
+          "rmse": 9.226457570971249,
+          "mape": 19.695452949250285,
+          "r2": -0.0009603065452112869
+        },
+        "climatology": {
+          "mae": 7.149185218315374,
+          "rmse": 9.145466133539275,
+          "mape": 19.154788483537573,
+          "r2": 0.016535767899437337
+        },
+        "ridge": {
+          "mae": 7.1779181225318025,
+          "rmse": 9.18196972592545,
+          "mape": 19.199674052228573,
+          "r2": 0.00866921998195791
+        },
+        "xgboost": {
+          "mae": 7.141464548621715,
+          "rmse": 9.148608343225835,
+          "mape": 19.117414248259045,
+          "r2": 0.015859852278010456
+        },
+        "random_forest": {
+          "mae": 7.100358338908756,
+          "rmse": 9.129233566445523,
+          "mape": 19.02863902431237,
+          "r2": 0.020023831005484327
+        }
       },
-      "xgboost": {
-        "mae": 6.9551195145358795,
-        "rmse": 8.865195086994762,
-        "mape": 18.387611736894883,
-        "r2": -0.01517890714698611
-      }
+      "chosen_model": "climatology",
+      "chosen_by": "highest mean R\u00b2 over 4 rolling folds",
+      "beats_seasonal_naive_on": 4,
+      "model_path": "outputs/models/avg_speed_kph_h3_climatology.joblib"
     },
-    "chosen_model": "xgboost",
-    "beats_baseline_on": 4,
-    "model_path": "outputs/models/avg_speed_kph_h5_xgboost.joblib"
-  },
-  {
-    "target": "avg_speed_kph",
-    "horizon": 6,
-    "train_rows": 6730,
-    "test_rows": 718,
-    "full_train_rows": 7448,
-    "metrics": {
-      "baseline": {
-        "mae": 9.834022810301619,
-        "rmse": 12.344757567461796,
-        "mape": 26.27472826000104,
-        "r2": -0.9684805243663237
+    {
+      "target": "avg_speed_kph",
+      "window": 1,
+      "predicts": "the value 4 day(s) ahead",
+      "horizon": 4,
+      "train_rows": 6746,
+      "test_rows": 718,
+      "test_rows_scored": 563,
+      "test_rows_dropped_interpolated": 155,
+      "min_observed_share": 1.0,
+      "full_train_rows": 7464,
+      "cv_r2": {
+        "climatology": 0.0747412362885044,
+        "ridge": 0.061071916846011653,
+        "xgboost": 0.060423546669973766,
+        "random_forest": 0.06548000012154362
       },
-      "random_forest": {
-        "mae": 6.877675473434176,
-        "rmse": 8.718456050252701,
-        "mape": 18.236131958953305,
-        "r2": 0.018149972416364735
+      "metrics": {
+        "seasonal_naive": {
+          "mae": 10.46841038133137,
+          "rmse": 13.258374183399134,
+          "mape": 27.983509667417145,
+          "r2": -1.066937864604276
+        },
+        "train_mean": {
+          "mae": 7.282758918801646,
+          "rmse": 9.226310390145303,
+          "mape": 19.697868564062798,
+          "r2": -0.0009283720809860618
+        },
+        "climatology": {
+          "mae": 7.149245089018637,
+          "rmse": 9.14500569365405,
+          "mape": 19.15714371607014,
+          "r2": 0.01663479287038816
+        },
+        "ridge": {
+          "mae": 7.167948383839921,
+          "rmse": 9.145931277860443,
+          "mape": 19.167794071593473,
+          "r2": 0.016435726101867276
+        },
+        "xgboost": {
+          "mae": 7.167653419934481,
+          "rmse": 9.134537542639046,
+          "mape": 19.20076530159047,
+          "r2": 0.018884791204585527
+        },
+        "random_forest": {
+          "mae": 7.152919634170835,
+          "rmse": 9.137504718723333,
+          "mape": 19.16066176288485,
+          "r2": 0.018247295461946256
+        }
       },
-      "xgboost": {
-        "mae": 6.886131642498818,
-        "rmse": 8.737956726842626,
-        "mape": 18.254883364905712,
-        "r2": 0.013752828561977237
-      }
+      "chosen_model": "climatology",
+      "chosen_by": "highest mean R\u00b2 over 4 rolling folds",
+      "beats_seasonal_naive_on": 4,
+      "model_path": "outputs/models/avg_speed_kph_h4_climatology.joblib"
     },
-    "chosen_model": "xgboost",
-    "beats_baseline_on": 4,
-    "model_path": "outputs/models/avg_speed_kph_h6_xgboost.joblib"
-  },
-  {
-    "target": "avg_speed_kph",
-    "horizon": 7,
-    "train_rows": 6722,
-    "test_rows": 718,
-    "full_train_rows": 7440,
-    "metrics": {
-      "baseline": {
-        "mae": 9.684635395626625,
-        "rmse": 12.273919098429584,
-        "mape": 25.823334069589325,
-        "r2": -0.9459537057317793
+    {
+      "target": "avg_speed_kph",
+      "window": 1,
+      "predicts": "the value 5 day(s) ahead",
+      "horizon": 5,
+      "train_rows": 6738,
+      "test_rows": 718,
+      "test_rows_scored": 563,
+      "test_rows_dropped_interpolated": 155,
+      "min_observed_share": 1.0,
+      "full_train_rows": 7456,
+      "cv_r2": {
+        "climatology": 0.07472853966370929,
+        "ridge": 0.057461468466974974,
+        "xgboost": 0.05883080429703211,
+        "random_forest": 0.06307236505477376
       },
-      "random_forest": {
-        "mae": 6.9465204653673265,
-        "rmse": 8.829215714233454,
-        "mape": 18.454309520892284,
-        "r2": -0.006955426302013734
+      "metrics": {
+        "seasonal_naive": {
+          "mae": 9.865687766033238,
+          "rmse": 12.576252850966789,
+          "mape": 26.49188905345008,
+          "r2": -0.8597278669792492
+        },
+        "train_mean": {
+          "mae": 7.28276640540816,
+          "rmse": 9.226267708067205,
+          "mape": 19.698576823133592,
+          "r2": -0.0009191112600679396
+        },
+        "climatology": {
+          "mae": 7.148715536969847,
+          "rmse": 9.144559581003863,
+          "mape": 19.155993062582482,
+          "r2": 0.016730731784632025
+        },
+        "ridge": {
+          "mae": 7.12797474620985,
+          "rmse": 9.124616750059566,
+          "mape": 19.051723194259772,
+          "r2": 0.021014763261646197
+        },
+        "xgboost": {
+          "mae": 7.176167301803469,
+          "rmse": 9.152121225881594,
+          "mape": 19.24243367968287,
+          "r2": 0.015103926902719111
+        },
+        "random_forest": {
+          "mae": 7.16260073527966,
+          "rmse": 9.15331174006831,
+          "mape": 19.164953217549222,
+          "r2": 0.014847678328109626
+        }
       },
-      "xgboost": {
-        "mae": 6.921453693122102,
-        "rmse": 8.823011442400523,
-        "mape": 18.348106881491177,
-        "r2": -0.005540752481800526
-      }
+      "chosen_model": "climatology",
+      "chosen_by": "highest mean R\u00b2 over 4 rolling folds",
+      "beats_seasonal_naive_on": 4,
+      "model_path": "outputs/models/avg_speed_kph_h5_climatology.joblib"
     },
-    "chosen_model": "xgboost",
-    "beats_baseline_on": 4,
-    "model_path": "outputs/models/avg_speed_kph_h7_xgboost.joblib"
-  }
-]
+    {
+      "target": "avg_speed_kph",
+      "window": 1,
+      "predicts": "the value 6 day(s) ahead",
+      "horizon": 6,
+      "train_rows": 6730,
+      "test_rows": 718,
+      "test_rows_scored": 563,
+      "test_rows_dropped_interpolated": 155,
+      "min_observed_share": 1.0,
+      "full_train_rows": 7448,
+      "cv_r2": {
+        "climatology": 0.07476499951058596,
+        "ridge": 0.05567313298475393,
+        "xgboost": 0.060532308316793404,
+        "random_forest": 0.06461637411955706
+      },
+      "metrics": {
+        "seasonal_naive": {
+          "mae": 9.805491036248803,
+          "rmse": 12.358965360453249,
+          "mape": 26.597712755416424,
+          "r2": -0.7960197490634386
+        },
+        "train_mean": {
+          "mae": 7.282755138896501,
+          "rmse": 9.226332021061628,
+          "mape": 19.697510971861128,
+          "r2": -0.0009330654030899055
+        },
+        "climatology": {
+          "mae": 7.149023010656511,
+          "rmse": 9.144684937267838,
+          "mape": 19.155740123450983,
+          "r2": 0.01670377372160281
+        },
+        "ridge": {
+          "mae": 7.16630226629519,
+          "rmse": 9.148098702593492,
+          "mape": 19.150622080098174,
+          "r2": 0.015969496022340768
+        },
+        "xgboost": {
+          "mae": 7.233716456273621,
+          "rmse": 9.193520642457548,
+          "mape": 19.391103823109752,
+          "r2": 0.006173463194059536
+        },
+        "random_forest": {
+          "mae": 7.174526528043427,
+          "rmse": 9.126771677130943,
+          "mape": 19.237578979337112,
+          "r2": 0.02055230199667968
+        }
+      },
+      "chosen_model": "climatology",
+      "chosen_by": "highest mean R\u00b2 over 4 rolling folds",
+      "beats_seasonal_naive_on": 4,
+      "model_path": "outputs/models/avg_speed_kph_h6_climatology.joblib"
+    },
+    {
+      "target": "avg_speed_kph",
+      "window": 1,
+      "predicts": "the value 7 day(s) ahead",
+      "horizon": 7,
+      "train_rows": 6722,
+      "test_rows": 718,
+      "test_rows_scored": 563,
+      "test_rows_dropped_interpolated": 155,
+      "min_observed_share": 1.0,
+      "full_train_rows": 7440,
+      "cv_r2": {
+        "climatology": 0.07472182951349249,
+        "ridge": 0.05687892641627537,
+        "xgboost": 0.058239622391167645,
+        "random_forest": 0.06202261534913475
+      },
+      "metrics": {
+        "seasonal_naive": {
+          "mae": 9.873177468884265,
+          "rmse": 12.571000418252106,
+          "mape": 26.726838077156728,
+          "r2": -0.8581747723019433
+        },
+        "train_mean": {
+          "mae": 7.2827189161021,
+          "rmse": 9.226542072870673,
+          "mape": 19.694084169256023,
+          "r2": -0.0009786415202184262
+        },
+        "climatology": {
+          "mae": 7.149264415394336,
+          "rmse": 9.144917779875836,
+          "mape": 19.15346893707094,
+          "r2": 0.016653699569427305
+        },
+        "ridge": {
+          "mae": 7.161918794388083,
+          "rmse": 9.152125975129639,
+          "mape": 19.144661945324863,
+          "r2": 0.01510290473160758
+        },
+        "xgboost": {
+          "mae": 7.204767587905293,
+          "rmse": 9.18037228306837,
+          "mape": 19.317411974442976,
+          "r2": 0.009014125610502965
+        },
+        "random_forest": {
+          "mae": 7.193366817537628,
+          "rmse": 9.172511367529177,
+          "mape": 19.305992621604307,
+          "r2": 0.010710510202997736
+        }
+      },
+      "chosen_model": "climatology",
+      "chosen_by": "highest mean R\u00b2 over 4 rolling folds",
+      "beats_seasonal_naive_on": 4,
+      "model_path": "outputs/models/avg_speed_kph_h7_climatology.joblib"
+    },
+    {
+      "target": "congestion_pct",
+      "window": 7,
+      "predicts": "the mean over 7 days starting 1 day(s) ahead",
+      "horizon": 1,
+      "train_rows": 6722,
+      "test_rows": 718,
+      "test_rows_scored": 411,
+      "test_rows_dropped_interpolated": 307,
+      "min_observed_share": 0.8,
+      "full_train_rows": 7440,
+      "cv_r2": {
+        "climatology": 0.6880725524906728,
+        "ridge": 0.6739519129898779,
+        "xgboost": 0.6260099619092856,
+        "random_forest": 0.659869230788062
+      },
+      "metrics": {
+        "seasonal_naive": {
+          "mae": 12.753997563616538,
+          "rmse": 16.806584304044357,
+          "mape": 16.192941094894053,
+          "r2": -1.1547770057408568
+        },
+        "train_mean": {
+          "mae": 11.15389875297269,
+          "rmse": 12.694029197916954,
+          "mape": 13.681139690527072,
+          "r2": -0.2292561835565281
+        },
+        "climatology": {
+          "mae": 4.6778745700453825,
+          "rmse": 6.017853629190381,
+          "mape": 5.989542597727816,
+          "r2": 0.7237344982797831
+        },
+        "ridge": {
+          "mae": 4.7653519356097975,
+          "rmse": 6.111127840822541,
+          "mape": 6.127519725043494,
+          "r2": 0.7151041298650638
+        },
+        "xgboost": {
+          "mae": 5.159724584633421,
+          "rmse": 6.637445370127537,
+          "mape": 6.630270941082057,
+          "r2": 0.6639179365218308
+        },
+        "random_forest": {
+          "mae": 4.894308611710115,
+          "rmse": 6.237573269290367,
+          "mape": 6.255063485242434,
+          "r2": 0.7031925922313057
+        }
+      },
+      "chosen_model": "climatology",
+      "chosen_by": "highest mean R\u00b2 over 4 rolling folds",
+      "beats_seasonal_naive_on": 4,
+      "model_path": "outputs/models/congestion_pct_w7_h1_climatology.joblib"
+    },
+    {
+      "target": "congestion_pct",
+      "window": 7,
+      "predicts": "the mean over 7 days starting 2 day(s) ahead",
+      "horizon": 2,
+      "train_rows": 6714,
+      "test_rows": 718,
+      "test_rows_scored": 411,
+      "test_rows_dropped_interpolated": 307,
+      "min_observed_share": 0.8,
+      "full_train_rows": 7432,
+      "cv_r2": {
+        "climatology": 0.6879811147085553,
+        "ridge": 0.6783454820697606,
+        "xgboost": 0.6278421438593351,
+        "random_forest": 0.6596021747008283
+      },
+      "metrics": {
+        "seasonal_naive": {
+          "mae": 12.90016422438822,
+          "rmse": 16.855857315020923,
+          "mape": 16.439555945593547,
+          "r2": -1.1674301404288552
+        },
+        "train_mean": {
+          "mae": 11.153815627519412,
+          "rmse": 12.693951951908812,
+          "mape": 13.681063701406421,
+          "r2": -0.22924122300416538
+        },
+        "climatology": {
+          "mae": 4.677737812030766,
+          "rmse": 6.017449714442518,
+          "mape": 5.989264014307628,
+          "r2": 0.7237715825867457
+        },
+        "ridge": {
+          "mae": 4.722250231214563,
+          "rmse": 6.060664686097585,
+          "mape": 6.068790531599592,
+          "r2": 0.719789806930597
+        },
+        "xgboost": {
+          "mae": 5.125172780748494,
+          "rmse": 6.567117039190962,
+          "mape": 6.567200624761684,
+          "r2": 0.6710022495054546
+        },
+        "random_forest": {
+          "mae": 4.849000222320184,
+          "rmse": 6.17571302723868,
+          "mape": 6.193431355239588,
+          "r2": 0.7090504901967807
+        }
+      },
+      "chosen_model": "climatology",
+      "chosen_by": "highest mean R\u00b2 over 4 rolling folds",
+      "beats_seasonal_naive_on": 4,
+      "model_path": "outputs/models/congestion_pct_w7_h2_climatology.joblib"
+    },
+    {
+      "target": "congestion_pct",
+      "window": 7,
+      "predicts": "the mean over 7 days starting 3 day(s) ahead",
+      "horizon": 3,
+      "train_rows": 6706,
+      "test_rows": 718,
+      "test_rows_scored": 411,
+      "test_rows_dropped_interpolated": 307,
+      "min_observed_share": 0.8,
+      "full_train_rows": 7424,
+      "cv_r2": {
+        "climatology": 0.6878576644680983,
+        "ridge": 0.6791052075895311,
+        "xgboost": 0.6282371153172648,
+        "random_forest": 0.6577334936756178
+      },
+      "metrics": {
+        "seasonal_naive": {
+          "mae": 13.229222820066422,
+          "rmse": 17.256066407727968,
+          "mape": 16.917520405789123,
+          "r2": -1.2715746979693798
+        },
+        "train_mean": {
+          "mae": 11.153545772609613,
+          "rmse": 12.693701197910947,
+          "mape": 13.68081701358108,
+          "r2": -0.22919265907265762
+        },
+        "climatology": {
+          "mae": 4.677427405293071,
+          "rmse": 6.016974701728189,
+          "mape": 5.9887489176468245,
+          "r2": 0.7238151913704234
+        },
+        "ridge": {
+          "mae": 4.693696093717336,
+          "rmse": 6.034926432514813,
+          "mape": 6.024979494656264,
+          "r2": 0.7221647302322933
+        },
+        "xgboost": {
+          "mae": 5.057868285669994,
+          "rmse": 6.50124759873345,
+          "mape": 6.486285345339228,
+          "r2": 0.6775689715488624
+        },
+        "random_forest": {
+          "mae": 4.848699851728379,
+          "rmse": 6.138837459309803,
+          "mape": 6.201275296709424,
+          "r2": 0.7125146721673012
+        }
+      },
+      "chosen_model": "climatology",
+      "chosen_by": "highest mean R\u00b2 over 4 rolling folds",
+      "beats_seasonal_naive_on": 4,
+      "model_path": "outputs/models/congestion_pct_w7_h3_climatology.joblib"
+    },
+    {
+      "target": "congestion_pct",
+      "window": 7,
+      "predicts": "the mean over 7 days starting 4 day(s) ahead",
+      "horizon": 4,
+      "train_rows": 6698,
+      "test_rows": 718,
+      "test_rows_scored": 411,
+      "test_rows_dropped_interpolated": 307,
+      "min_observed_share": 0.8,
+      "full_train_rows": 7416,
+      "cv_r2": {
+        "climatology": 0.6877533925691031,
+        "ridge": 0.6796038151046907,
+        "xgboost": 0.6233361972931786,
+        "random_forest": 0.6602704885893067
+      },
+      "metrics": {
+        "seasonal_naive": {
+          "mae": 13.153449712809717,
+          "rmse": 17.122719658677486,
+          "mape": 16.973089571379965,
+          "r2": -1.2366030268589965
+        },
+        "train_mean": {
+          "mae": 11.15286163716178,
+          "rmse": 12.6930655838893,
+          "mape": 13.680191611264018,
+          "r2": -0.22906956297698944
+        },
+        "climatology": {
+          "mae": 4.677275209038635,
+          "rmse": 6.016578062944447,
+          "mape": 5.988498832755082,
+          "r2": 0.7238516023581344
+        },
+        "ridge": {
+          "mae": 4.703213886615864,
+          "rmse": 6.029111533300413,
+          "mape": 6.034821246706256,
+          "r2": 0.7226998836493845
+        },
+        "xgboost": {
+          "mae": 5.038790051777356,
+          "rmse": 6.51005311509185,
+          "mape": 6.47831516833154,
+          "r2": 0.6766949564036494
+        },
+        "random_forest": {
+          "mae": 4.815886727068036,
+          "rmse": 6.102603360658428,
+          "mape": 6.167334661720517,
+          "r2": 0.7158983843542461
+        }
+      },
+      "chosen_model": "climatology",
+      "chosen_by": "highest mean R\u00b2 over 4 rolling folds",
+      "beats_seasonal_naive_on": 4,
+      "model_path": "outputs/models/congestion_pct_w7_h4_climatology.joblib"
+    },
+    {
+      "target": "congestion_pct",
+      "window": 7,
+      "predicts": "the mean over 7 days starting 5 day(s) ahead",
+      "horizon": 5,
+      "train_rows": 6690,
+      "test_rows": 718,
+      "test_rows_scored": 411,
+      "test_rows_dropped_interpolated": 307,
+      "min_observed_share": 0.8,
+      "full_train_rows": 7408,
+      "cv_r2": {
+        "climatology": 0.6876713184894541,
+        "ridge": 0.6775098633916959,
+        "xgboost": 0.6202638719213555,
+        "random_forest": 0.6602187326217298
+      },
+      "metrics": {
+        "seasonal_naive": {
+          "mae": 13.37052354615748,
+          "rmse": 17.471469919325738,
+          "mape": 17.22585953205831,
+          "r2": -1.3286397436343882
+        },
+        "train_mean": {
+          "mae": 11.151539210399628,
+          "rmse": 12.691837342354914,
+          "mape": 13.67898271503767,
+          "r2": -0.22883171322538276
+        },
+        "climatology": {
+          "mae": 4.677093566726786,
+          "rmse": 6.016339671628759,
+          "mape": 5.988304049536287,
+          "r2": 0.7238734852540102
+        },
+        "ridge": {
+          "mae": 4.670676572114869,
+          "rmse": 5.995005689547508,
+          "mape": 5.997047009641906,
+          "r2": 0.7258283062552937
+        },
+        "xgboost": {
+          "mae": 5.040900620004522,
+          "rmse": 6.503861010279158,
+          "mape": 6.4840495509421805,
+          "r2": 0.677309693825485
+        },
+        "random_forest": {
+          "mae": 4.83915135799403,
+          "rmse": 6.137190110953328,
+          "mape": 6.210474669354235,
+          "r2": 0.7126689440280746
+        }
+      },
+      "chosen_model": "climatology",
+      "chosen_by": "highest mean R\u00b2 over 4 rolling folds",
+      "beats_seasonal_naive_on": 4,
+      "model_path": "outputs/models/congestion_pct_w7_h5_climatology.joblib"
+    },
+    {
+      "target": "congestion_pct",
+      "window": 7,
+      "predicts": "the mean over 7 days starting 6 day(s) ahead",
+      "horizon": 6,
+      "train_rows": 6682,
+      "test_rows": 718,
+      "test_rows_scored": 411,
+      "test_rows_dropped_interpolated": 307,
+      "min_observed_share": 0.8,
+      "full_train_rows": 7400,
+      "cv_r2": {
+        "climatology": 0.6876114578248522,
+        "ridge": 0.6795991525507638,
+        "xgboost": 0.6157309387240779,
+        "random_forest": 0.6607270003981283
+      },
+      "metrics": {
+        "seasonal_naive": {
+          "mae": 13.510049662976359,
+          "rmse": 17.77112588644596,
+          "mape": 17.331689697107894,
+          "r2": -1.4092024848698275
+        },
+        "train_mean": {
+          "mae": 11.149896504447367,
+          "rmse": 12.690312355473546,
+          "mape": 13.677481035637692,
+          "r2": -0.22853643057887107
+        },
+        "climatology": {
+          "mae": 4.676815039581987,
+          "rmse": 6.016279708923076,
+          "mape": 5.988020410619945,
+          "r2": 0.7238789893350058
+        },
+        "ridge": {
+          "mae": 4.676348213398111,
+          "rmse": 6.01511490199431,
+          "mape": 6.006290573195987,
+          "r2": 0.7239858981048526
+        },
+        "xgboost": {
+          "mae": 5.066011628332864,
+          "rmse": 6.485209475314638,
+          "mape": 6.531126172142724,
+          "r2": 0.6791578389376104
+        },
+        "random_forest": {
+          "mae": 4.844895928070747,
+          "rmse": 6.150231260332334,
+          "mape": 6.222721505091315,
+          "r2": 0.7114465251812965
+        }
+      },
+      "chosen_model": "climatology",
+      "chosen_by": "highest mean R\u00b2 over 4 rolling folds",
+      "beats_seasonal_naive_on": 4,
+      "model_path": "outputs/models/congestion_pct_w7_h6_climatology.joblib"
+    },
+    {
+      "target": "congestion_pct",
+      "window": 7,
+      "predicts": "the mean over 7 days starting 7 day(s) ahead",
+      "horizon": 7,
+      "train_rows": 6674,
+      "test_rows": 718,
+      "test_rows_scored": 411,
+      "test_rows_dropped_interpolated": 307,
+      "min_observed_share": 0.8,
+      "full_train_rows": 7392,
+      "cv_r2": {
+        "climatology": 0.6875416317423819,
+        "ridge": 0.6794224878966222,
+        "xgboost": 0.6147239702209046,
+        "random_forest": 0.658418717559682
+      },
+      "metrics": {
+        "seasonal_naive": {
+          "mae": 13.530150117903732,
+          "rmse": 17.896134314949972,
+          "mape": 17.36685806547723,
+          "r2": -1.443216074014463
+        },
+        "train_mean": {
+          "mae": 11.149183672060227,
+          "rmse": 12.68965085518401,
+          "mape": 13.676829400017862,
+          "r2": -0.22840835555584516
+        },
+        "climatology": {
+          "mae": 4.676464249376273,
+          "rmse": 6.016192893751079,
+          "mape": 5.987386137026366,
+          "r2": 0.723886958153358
+        },
+        "ridge": {
+          "mae": 4.723480462039227,
+          "rmse": 6.060331937828607,
+          "mape": 6.061876840123473,
+          "r2": 0.7198205748090272
+        },
+        "xgboost": {
+          "mae": 5.071235909328308,
+          "rmse": 6.466750289419437,
+          "mape": 6.549164526051167,
+          "r2": 0.6809816987155661
+        },
+        "random_forest": {
+          "mae": 4.826232444685647,
+          "rmse": 6.147834957335988,
+          "mape": 6.202373246483505,
+          "r2": 0.7116713384673733
+        }
+      },
+      "chosen_model": "climatology",
+      "chosen_by": "highest mean R\u00b2 over 4 rolling folds",
+      "beats_seasonal_naive_on": 4,
+      "model_path": "outputs/models/congestion_pct_w7_h7_climatology.joblib"
+    },
+    {
+      "target": "avg_speed_kph",
+      "window": 7,
+      "predicts": "the mean over 7 days starting 1 day(s) ahead",
+      "horizon": 1,
+      "train_rows": 6722,
+      "test_rows": 718,
+      "test_rows_scored": 411,
+      "test_rows_dropped_interpolated": 307,
+      "min_observed_share": 0.8,
+      "full_train_rows": 7440,
+      "cv_r2": {
+        "climatology": 0.24630685962808613,
+        "ridge": 0.22640916782300916,
+        "xgboost": 0.2401967211086851,
+        "random_forest": 0.22966394531559664
+      },
+      "metrics": {
+        "seasonal_naive": {
+          "mae": 7.512977982034211,
+          "rmse": 9.449425456012547,
+          "mape": 18.990489558250157,
+          "r2": -4.978129630271392
+        },
+        "train_mean": {
+          "mae": 3.102039734768388,
+          "rmse": 3.8663823829792383,
+          "mape": 7.879933709423874,
+          "r2": -0.0008387872598540902
+        },
+        "climatology": {
+          "mae": 2.9238734581650907,
+          "rmse": 3.653332682105675,
+          "mape": 7.231478994857612,
+          "r2": 0.10642097621185509
+        },
+        "ridge": {
+          "mae": 2.9152854046635888,
+          "rmse": 3.6491886403196285,
+          "mape": 7.2058186915771305,
+          "r2": 0.10844703237987596
+        },
+        "xgboost": {
+          "mae": 2.8440621278976326,
+          "rmse": 3.5992343455487728,
+          "mape": 7.039473631916978,
+          "r2": 0.13268916833526323
+        },
+        "random_forest": {
+          "mae": 2.8989530895465214,
+          "rmse": 3.625547843681561,
+          "mape": 7.196036989932825,
+          "r2": 0.11996123572121076
+        }
+      },
+      "chosen_model": "climatology",
+      "chosen_by": "highest mean R\u00b2 over 4 rolling folds",
+      "beats_seasonal_naive_on": 4,
+      "model_path": "outputs/models/avg_speed_kph_w7_h1_climatology.joblib"
+    },
+    {
+      "target": "avg_speed_kph",
+      "window": 7,
+      "predicts": "the mean over 7 days starting 2 day(s) ahead",
+      "horizon": 2,
+      "train_rows": 6714,
+      "test_rows": 718,
+      "test_rows_scored": 411,
+      "test_rows_dropped_interpolated": 307,
+      "min_observed_share": 0.8,
+      "full_train_rows": 7432,
+      "cv_r2": {
+        "climatology": 0.24618296753862828,
+        "ridge": 0.22866401602692052,
+        "xgboost": 0.2378980273347792,
+        "random_forest": 0.23789277146029653
+      },
+      "metrics": {
+        "seasonal_naive": {
+          "mae": 7.431905061777519,
+          "rmse": 9.325279389717377,
+          "mape": 18.767921395382718,
+          "r2": -4.822080769425562
+        },
+        "train_mean": {
+          "mae": 3.1020061169251814,
+          "rmse": 3.866352871979881,
+          "mape": 7.879648786548882,
+          "r2": -0.0008235090813593082
+        },
+        "climatology": {
+          "mae": 2.9238501431665136,
+          "rmse": 3.6532587235633094,
+          "mape": 7.231118813463193,
+          "r2": 0.10645715530579114
+        },
+        "ridge": {
+          "mae": 2.9265151807910033,
+          "rmse": 3.654701319130685,
+          "mape": 7.227775972847611,
+          "r2": 0.10575133316271368
+        },
+        "xgboost": {
+          "mae": 2.877719268605232,
+          "rmse": 3.635725507064315,
+          "mape": 7.115077934137147,
+          "r2": 0.11501339864793025
+        },
+        "random_forest": {
+          "mae": 2.8963557991076416,
+          "rmse": 3.6271793361914275,
+          "mape": 7.187381073813998,
+          "r2": 0.11916902457785672
+        }
+      },
+      "chosen_model": "climatology",
+      "chosen_by": "highest mean R\u00b2 over 4 rolling folds",
+      "beats_seasonal_naive_on": 4,
+      "model_path": "outputs/models/avg_speed_kph_w7_h2_climatology.joblib"
+    },
+    {
+      "target": "avg_speed_kph",
+      "window": 7,
+      "predicts": "the mean over 7 days starting 3 day(s) ahead",
+      "horizon": 3,
+      "train_rows": 6706,
+      "test_rows": 718,
+      "test_rows_scored": 411,
+      "test_rows_dropped_interpolated": 307,
+      "min_observed_share": 0.8,
+      "full_train_rows": 7424,
+      "cv_r2": {
+        "climatology": 0.24607518981135162,
+        "ridge": 0.22807220964398395,
+        "xgboost": 0.23121857095144183,
+        "random_forest": 0.24064037743658828
+      },
+      "metrics": {
+        "seasonal_naive": {
+          "mae": 7.511964815766539,
+          "rmse": 9.38106989947371,
+          "mape": 19.011115721433665,
+          "r2": -4.891952884576084
+        },
+        "train_mean": {
+          "mae": 3.101974913938736,
+          "rmse": 3.866324700097556,
+          "mape": 7.879377262650785,
+          "r2": -0.0008089242877107328
+        },
+        "climatology": {
+          "mae": 2.923873950221782,
+          "rmse": 3.6533022063915217,
+          "mape": 7.230916127713323,
+          "r2": 0.10643588443275198
+        },
+        "ridge": {
+          "mae": 2.940061454560734,
+          "rmse": 3.660974422873499,
+          "mape": 7.259931528181326,
+          "r2": 0.10267883636494868
+        },
+        "xgboost": {
+          "mae": 2.8663745590929555,
+          "rmse": 3.63746775198387,
+          "mape": 7.0828022367317915,
+          "r2": 0.11416502170711285
+        },
+        "random_forest": {
+          "mae": 2.9020794084900015,
+          "rmse": 3.631910700093697,
+          "mape": 7.20192726527624,
+          "r2": 0.11686957941688225
+        }
+      },
+      "chosen_model": "climatology",
+      "chosen_by": "highest mean R\u00b2 over 4 rolling folds",
+      "beats_seasonal_naive_on": 4,
+      "model_path": "outputs/models/avg_speed_kph_w7_h3_climatology.joblib"
+    },
+    {
+      "target": "avg_speed_kph",
+      "window": 7,
+      "predicts": "the mean over 7 days starting 4 day(s) ahead",
+      "horizon": 4,
+      "train_rows": 6698,
+      "test_rows": 718,
+      "test_rows_scored": 411,
+      "test_rows_dropped_interpolated": 307,
+      "min_observed_share": 0.8,
+      "full_train_rows": 7416,
+      "cv_r2": {
+        "climatology": 0.24593529155039112,
+        "ridge": 0.23114717549051897,
+        "xgboost": 0.22507175030243415,
+        "random_forest": 0.2423674526644867
+      },
+      "metrics": {
+        "seasonal_naive": {
+          "mae": 7.492272849535914,
+          "rmse": 9.366130077580692,
+          "mape": 18.924302159003474,
+          "r2": -4.873201369928937
+        },
+        "train_mean": {
+          "mae": 3.1019198802139862,
+          "rmse": 3.866275625402408,
+          "mape": 7.878898367097096,
+          "r2": -0.0007835182057234213
+        },
+        "climatology": {
+          "mae": 2.9234463271808284,
+          "rmse": 3.6529369121257997,
+          "mape": 7.22963463354356,
+          "r2": 0.10661457073349878
+        },
+        "ridge": {
+          "mae": 2.939138236671692,
+          "rmse": 3.6535117534629196,
+          "mape": 7.257919695549271,
+          "r2": 0.10633337492057193
+        },
+        "xgboost": {
+          "mae": 2.8906979564913673,
+          "rmse": 3.655594157758539,
+          "mape": 7.153643581725613,
+          "r2": 0.10531435229376218
+        },
+        "random_forest": {
+          "mae": 2.892981842943521,
+          "rmse": 3.629617203494622,
+          "mape": 7.179306133298503,
+          "r2": 0.11798459421804852
+        }
+      },
+      "chosen_model": "climatology",
+      "chosen_by": "highest mean R\u00b2 over 4 rolling folds",
+      "beats_seasonal_naive_on": 4,
+      "model_path": "outputs/models/avg_speed_kph_w7_h4_climatology.joblib"
+    },
+    {
+      "target": "avg_speed_kph",
+      "window": 7,
+      "predicts": "the mean over 7 days starting 5 day(s) ahead",
+      "horizon": 5,
+      "train_rows": 6690,
+      "test_rows": 718,
+      "test_rows_scored": 411,
+      "test_rows_dropped_interpolated": 307,
+      "min_observed_share": 0.8,
+      "full_train_rows": 7408,
+      "cv_r2": {
+        "climatology": 0.2458779293720966,
+        "ridge": 0.2310862835773175,
+        "xgboost": 0.22335331603362912,
+        "random_forest": 0.24283765064565918
+      },
+      "metrics": {
+        "seasonal_naive": {
+          "mae": 7.61457284277797,
+          "rmse": 9.571925230142924,
+          "mape": 19.22730441151858,
+          "r2": -5.134131987912136
+        },
+        "train_mean": {
+          "mae": 3.1018476428127704,
+          "rmse": 3.8662123973216933,
+          "mape": 7.87826976762631,
+          "r2": -0.0007507853590331681
+        },
+        "climatology": {
+          "mae": 2.92330764531369,
+          "rmse": 3.6529674584709935,
+          "mape": 7.229046245427289,
+          "r2": 0.10659962945503187
+        },
+        "ridge": {
+          "mae": 2.9407540988087297,
+          "rmse": 3.6538914956299346,
+          "mape": 7.261271298417327,
+          "r2": 0.10614759172883259
+        },
+        "xgboost": {
+          "mae": 2.8834956787418236,
+          "rmse": 3.6602485351557665,
+          "mape": 7.138723751602289,
+          "r2": 0.10303463772379651
+        },
+        "random_forest": {
+          "mae": 2.8779883167966305,
+          "rmse": 3.612509042921876,
+          "mape": 7.140603015927644,
+          "r2": 0.12627973823468952
+        }
+      },
+      "chosen_model": "climatology",
+      "chosen_by": "highest mean R\u00b2 over 4 rolling folds",
+      "beats_seasonal_naive_on": 4,
+      "model_path": "outputs/models/avg_speed_kph_w7_h5_climatology.joblib"
+    },
+    {
+      "target": "avg_speed_kph",
+      "window": 7,
+      "predicts": "the mean over 7 days starting 6 day(s) ahead",
+      "horizon": 6,
+      "train_rows": 6682,
+      "test_rows": 718,
+      "test_rows_scored": 411,
+      "test_rows_dropped_interpolated": 307,
+      "min_observed_share": 0.8,
+      "full_train_rows": 7400,
+      "cv_r2": {
+        "climatology": 0.2458938511668393,
+        "ridge": 0.23126412627029116,
+        "xgboost": 0.22142139549335646,
+        "random_forest": 0.24008310326589272
+      },
+      "metrics": {
+        "seasonal_naive": {
+          "mae": 7.566363940262625,
+          "rmse": 9.397622314306156,
+          "mape": 19.06159779110127,
+          "r2": -4.912763322875805
+        },
+        "train_mean": {
+          "mae": 3.101752268402683,
+          "rmse": 3.8661309827147963,
+          "mape": 7.877439833233635,
+          "r2": -0.0007086382312699868
+        },
+        "climatology": {
+          "mae": 2.923455874078215,
+          "rmse": 3.653388941119809,
+          "mape": 7.229099485768911,
+          "r2": 0.10639345489563168
+        },
+        "ridge": {
+          "mae": 2.9358963272686656,
+          "rmse": 3.653450006311152,
+          "mape": 7.248480879862468,
+          "r2": 0.10636358196855666
+        },
+        "xgboost": {
+          "mae": 2.9067841072154432,
+          "rmse": 3.6767722407706613,
+          "mape": 7.1911988471148005,
+          "r2": 0.09491789614174806
+        },
+        "random_forest": {
+          "mae": 2.879167898923947,
+          "rmse": 3.611706365914079,
+          "mape": 7.138490345730383,
+          "r2": 0.12666796549895543
+        }
+      },
+      "chosen_model": "climatology",
+      "chosen_by": "highest mean R\u00b2 over 4 rolling folds",
+      "beats_seasonal_naive_on": 4,
+      "model_path": "outputs/models/avg_speed_kph_w7_h6_climatology.joblib"
+    },
+    {
+      "target": "avg_speed_kph",
+      "window": 7,
+      "predicts": "the mean over 7 days starting 7 day(s) ahead",
+      "horizon": 7,
+      "train_rows": 6674,
+      "test_rows": 718,
+      "test_rows_scored": 411,
+      "test_rows_dropped_interpolated": 307,
+      "min_observed_share": 0.8,
+      "full_train_rows": 7392,
+      "cv_r2": {
+        "climatology": 0.2460121211387535,
+        "ridge": 0.2295088138657383,
+        "xgboost": 0.21538435993790894,
+        "random_forest": 0.23656566602294574
+      },
+      "metrics": {
+        "seasonal_naive": {
+          "mae": 7.50995377179389,
+          "rmse": 9.39851613312089,
+          "mape": 18.901783889767028,
+          "r2": -4.913888115989774
+        },
+        "train_mean": {
+          "mae": 3.101654719880035,
+          "rmse": 3.8660501432305736,
+          "mape": 7.876590980026292,
+          "r2": -0.0006667897140979484
+        },
+        "climatology": {
+          "mae": 2.923621667981094,
+          "rmse": 3.6538949217167946,
+          "mape": 7.229105096054998,
+          "r2": 0.10614591547904217
+        },
+        "ridge": {
+          "mae": 2.9330574620992427,
+          "rmse": 3.6584947214937382,
+          "mape": 7.237533962328147,
+          "r2": 0.1038939964326756
+        },
+        "xgboost": {
+          "mae": 2.955792083878577,
+          "rmse": 3.711432864870785,
+          "mape": 7.308658869518468,
+          "r2": 0.07777319799414306
+        },
+        "random_forest": {
+          "mae": 2.911163686309771,
+          "rmse": 3.6347077043126106,
+          "mape": 7.219545193048319,
+          "r2": 0.11550882423344222
+        }
+      },
+      "chosen_model": "climatology",
+      "chosen_by": "highest mean R\u00b2 over 4 rolling folds",
+      "beats_seasonal_naive_on": 4,
+      "model_path": "outputs/models/avg_speed_kph_w7_h7_climatology.joblib"
+    }
+  ]
+}

@@ -1,13 +1,30 @@
 """Trains a 7-day-ahead traffic forecasting model per target (congestion,
-speed) and per horizon (1..7 days), using real traffic + weather history,
-then saves the winning model per (target, horizon) plus a metrics report.
+speed) and per horizon (1..7 days), then saves the winning model per
+(target, horizon) plus a metrics report.
 
 Usage:
     python3 ml/train.py
 
-Evaluation is a strict time-based split (train on the past, test on the
-most recent TEST_DAYS) — never a random shuffle, since that would leak
-future information (via overlapping lag windows) into training rows.
+Two properties of this dataset drive how evaluation works here (the numbers
+behind both are in ml/README.md):
+
+1. The series carry almost no day-to-day signal. Per-road autocorrelation is
+   ~0.006 at lag 1 and -0.029 at lag 7, and day-of-week and weather shift the
+   mean by ~1-2 points against a standard deviation of ~23. Practically all
+   the explainable variance is the difference between areas, which caps R² at
+   roughly 0.33 for congestion and 0.02 for speed. A per-area mean
+   ("climatology") is therefore a serious competitor, not a straw man, so it
+   is entered as a model candidate rather than assumed to lose.
+
+2. data.py interpolates gaps in coverage. An interpolated target is a linear
+   blend of neighbouring observed days that the lag features already contain,
+   so a model scores ~0.79 R² on those rows while scoring ~0.32 on observed
+   ones. Scoring on them measures the interpolation, not forecasting skill,
+   so EVAL_OBSERVED_ONLY drops them from every reported metric.
+
+Selection uses rolling-origin cross-validation on earlier windows, keeping the
+final TEST_DAYS strictly for the reported numbers, so the choice of model is
+never made on the rows used to report it.
 """
 
 import json
@@ -16,24 +33,52 @@ from pathlib import Path
 import joblib
 import numpy as np
 import pandas as pd
-from sklearn.ensemble import RandomForestRegressor
-from xgboost import XGBRegressor
+from sklearn.dummy import DummyRegressor
 
 from data import load_daily_area_series
-from features import build_supervised, feature_columns
+from estimators import build_candidates
+from features import area_columns, build_supervised, feature_columns
 
 OUT_DIR = Path(__file__).resolve().parent / "outputs"
 MODELS_DIR = OUT_DIR / "models"
 TEST_DAYS = 90
+CV_FOLDS = 4
 HORIZONS = range(1, 8)
 TARGETS = ["congestion_pct", "avg_speed_kph"]
+# What each model predicts: a single day (window 1) and the mean over the next
+# week (window 7). A single day in this dataset is mostly noise, so the weekly
+# level is both far more predictable and what a planner actually asks for.
+WINDOWS = [1, 7]
+# Only score target periods that were genuinely observed, not interpolated.
+# 1.0 = every day in the window was a real reading; 0.8 tolerates one filled
+# day in seven, without which the weekly target has too few rows to score.
+MIN_OBSERVED_SHARE = {1: 1.0, 7: 0.8}
+
+
+# --- evaluation -----------------------------------------------------------
 
 
 def time_split(df: pd.DataFrame, test_days: int):
     cutoff = df["date"].max() - pd.Timedelta(days=test_days)
-    train = df[df["date"] <= cutoff]
-    test = df[df["date"] > cutoff]
-    return train, test
+    return df[df["date"] <= cutoff], df[df["date"] > cutoff]
+
+
+def rolling_folds(df: pd.DataFrame, n_folds: int = CV_FOLDS, test_days: int = TEST_DAYS):
+    """Successive test windows ending before the final held-out window, each
+    trained only on rows that precede it."""
+    final_cutoff = df["date"].max() - pd.Timedelta(days=test_days)
+    for i in range(n_folds, 0, -1):
+        hi = final_cutoff - pd.Timedelta(days=(i - 1) * test_days)
+        lo = hi - pd.Timedelta(days=test_days)
+        train, test = df[df["date"] <= lo], df[(df["date"] > lo) & (df["date"] <= hi)]
+        if len(test) >= 50 and len(train) >= 500:
+            yield train, test
+
+
+def scoreable(df: pd.DataFrame, window: int) -> pd.DataFrame:
+    """Rows whose metrics mean something — target periods that were observed."""
+    threshold = MIN_OBSERVED_SHARE.get(window, 1.0)
+    return df[df["target_observed_share"] >= threshold - 1e-9]
 
 
 def mape(y_true: np.ndarray, y_pred: np.ndarray) -> float:
@@ -55,123 +100,142 @@ def metrics(y_true: np.ndarray, y_pred: np.ndarray) -> dict:
 
 
 def seasonal_naive_predict(test: pd.DataFrame, target_col: str) -> np.ndarray:
-    """Baseline: assume the value 7 days before the as-of date repeats at the target date."""
+    """Baseline from the project brief: the value 7 days before the as-of day."""
     return test[f"{target_col}_lag7"].to_numpy()
 
 
-def better_on_at_least(challenger: dict, baseline: dict, n: int) -> bool:
-    wins = 0
-    wins += challenger["mae"] < baseline["mae"]
-    wins += challenger["rmse"] < baseline["rmse"]
-    wins += challenger["mape"] < baseline["mape"]
-    wins += challenger["r2"] > baseline["r2"]
-    return wins >= n
+# --- training ---------------------------------------------------------------
 
 
-def make_model(name: str):
-    if name == "random_forest":
-        return RandomForestRegressor(
-            n_estimators=300, max_depth=12, min_samples_leaf=3, random_state=42, n_jobs=-1
-        )
-    return XGBRegressor(
-        n_estimators=400,
-        max_depth=5,
-        learning_rate=0.03,
-        subsample=0.8,
-        colsample_bytree=0.8,
-        random_state=42,
-        n_jobs=-1,
-    )
+def cross_validate(sup: pd.DataFrame, cols: list[str], candidates: dict, window: int) -> dict:
+    """Mean R² per candidate over the rolling folds, for model selection."""
+    scores: dict[str, list[float]] = {name: [] for name in candidates}
+    for train, test in rolling_folds(sup):
+        eval_rows = scoreable(test, window)
+        if len(eval_rows) < 20:
+            continue
+        y_eval = eval_rows["target"].to_numpy()
+        for name, make in candidates.items():
+            model = make().fit(train[cols], train["target"].to_numpy())
+            scores[name].append(metrics(y_eval, model.predict(eval_rows[cols]))["r2"])
+    return {name: (float(np.mean(v)) if v else float("-inf")) for name, v in scores.items()}
 
 
-def train_one(daily: pd.DataFrame, target_col: str, horizon: int) -> dict:
-    sup = build_supervised(daily, horizon=horizon, target_col=target_col)
-    train, test = time_split(sup, TEST_DAYS)
+def train_one(daily: pd.DataFrame, target_col: str, horizon: int, window: int = 1) -> dict:
+    sup = build_supervised(daily, horizon=horizon, target_col=target_col, window=window)
     cols = feature_columns(sup)
+    candidates = build_candidates(area_columns(sup))
 
-    X_train, y_train = train[cols], train["target"].to_numpy()
-    X_test, y_test = test[cols], test["target"].to_numpy()
+    # 1. Pick the model on earlier windows only.
+    cv_scores = cross_validate(sup, cols, candidates, window)
+    chosen = max(cv_scores, key=lambda name: cv_scores[name])
 
-    # Held out (most recent TEST_DAYS never seen in training) — this is the
-    # honest accuracy report, comparable to the baseline on the same rows.
-    results = {"baseline": metrics(y_test, seasonal_naive_predict(test, target_col))}
+    # 2. Report every candidate on the untouched final window.
+    train, test = time_split(sup, TEST_DAYS)
+    eval_rows = scoreable(test, window)
+    y_eval = eval_rows["target"].to_numpy()
+    y_train = train["target"].to_numpy()
 
-    rf = make_model("random_forest")
-    rf.fit(X_train, y_train)
-    results["random_forest"] = metrics(y_test, rf.predict(X_test))
+    results = {
+        "seasonal_naive": metrics(y_eval, seasonal_naive_predict(eval_rows, target_col)),
+        "train_mean": metrics(
+            y_eval, DummyRegressor(strategy="mean").fit(train[cols], y_train).predict(eval_rows[cols])
+        ),
+    }
+    for name, make in candidates.items():
+        model = make().fit(train[cols], y_train)
+        results[name] = metrics(y_eval, model.predict(eval_rows[cols]))
 
-    xgb = make_model("xgboost")
-    xgb.fit(X_train, y_train)
-    results["xgboost"] = metrics(y_test, xgb.predict(X_test))
-
-    # Pick whichever of the two models clears the baseline on more metrics;
-    # ties go to XGBoost (lower MAE as the tiebreaker).
-    rf_wins = sum(
-        [
-            results["random_forest"]["mae"] < results["baseline"]["mae"],
-            results["random_forest"]["rmse"] < results["baseline"]["rmse"],
-            results["random_forest"]["mape"] < results["baseline"]["mape"],
-            results["random_forest"]["r2"] > results["baseline"]["r2"],
-        ]
-    )
-    xgb_wins = sum(
-        [
-            results["xgboost"]["mae"] < results["baseline"]["mae"],
-            results["xgboost"]["rmse"] < results["baseline"]["rmse"],
-            results["xgboost"]["mape"] < results["baseline"]["mape"],
-            results["xgboost"]["r2"] > results["baseline"]["r2"],
-        ]
-    )
-    best_name = "xgboost" if xgb_wins >= rf_wins else "random_forest"
-
-    # The model actually saved for forecasting is refit on ALL available
-    # history (train + held-out test rows combined) using the same
-    # architecture/hyperparameters just validated above — the held-out
-    # split above exists only to pick the model type and report honest
-    # accuracy; throwing away the most recent 90 days at serving time would
-    # waste real signal for no reason.
-    X_full = pd.concat([X_train, X_test], ignore_index=True)
-    y_full = np.concatenate([y_train, y_test])
-    final_model = make_model(best_name)
-    final_model.fit(X_full, y_full)
-
+    # 3. Refit the winner on all history, including the reporting window: the
+    #    split exists to choose and to report, not to withhold data at serving.
+    final_model = candidates[chosen]().fit(sup[cols], sup["target"].to_numpy())
     MODELS_DIR.mkdir(parents=True, exist_ok=True)
-    model_path = MODELS_DIR / f"{target_col}_h{horizon}_{best_name}.joblib"
+    # Single-day models keep their original filename so forecast.py's glob
+    # still finds exactly one match; weekly models are tagged.
+    stem = f"{target_col}_h{horizon}" if window == 1 else f"{target_col}_w{window}_h{horizon}"
+    model_path = MODELS_DIR / f"{stem}_{chosen}.joblib"
     joblib.dump({"model": final_model, "feature_columns": cols}, model_path)
+
+    naive = results["seasonal_naive"]
+    picked = results[chosen]
+    beats_naive = sum(
+        [
+            picked["mae"] < naive["mae"],
+            picked["rmse"] < naive["rmse"],
+            picked["mape"] < naive["mape"],
+            picked["r2"] > naive["r2"],
+        ]
+    )
 
     return {
         "target": target_col,
+        "window": window,
+        "predicts": (
+            f"the value {horizon} day(s) ahead"
+            if window == 1
+            else f"the mean over {window} days starting {horizon} day(s) ahead"
+        ),
         "horizon": horizon,
         "train_rows": len(train),
         "test_rows": len(test),
-        "full_train_rows": len(X_full),
+        "test_rows_scored": len(eval_rows),
+        "test_rows_dropped_interpolated": len(test) - len(eval_rows),
+        "min_observed_share": MIN_OBSERVED_SHARE.get(window, 1.0),
+        "full_train_rows": len(sup),
+        "cv_r2": cv_scores,
         "metrics": results,
-        "chosen_model": best_name,
-        "beats_baseline_on": max(rf_wins, xgb_wins),
+        "chosen_model": chosen,
+        "chosen_by": f"highest mean R² over {CV_FOLDS} rolling folds",
+        "beats_seasonal_naive_on": beats_naive,
         "model_path": str(model_path.relative_to(OUT_DIR.parent)),
     }
+
+
+def variance_ceiling(daily: pd.DataFrame) -> dict:
+    """Share of each target's variance that lies between areas — the practical
+    upper bound on R² once the series themselves prove to be noise."""
+    ceiling = {}
+    for col in ("congestion_pct", "avg_speed_kph", "traffic_volume"):
+        area_mean = daily.groupby("area")[col].transform("mean")
+        total = float(((daily[col] - daily[col].mean()) ** 2).sum())
+        resid = float(((daily[col] - area_mean) ** 2).sum())
+        ceiling[col] = round(1 - resid / total, 4) if total else None
+    return ceiling
 
 
 def main():
     daily = load_daily_area_series()
     report = []
-    for target_col in TARGETS:
-        for horizon in HORIZONS:
-            row = train_one(daily, target_col, horizon)
-            report.append(row)
-            m = row["metrics"]
-            print(
-                f"{target_col:16s} h={horizon}  "
-                f"baseline MAE={m['baseline']['mae']:.2f}  "
-                f"chosen={row['chosen_model']:13s} "
-                f"MAE={m[row['chosen_model']]['mae']:.2f}  "
-                f"R2={m[row['chosen_model']]['r2']:.3f}  "
-                f"beats baseline on {row['beats_baseline_on']}/4 metrics"
-            )
+    for window in WINDOWS:
+        label = "single day" if window == 1 else f"{window}-day mean"
+        print(f"\n--- predicting the {label} ---")
+        for target_col in TARGETS:
+            for horizon in HORIZONS:
+                row = train_one(daily, target_col, horizon, window=window)
+                report.append(row)
+                m = row["metrics"]
+                print(
+                    f"{target_col:16s} h={horizon}  "
+                    f"naive R²={m['seasonal_naive']['r2']:+.3f}  "
+                    f"chosen={row['chosen_model']:13s} "
+                    f"MAE={m[row['chosen_model']]['mae']:.2f}  "
+                    f"R²={m[row['chosen_model']]['r2']:+.3f}  "
+                    f"(scored on {row['test_rows_scored']} rows)"
+                )
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
+    payload = {
+        "config": {
+            "test_days": TEST_DAYS,
+            "cv_folds": CV_FOLDS,
+            "windows": WINDOWS,
+            "min_observed_share": MIN_OBSERVED_SHARE,
+        },
+        "variance_ceiling_r2": variance_ceiling(daily),
+        "runs": report,
+    }
     with open(OUT_DIR / "metrics.json", "w") as f:
-        json.dump(report, f, indent=2)
+        json.dump(payload, f, indent=2)
     print(f"\nSaved metrics report to {OUT_DIR / 'metrics.json'}")
     print(f"Saved {len(report)} trained models to {MODELS_DIR}/")
 

@@ -147,6 +147,28 @@ export type EventInput = {
   url: string | null;
 };
 
+/** One row read out of a BookMyShow paste; `venue` is null when unmatched. */
+export type ParsedEvent = {
+  title: string;
+  category: EventCategory;
+  starts_at: string;
+  ends_at: string;
+  expected_attendance: number | null;
+  venue_text: string;
+  venue: string | null;
+  venue_name: string | null;
+  issues: string[];
+};
+
+export type PasteImportResult = {
+  events: ParsedEvent[];
+  created: number;
+  skipped: number;
+  /** Rows already stored, left untouched so re-pasting is safe. */
+  duplicates: number;
+  dry_run: boolean;
+};
+
 export type ImpactWindow = {
   start: string;
   end: string;
@@ -214,6 +236,16 @@ export const cityflowApi = {
   updateEvent: (id: number, input: EventInput) =>
     sendJson<ApiEvent>(`/api/events/${id}`, "PUT", input),
   deleteEvent: (id: number) => request<void>(`/api/events/${id}`, { method: "DELETE" }),
+  /**
+   * Read events out of text copied from BookMyShow's Bengaluru listing.
+   * `dryRun` previews the parsed rows without saving them.
+   */
+  importBookMyShow: (text: string, dryRun: boolean, sourceUrl?: string) =>
+    sendJson<PasteImportResult>("/api/events/import/bookmyshow", "POST", {
+      text,
+      dry_run: dryRun,
+      source_url: sourceUrl ?? null,
+    }),
   importEvents: (csvText: string) =>
     request<{ created: number }>("/api/events/import", {
       method: "POST",

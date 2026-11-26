@@ -5,8 +5,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-03",
     "horizon_days":1,
-    "predicted":51.79,
+    "predicted":54.75,
     "actual":55.97,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -15,8 +16,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-04",
     "horizon_days":2,
-    "predicted":53.45,
+    "predicted":54.73,
     "actual":53.99,
+    "actual_is_interpolated":true,
     "weather_forecast_persisted":false
   },
   {
@@ -25,8 +27,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-05",
     "horizon_days":3,
-    "predicted":55.23,
+    "predicted":54.75,
     "actual":52.01,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -35,8 +38,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-06",
     "horizon_days":4,
-    "predicted":48.59,
+    "predicted":54.75,
     "actual":43.33,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -45,8 +49,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-07",
     "horizon_days":5,
-    "predicted":54.2,
+    "predicted":54.73,
     "actual":54.68,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -55,8 +60,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-08",
     "horizon_days":6,
-    "predicted":72.29,
+    "predicted":54.75,
     "actual":90.49,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -65,8 +71,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-09",
     "horizon_days":7,
-    "predicted":40.45,
+    "predicted":54.77,
     "actual":35.87,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -75,8 +82,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-03",
     "horizon_days":1,
-    "predicted":44.81,
+    "predicted":42.27,
     "actual":51.19,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -85,8 +93,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-04",
     "horizon_days":2,
-    "predicted":47.34,
+    "predicted":43.87,
     "actual":49.98,
+    "actual_is_interpolated":true,
     "weather_forecast_persisted":false
   },
   {
@@ -95,8 +104,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-05",
     "horizon_days":3,
-    "predicted":47.46,
+    "predicted":43.88,
     "actual":48.76,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -105,8 +115,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-06",
     "horizon_days":4,
-    "predicted":44.23,
+    "predicted":43.88,
     "actual":39.98,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -115,8 +126,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-07",
     "horizon_days":5,
-    "predicted":42.83,
+    "predicted":43.89,
     "actual":41.7,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -125,8 +137,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-08",
     "horizon_days":6,
-    "predicted":38.64,
+    "predicted":43.9,
     "actual":31.52,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -135,8 +148,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-09",
     "horizon_days":7,
-    "predicted":36.73,
+    "predicted":43.9,
     "actual":23.44,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -145,8 +159,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-03",
     "horizon_days":1,
-    "predicted":81.68,
+    "predicted":80.06,
     "actual":64.26,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -155,8 +170,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-04",
     "horizon_days":2,
-    "predicted":81.55,
+    "predicted":80.04,
     "actual":100.0,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -165,8 +181,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-05",
     "horizon_days":3,
-    "predicted":85.28,
+    "predicted":80.02,
     "actual":97.46,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -175,8 +192,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-06",
     "horizon_days":4,
-    "predicted":73.0,
+    "predicted":80.01,
     "actual":33.7,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -185,8 +203,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-07",
     "horizon_days":5,
-    "predicted":76.4,
+    "predicted":80.01,
     "actual":64.2,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -195,8 +214,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-08",
     "horizon_days":6,
-    "predicted":76.9,
+    "predicted":80.03,
     "actual":62.77,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -205,8 +225,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-09",
     "horizon_days":7,
-    "predicted":79.3,
+    "predicted":80.08,
     "actual":null,
+    "actual_is_interpolated":null,
     "weather_forecast_persisted":true
   },
   {
@@ -215,8 +236,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-03",
     "horizon_days":1,
-    "predicted":39.76,
+    "predicted":40.42,
     "actual":39.87,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -225,8 +247,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-04",
     "horizon_days":2,
-    "predicted":40.73,
+    "predicted":40.02,
     "actual":41.1,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -235,8 +258,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-05",
     "horizon_days":3,
-    "predicted":39.56,
+    "predicted":40.02,
     "actual":31.88,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -245,8 +269,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-06",
     "horizon_days":4,
-    "predicted":41.08,
+    "predicted":40.01,
     "actual":40.75,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -255,8 +280,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-07",
     "horizon_days":5,
-    "predicted":42.66,
+    "predicted":40.02,
     "actual":56.67,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -265,8 +291,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-08",
     "horizon_days":6,
-    "predicted":39.68,
+    "predicted":40.02,
     "actual":38.08,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -275,8 +302,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-09",
     "horizon_days":7,
-    "predicted":37.86,
+    "predicted":39.99,
     "actual":null,
+    "actual_is_interpolated":null,
     "weather_forecast_persisted":true
   },
   {
@@ -285,8 +313,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-03",
     "horizon_days":1,
-    "predicted":84.09,
+    "predicted":87.91,
     "actual":90.6,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -295,8 +324,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-04",
     "horizon_days":2,
-    "predicted":83.41,
+    "predicted":87.9,
     "actual":67.17,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -305,8 +335,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-05",
     "horizon_days":3,
-    "predicted":83.27,
+    "predicted":87.92,
     "actual":56.75,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -315,8 +346,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-06",
     "horizon_days":4,
-    "predicted":90.34,
+    "predicted":87.93,
     "actual":100.0,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -327,6 +359,7 @@
     "horizon_days":5,
     "predicted":87.92,
     "actual":70.8,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -335,8 +368,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-08",
     "horizon_days":6,
-    "predicted":86.43,
+    "predicted":87.91,
     "actual":100.0,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -345,8 +379,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-09",
     "horizon_days":7,
-    "predicted":88.39,
+    "predicted":87.9,
     "actual":100.0,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -355,8 +390,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-03",
     "horizon_days":1,
-    "predicted":38.65,
+    "predicted":39.1,
     "actual":40.7,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -365,8 +401,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-04",
     "horizon_days":2,
-    "predicted":38.7,
+    "predicted":38.6,
     "actual":42.72,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -375,8 +412,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-05",
     "horizon_days":3,
-    "predicted":38.69,
+    "predicted":38.58,
     "actual":49.07,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -385,8 +423,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-06",
     "horizon_days":4,
-    "predicted":38.21,
+    "predicted":38.58,
     "actual":36.08,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -395,8 +434,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-07",
     "horizon_days":5,
-    "predicted":38.79,
+    "predicted":38.56,
     "actual":37.62,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -405,8 +445,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-08",
     "horizon_days":6,
-    "predicted":36.3,
+    "predicted":38.56,
     "actual":20.0,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -415,8 +456,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-09",
     "horizon_days":7,
-    "predicted":38.17,
+    "predicted":38.56,
     "actual":31.7,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -425,8 +467,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-03",
     "horizon_days":1,
-    "predicted":79.24,
+    "predicted":77.19,
     "actual":74.67,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -435,8 +478,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-04",
     "horizon_days":2,
-    "predicted":76.81,
+    "predicted":77.21,
     "actual":74.24,
+    "actual_is_interpolated":true,
     "weather_forecast_persisted":false
   },
   {
@@ -445,8 +489,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-05",
     "horizon_days":3,
-    "predicted":78.71,
+    "predicted":77.18,
     "actual":73.81,
+    "actual_is_interpolated":true,
     "weather_forecast_persisted":false
   },
   {
@@ -455,8 +500,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-06",
     "horizon_days":4,
-    "predicted":73.41,
+    "predicted":77.16,
     "actual":73.38,
+    "actual_is_interpolated":true,
     "weather_forecast_persisted":false
   },
   {
@@ -465,8 +511,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-07",
     "horizon_days":5,
-    "predicted":76.5,
+    "predicted":77.13,
     "actual":72.95,
+    "actual_is_interpolated":true,
     "weather_forecast_persisted":false
   },
   {
@@ -475,8 +522,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-08",
     "horizon_days":6,
-    "predicted":74.82,
+    "predicted":77.13,
     "actual":72.52,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -485,8 +533,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-09",
     "horizon_days":7,
-    "predicted":76.49,
+    "predicted":77.15,
     "actual":72.64,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -495,8 +544,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-03",
     "horizon_days":1,
-    "predicted":39.97,
+    "predicted":39.22,
     "actual":45.06,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -505,8 +555,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-04",
     "horizon_days":2,
-    "predicted":40.5,
+    "predicted":39.61,
     "actual":44.98,
+    "actual_is_interpolated":true,
     "weather_forecast_persisted":false
   },
   {
@@ -515,8 +566,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-05",
     "horizon_days":3,
-    "predicted":40.85,
+    "predicted":39.61,
     "actual":44.89,
+    "actual_is_interpolated":true,
     "weather_forecast_persisted":false
   },
   {
@@ -525,8 +577,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-06",
     "horizon_days":4,
-    "predicted":42.39,
+    "predicted":39.61,
     "actual":44.81,
+    "actual_is_interpolated":true,
     "weather_forecast_persisted":false
   },
   {
@@ -535,8 +588,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-07",
     "horizon_days":5,
-    "predicted":39.81,
+    "predicted":39.61,
     "actual":44.72,
+    "actual_is_interpolated":true,
     "weather_forecast_persisted":false
   },
   {
@@ -545,8 +599,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-08",
     "horizon_days":6,
-    "predicted":41.47,
+    "predicted":39.62,
     "actual":44.64,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -555,8 +610,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-09",
     "horizon_days":7,
-    "predicted":43.61,
+    "predicted":39.62,
     "actual":52.25,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -565,8 +621,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-03",
     "horizon_days":1,
-    "predicted":94.44,
+    "predicted":94.08,
     "actual":100.0,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -575,8 +632,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-04",
     "horizon_days":2,
-    "predicted":97.68,
+    "predicted":94.07,
     "actual":100.0,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -585,8 +643,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-05",
     "horizon_days":3,
-    "predicted":95.56,
+    "predicted":94.12,
     "actual":100.0,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -595,8 +654,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-06",
     "horizon_days":4,
-    "predicted":91.21,
+    "predicted":94.11,
     "actual":100.0,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -605,8 +665,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-07",
     "horizon_days":5,
-    "predicted":92.77,
+    "predicted":94.11,
     "actual":100.0,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -615,8 +676,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-08",
     "horizon_days":6,
-    "predicted":94.6,
+    "predicted":94.1,
     "actual":86.66,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -625,8 +687,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-09",
     "horizon_days":7,
-    "predicted":92.1,
+    "predicted":94.09,
     "actual":96.98,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -635,8 +698,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-03",
     "horizon_days":1,
-    "predicted":36.64,
+    "predicted":37.57,
     "actual":34.24,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -645,8 +709,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-04",
     "horizon_days":2,
-    "predicted":36.4,
+    "predicted":36.13,
     "actual":33.37,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -655,8 +720,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-05",
     "horizon_days":3,
-    "predicted":36.34,
+    "predicted":36.13,
     "actual":37.49,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -665,8 +731,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-06",
     "horizon_days":4,
-    "predicted":35.2,
+    "predicted":36.14,
     "actual":26.76,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -675,8 +742,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-07",
     "horizon_days":5,
-    "predicted":38.71,
+    "predicted":36.15,
     "actual":41.63,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -685,8 +753,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-08",
     "horizon_days":6,
-    "predicted":37.97,
+    "predicted":36.15,
     "actual":46.09,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -695,8 +764,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-09",
     "horizon_days":7,
-    "predicted":35.27,
+    "predicted":36.14,
     "actual":31.57,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -705,8 +775,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-03",
     "horizon_days":1,
-    "predicted":87.93,
+    "predicted":90.78,
     "actual":76.88,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -715,8 +786,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-04",
     "horizon_days":2,
-    "predicted":91.72,
+    "predicted":90.77,
     "actual":96.91,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -725,8 +797,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-05",
     "horizon_days":3,
-    "predicted":91.53,
+    "predicted":90.83,
     "actual":82.29,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -735,8 +808,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-06",
     "horizon_days":4,
-    "predicted":89.91,
+    "predicted":90.83,
     "actual":90.05,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -745,8 +819,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-07",
     "horizon_days":5,
-    "predicted":73.05,
+    "predicted":90.83,
     "actual":45.46,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -755,8 +830,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-08",
     "horizon_days":6,
-    "predicted":88.97,
+    "predicted":90.84,
     "actual":100.0,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -765,8 +841,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-09",
     "horizon_days":7,
-    "predicted":90.7,
+    "predicted":90.86,
     "actual":100.0,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -775,8 +852,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-03",
     "horizon_days":1,
-    "predicted":38.61,
+    "predicted":38.03,
     "actual":41.58,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -785,8 +863,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-04",
     "horizon_days":2,
-    "predicted":36.26,
+    "predicted":37.66,
     "actual":33.88,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -795,8 +874,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-05",
     "horizon_days":3,
-    "predicted":40.03,
+    "predicted":37.64,
     "actual":40.92,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -805,8 +885,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-06",
     "horizon_days":4,
-    "predicted":38.08,
+    "predicted":37.66,
     "actual":36.81,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -815,8 +896,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-07",
     "horizon_days":5,
-    "predicted":39.2,
+    "predicted":37.66,
     "actual":39.86,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -825,8 +907,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-08",
     "horizon_days":6,
-    "predicted":37.94,
+    "predicted":37.66,
     "actual":42.18,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -835,8 +918,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-09",
     "horizon_days":7,
-    "predicted":36.78,
+    "predicted":37.66,
     "actual":33.6,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -845,8 +929,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-03",
     "horizon_days":1,
-    "predicted":78.32,
+    "predicted":69.43,
     "actual":87.47,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -855,8 +940,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-04",
     "horizon_days":2,
-    "predicted":77.84,
+    "predicted":69.42,
     "actual":100.0,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -865,8 +951,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-05",
     "horizon_days":3,
-    "predicted":79.36,
+    "predicted":69.39,
     "actual":80.4,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -875,8 +962,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-06",
     "horizon_days":4,
-    "predicted":77.67,
+    "predicted":69.39,
     "actual":89.06,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -885,8 +973,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-07",
     "horizon_days":5,
-    "predicted":69.58,
+    "predicted":69.39,
     "actual":55.22,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -895,8 +984,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-08",
     "horizon_days":6,
-    "predicted":71.93,
+    "predicted":69.43,
     "actual":86.83,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -905,8 +995,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-09",
     "horizon_days":7,
-    "predicted":69.23,
+    "predicted":69.43,
     "actual":null,
+    "actual_is_interpolated":null,
     "weather_forecast_persisted":true
   },
   {
@@ -915,8 +1006,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-03",
     "horizon_days":1,
-    "predicted":41.05,
+    "predicted":40.36,
     "actual":38.18,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -925,8 +1017,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-04",
     "horizon_days":2,
-    "predicted":36.86,
+    "predicted":42.12,
     "actual":27.62,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -935,8 +1028,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-05",
     "horizon_days":3,
-    "predicted":44.09,
+    "predicted":42.13,
     "actual":58.6,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -945,8 +1039,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-06",
     "horizon_days":4,
-    "predicted":40.53,
+    "predicted":42.12,
     "actual":39.29,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -955,8 +1050,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-07",
     "horizon_days":5,
-    "predicted":42.88,
+    "predicted":42.12,
     "actual":44.46,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -965,8 +1061,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-08",
     "horizon_days":6,
-    "predicted":40.54,
+    "predicted":42.1,
     "actual":32.73,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -975,8 +1072,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-09",
     "horizon_days":7,
-    "predicted":42.0,
+    "predicted":42.09,
     "actual":null,
+    "actual_is_interpolated":null,
     "weather_forecast_persisted":true
   },
   {
@@ -985,8 +1083,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-03",
     "horizon_days":1,
-    "predicted":46.25,
+    "predicted":62.34,
     "actual":31.0,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -995,8 +1094,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-04",
     "horizon_days":2,
-    "predicted":52.99,
+    "predicted":62.34,
     "actual":38.98,
+    "actual_is_interpolated":true,
     "weather_forecast_persisted":false
   },
   {
@@ -1005,8 +1105,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-05",
     "horizon_days":3,
-    "predicted":54.49,
+    "predicted":62.32,
     "actual":46.96,
+    "actual_is_interpolated":true,
     "weather_forecast_persisted":false
   },
   {
@@ -1015,8 +1116,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-06",
     "horizon_days":4,
-    "predicted":61.71,
+    "predicted":62.31,
     "actual":54.94,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -1025,8 +1127,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-07",
     "horizon_days":5,
-    "predicted":61.53,
+    "predicted":62.29,
     "actual":62.1,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -1035,8 +1138,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-08",
     "horizon_days":6,
-    "predicted":59.44,
+    "predicted":62.29,
     "actual":52.75,
+    "actual_is_interpolated":true,
     "weather_forecast_persisted":false
   },
   {
@@ -1045,8 +1149,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-09",
     "horizon_days":7,
-    "predicted":54.11,
+    "predicted":62.29,
     "actual":43.41,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -1055,8 +1160,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-03",
     "horizon_days":1,
-    "predicted":36.19,
+    "predicted":39.95,
     "actual":30.08,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -1065,8 +1171,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-04",
     "horizon_days":2,
-    "predicted":39.77,
+    "predicted":43.44,
     "actual":33.77,
+    "actual_is_interpolated":true,
     "weather_forecast_persisted":false
   },
   {
@@ -1075,8 +1182,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-05",
     "horizon_days":3,
-    "predicted":40.93,
+    "predicted":43.46,
     "actual":37.47,
+    "actual_is_interpolated":true,
     "weather_forecast_persisted":false
   },
   {
@@ -1085,8 +1193,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-06",
     "horizon_days":4,
-    "predicted":41.11,
+    "predicted":43.48,
     "actual":41.17,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -1095,8 +1204,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-07",
     "horizon_days":5,
-    "predicted":40.18,
+    "predicted":43.48,
     "actual":39.33,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   },
   {
@@ -1105,8 +1215,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-08",
     "horizon_days":6,
-    "predicted":39.76,
+    "predicted":43.47,
     "actual":35.23,
+    "actual_is_interpolated":true,
     "weather_forecast_persisted":false
   },
   {
@@ -1115,8 +1226,9 @@
     "as_of_date":"2024-08-02",
     "target_date":"2024-08-09",
     "horizon_days":7,
-    "predicted":38.34,
+    "predicted":43.47,
     "actual":31.13,
+    "actual_is_interpolated":false,
     "weather_forecast_persisted":false
   }
 ]

@@ -6,6 +6,8 @@ import { DashboardSidebar } from "@/components/dashboard/sidebar";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/hooks/use-theme";
 import { NotificationCenter } from "@/components/route/notification-center";
+import { BookMyShowImport } from "@/components/events/bookmyshow-import";
+import { LeaveEarlyAdvice } from "@/components/events/leave-early-advice";
 import {
   cityflowApi,
   type ApiEvent,
@@ -144,6 +146,7 @@ function EventsPage() {
             </section>
           ) : (
             <>
+              <BookMyShowImport />
               <EventEditor venues={venuesQuery.data ?? []} />
               <EventList
                 events={eventsQuery.data}
@@ -449,6 +452,9 @@ function EventList({
                       </Button>
                     </>
                   )}
+                </div>
+                <div className="w-full">
+                  <LeaveEarlyAdvice event={e} />
                 </div>
               </li>
             ),
