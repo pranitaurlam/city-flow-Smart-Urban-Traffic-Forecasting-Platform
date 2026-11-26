@@ -1,16 +1,63 @@
 import { CalendarClock, Route as RouteIcon, TrendingUp } from "lucide-react";
+import { HERO_PARTICLES } from "@/components/landing/hero-particles";
 
 /**
  * Animated hero visual: the globe sits in a softly pulsing halo, with
  * floating cards that walk through what CityFlow does.
  */
 
-/** Wraps the globe image with its glow. */
+/**
+ * The hero's opening: particles fly in, spell "Bengaluru", hold, then
+ * rearrange into the globe's disc and fade out as the globe materialises and
+ * takes over the rotation.
+ *
+ * Positions come from the pre-sampled table in hero-particles.ts, so the
+ * markup is identical on server and client. Coordinates are in cqw (percent of
+ * the globe's width), which keeps the lettering in proportion at any size.
+ */
+/**
+ * How wide the word sits relative to the globe. The sampled points span the
+ * full 100 units; at 1.0 the lettering is as wide as the globe and runs off the
+ * column, and past ~0.6 the last letters disappear behind the Events card.
+ */
+const WORD_SCALE = 0.56;
+
+function GlobeParticles() {
+  return (
+    <div className="cf-particle-field" aria-hidden="true">
+      {HERO_PARTICLES.map(([tx, ty, gx, gy, fx, fy, size, delay], i) => (
+        <span
+          key={i}
+          className="cf-particle"
+          style={
+            {
+              width: size,
+              height: size,
+              "--tx": `${(tx * WORD_SCALE).toFixed(2)}cqw`,
+              "--ty": `${(ty * WORD_SCALE).toFixed(2)}cqw`,
+              "--gx": `${gx}cqw`,
+              "--gy": `${gy}cqw`,
+              "--fx": `${fx}px`,
+              "--fy": `${fy}px`,
+              "--d": `${delay}ms`,
+            } as React.CSSProperties
+          }
+        />
+      ))}
+    </div>
+  );
+}
+
+/** Wraps the globe image with its glow, assembled out of incoming particles. */
 export function GlobeOrbit({ children }: { children: React.ReactNode }) {
   return (
     <>
       <div className="cf-halo size-[72%]" aria-hidden="true" />
-      <div className="relative">{children}</div>
+      <div className="relative">
+        <GlobeParticles />
+        {/* The fade-in lives on this wrapper so the image keeps its own spin. */}
+        <div className="cf-globe-form">{children}</div>
+      </div>
     </>
   );
 }
