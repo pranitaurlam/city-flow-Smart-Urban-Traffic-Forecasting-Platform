@@ -324,6 +324,53 @@
   }
 }
 
+@keyframes cf-particle-journey {
+  /* 1. Fly in from off-frame. */
+  0% {
+    transform: translate(-50%, -50%) translate(var(--fx), var(--fy)) scale(0.4);
+    opacity: 0;
+  }
+  8% {
+    opacity: 1;
+  }
+  /* 2. Settle into the letters of "Bengaluru" and hold. */
+  26% {
+    transform: translate(-50%, -50%) translate(var(--tx), var(--ty)) scale(1);
+    opacity: 1;
+  }
+  52% {
+    transform: translate(-50%, -50%) translate(var(--tx), var(--ty)) scale(1);
+    opacity: 1;
+  }
+  /* 3. Gather onto the sphere, overshooting very slightly inward so they read
+        as being pulled in rather than parking. */
+  70% {
+    transform: translate(-50%, -50%) translate(var(--gx), var(--gy)) scale(0.94);
+    opacity: 1;
+  }
+  76% {
+    transform: translate(-50%, -50%) translate(var(--gx), var(--gy)) scale(1);
+    opacity: 1;
+  }
+  /* 4. Dissolve in place at full size while the image fades up underneath.
+        No shrinking: these are becoming the planet's surface, not leaving. */
+  100% {
+    transform: translate(-50%, -50%) translate(var(--gx), var(--gy)) scale(1);
+    opacity: 0;
+  }
+}
+
+@keyframes cf-globe-form {
+  /* Opacity only. A blur or scale-up here reads as the planet "popping in"
+     over the particles instead of the particles becoming the planet. */
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
 @keyframes cf-halo {
   0%,
   100% {
@@ -426,6 +473,37 @@
   color: transparent;
 }
 
+.cf-particle-field {
+  position: absolute;
+  inset: 0;
+  /* Above the floating cards (z-20) so the word is never half-hidden; the
+     particles fade out before the cards matter. */
+  z-index: 30;
+  pointer-events: none;
+  /* 1cqw = 1% of the globe's width, so --tx/--gx scale with it. */
+  container-type: inline-size;
+}
+
+.cf-particle {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  border-radius: 9999px;
+  opacity: 0;
+  /* Deep blue, not cyan-and-white: the word forms over the pale hero, where a
+     light dot has almost no contrast. This tone reads on the light background
+     and still shows against the dark globe it lands on. */
+  background: var(--brand-blue);
+  box-shadow: 0 0 5px color-mix(in oklab, var(--brand-blue) 40%, transparent);
+  will-change: transform, opacity;
+}
+
+/* Dark mode inverts the problem: the hero is near-black, so go bright. */
+.dark .cf-particle {
+  background: color-mix(in oklab, var(--brand-cyan) 80%, white);
+  box-shadow: 0 0 6px color-mix(in oklab, var(--brand-cyan) 65%, transparent);
+}
+
 .cf-halo {
   position: absolute;
   left: 50%;
@@ -474,6 +552,15 @@
   }
   .cf-halo {
     animation: cf-halo 6s ease-in-out infinite;
+  }
+  /* One-shot intro: the particles gather into the globe, which then keeps
+     spinning via .globe-rotate on the image itself. */
+  .cf-particle {
+    animation: cf-particle-journey 4.6s cubic-bezier(0.3, 0.6, 0.25, 1) both;
+    animation-delay: var(--d, 0ms);
+  }
+  .cf-globe-form {
+    animation: cf-globe-form 1.35s ease-in 3.25s both;
   }
   .cf-aurora-a {
     animation: cf-drift-a 18s ease-in-out infinite;
@@ -1167,6 +1254,17 @@
    windows, drifting clouds and flapping birds, sparkles and icon wiggles.
 --------------------------------------------------------------------------- */
 
+@keyframes cf-face-swap {
+  from {
+    opacity: 0;
+    transform: translateY(2px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 @keyframes cf-car-bob {
   0%,
   100% {
@@ -1322,6 +1420,9 @@
 @media (prefers-reduced-motion: no-preference) {
   .cf-car-bob {
     animation: cf-car-bob 1.6s ease-in-out infinite;
+  }
+  .cf-face-swap {
+    animation: cf-face-swap 0.35s ease-out both;
   }
   .cf-wheel {
     transform-box: fill-box;

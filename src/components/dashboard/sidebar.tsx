@@ -8,6 +8,7 @@ import {
   Route as RouteIcon,
   Home,
 } from "lucide-react";
+import { SidebarCar } from "@/components/dashboard/sidebar-car";
 import { cn } from "@/lib/utils";
 
 const navItems = [
@@ -110,6 +111,8 @@ export function DashboardSidebar() {
             <NavLink key={item.label} item={item} pathname={pathname} />
           ))}
         </nav>
+
+        <SidebarCar />
       </aside>
     </>
   );
