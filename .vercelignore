@@ -1,0 +1,10 @@
+# Frontend deploy only: the backend is its own Vercel project (backend/).
+backend
+ml
+.env
+*.local
+.output
+.wrangler
+.tanstack
+.vercel
+node_modules

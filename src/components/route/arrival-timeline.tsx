@@ -1,14 +1,33 @@
+import { Bike, Bus, Car, Flag, Footprints, Home } from "lucide-react";
 import { formatMinutes, minutesToClock, type ArrivalPlanResult } from "@/lib/arrival-planner";
+import type { PlannerMode } from "@/lib/route-intelligence";
 
+const MODE_ICON: Record<PlannerMode, typeof Car> = {
+  driving: Car,
+  "two-wheeler": Bike,
+  transit: Bus,
+  walking: Footprints,
+};
+
+/**
+ * The recommended trip drawn to scale as a little animated journey: the
+ * vehicle for the chosen travel mode drives from home to its typical arrival
+ * time, past the arrival window, with the deadline flagged at the end.
+ */
 export function ArrivalTimeline({ plan }: { plan: ArrivalPlanResult }) {
   const { recommended, deadlineMinute } = plan;
   const start = recommended.departureMinute;
   const end = Math.max(deadlineMinute, recommended.arrivalRangeHigh);
   const span = Math.max(1, end - start);
-  const pct = (minute: number) => Math.min(100, Math.max(0, ((minute - start) / span) * 100));
+  // Keep a little margin at both ends so the home and flag icons fit.
+  const pct = (minute: number) => 4 + Math.min(92, Math.max(0, ((minute - start) / span) * 92));
 
   const arrivalMeanMinute = start + recommended.journeyMin;
   const bufferRemaining = deadlineMinute - arrivalMeanMinute;
+  const Vehicle = MODE_ICON[plan.input.mode] ?? Car;
+  const fromPct = pct(start);
+  const toPct = pct(arrivalMeanMinute);
+  const late = bufferRemaining < 0;
 
   return (
     <div className="glass-panel rounded-2xl p-5 sm:p-6">
@@ -17,17 +36,75 @@ export function ArrivalTimeline({ plan }: { plan: ArrivalPlanResult }) {
         Departure, journey, estimated arrival range, and your deadline — to scale.
       </p>
 
-      <div className="relative mt-8 h-2 rounded-full bg-secondary">
+      <div
+        className="cf-trip relative mt-6 h-24"
+        style={
+          {
+            "--from": `${fromPct}%`,
+            "--to": `${toPct}%`,
+            "--trail": `${toPct - fromPct}%`,
+          } as React.CSSProperties
+        }
+        aria-hidden="true"
+      >
+        {/* road */}
+        <div className="cf-trip-road absolute inset-x-0 top-12 h-7 rounded-full" />
+
+        {/* arrival window */}
         <div
-          className="absolute inset-y-0 rounded-full bg-[color-mix(in_oklab,var(--brand-cyan)_55%,transparent)]"
+          className="absolute top-11 h-9 rounded-xl border border-dashed border-success/60 bg-success/15"
           style={{
             left: `${pct(recommended.arrivalRangeLow)}%`,
             right: `${100 - pct(recommended.arrivalRangeHigh)}%`,
           }}
+        >
+          <span className="absolute -bottom-5 left-1/2 -translate-x-1/2 whitespace-nowrap text-[10px] font-bold text-success">
+            Arrive
+          </span>
+        </div>
+
+        {/* trail behind the vehicle */}
+        <div
+          className="cf-trip-trail absolute top-[3.75rem] h-1.5 rounded-full bg-gradient-brand"
+          style={{ left: `${fromPct}%` }}
         />
-        <Marker pct={pct(start)} tone="start" />
-        <Marker pct={pct(arrivalMeanMinute)} tone="mid" />
-        <Marker pct={pct(deadlineMinute)} tone="end" />
+
+        {/* home */}
+        <div
+          className="absolute top-11 grid size-9 -translate-x-1/2 place-items-center rounded-full bg-[var(--brand-blue)] text-white shadow-md ring-2 ring-background"
+          style={{ left: `${fromPct}%` }}
+        >
+          <Home size={16} />
+        </div>
+
+        {/* deadline flag */}
+        <div
+          className="absolute top-3 flex -translate-x-1/2 flex-col items-center"
+          style={{ left: `${pct(deadlineMinute)}%` }}
+        >
+          <span className="cf-flag grid size-8 place-items-center rounded-full bg-destructive text-white shadow-md ring-2 ring-background">
+            <Flag size={15} />
+          </span>
+          <span className="h-5 w-0.5 bg-destructive/70" />
+        </div>
+
+        {/* the traveller */}
+        <div className="cf-trip-vehicle absolute top-[2.625rem] z-10" style={{ left: `${toPct}%` }}>
+          <div className="relative -translate-x-1/2">
+            <span className="cf-trip-puff absolute -left-3 top-6 size-2 rounded-full bg-foreground/20" />
+            <span
+              className="cf-trip-puff absolute -left-5 top-4 size-1.5 rounded-full bg-foreground/15"
+              style={{ animationDelay: "0.4s" }}
+            />
+            <span
+              className={`cf-trip-bob grid size-10 place-items-center rounded-2xl text-white shadow-lg ring-2 ring-background ${
+                late ? "bg-destructive" : "bg-gradient-brand"
+              }`}
+            >
+              <Vehicle size={20} />
+            </span>
+          </div>
+        </div>
       </div>
 
       <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
@@ -46,21 +123,6 @@ export function ArrivalTimeline({ plan }: { plan: ArrivalPlanResult }) {
           : `Your typical arrival is estimated ${formatMinutes(-bufferRemaining)} after the deadline at this departure time — consider the Early option below.`}
       </p>
     </div>
-  );
-}
-
-function Marker({ pct, tone }: { pct: number; tone: "start" | "mid" | "end" }) {
-  const color =
-    tone === "start"
-      ? "var(--brand-blue)"
-      : tone === "mid"
-        ? "var(--brand-cyan)"
-        : "var(--destructive)";
-  return (
-    <span
-      className="absolute top-1/2 size-3.5 -translate-x-1/2 -translate-y-1/2 rounded-full ring-2 ring-background"
-      style={{ left: `${pct}%`, background: color }}
-    />
   );
 }
 

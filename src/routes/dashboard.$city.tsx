@@ -27,6 +27,7 @@ import { Button } from "@/components/ui/button";
 import { DashboardSidebar } from "@/components/dashboard/sidebar";
 import { DashboardHeader } from "@/components/dashboard/header";
 import { TrafficGauge } from "@/components/dashboard/gauge";
+import { LocationGrid } from "@/components/locations/location-grid";
 import { CountUp } from "@/components/motion/count-up";
 import { StreetScene } from "@/components/motion/street-scene";
 import {
@@ -42,6 +43,9 @@ import { bangaloreTrafficHistory } from "@/data/bangalore-traffic-history";
 import cityIllustration from "@/assets/cityflow-globe-transparent.png";
 
 export const Route = createFileRoute("/dashboard/$city")({
+  // Render in the browser: the greeting, current volume and "now" marker all
+  // depend on the visitor's local hour, which the server (UTC) doesn't know.
+  ssr: false,
   loader: ({ params }) => {
     const target = findDashboardTarget(params.city);
     if (!target) throw notFound();
@@ -393,6 +397,15 @@ function CityDashboard() {
                 </Link>
               ))}
             </div>
+          </section>
+
+          {/* 6. Every area */}
+          <section>
+            <h3 className="text-base font-bold">Traffic Insights for Every Area</h3>
+            <p className="text-xs text-muted-foreground">
+              Expected traffic level per location. Pick one to open its dashboard.
+            </p>
+            <LocationGrid className="mt-3" destination="dashboard" activeSlug={target.slug} />
           </section>
 
           {/* 7. Quick actions */}

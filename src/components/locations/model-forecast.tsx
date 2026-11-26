@@ -55,6 +55,9 @@ export function ModelForecastCard({ location }: { location: BengaluruLocation })
     staleTime: 10 * 60_000,
   });
 
+  // The trained model only covers the 8 dataset areas; show nothing elsewhere.
+  if (!enabled) return null;
+
   return (
     <section className="glass-panel rounded-2xl p-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -73,12 +76,7 @@ export function ModelForecastCard({ location }: { location: BengaluruLocation })
         )}
       </div>
 
-      {!enabled ? (
-        <p className="mt-3 text-sm text-muted-foreground">
-          The trained model covers the 8 areas in the Kaggle traffic dataset. {location.name} isn't
-          one of them, so only the estimate above is available.
-        </p>
-      ) : forecastQuery.isPending || (forecastQuery.isSuccess && historyQuery.isPending) ? (
+      {forecastQuery.isPending || (forecastQuery.isSuccess && historyQuery.isPending) ? (
         <div className="mt-4 h-64 animate-pulse rounded-xl bg-secondary" />
       ) : forecastQuery.isError ? (
         <p className="mt-3 text-sm text-muted-foreground">

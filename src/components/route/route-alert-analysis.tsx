@@ -77,7 +77,7 @@ function Analysis({
       <div className="relative overflow-hidden bg-[oklch(0.19_0.05_262)] p-6 pr-14 text-white sm:p-8 sm:pr-16">
         <div
           aria-hidden
-          className="pointer-events-none absolute -right-20 -top-28 size-72 rounded-full bg-[radial-gradient(circle,oklch(0.62_0.24_300/35%),transparent_70%)]"
+          className="pointer-events-none absolute -right-20 -top-28 size-72 rounded-full bg-[radial-gradient(circle,color-mix(in_oklab,var(--brand-violet)_35%,transparent),transparent_70%)]"
         />
         <div className="relative flex flex-wrap items-start justify-between gap-4">
           <div className="min-w-0">
